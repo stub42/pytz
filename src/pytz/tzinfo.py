@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-'''$Id: tzinfo.py,v 1.6 2004/07/24 21:21:28 zenzen Exp $'''
+'''$Id: tzinfo.py,v 1.7 2005/02/15 20:21:52 zenzen Exp $'''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.6 2004/07/24 21:21:28 zenzen Exp $'
-__version__ = '$Revision: 1.6 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.7 2005/02/15 20:21:52 zenzen Exp $'
+__version__ = '$Revision: 1.7 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
@@ -48,10 +48,10 @@ class BaseTzInfo(tzinfo):
     # Overridden in subclass
     _utcoffset = None
     _tzname = None
-    _zone = None
+    zone = None
 
     def __str__(self):
-        return self._zone
+        return self.zone
     
 
 class StaticTzInfo(BaseTzInfo):
@@ -90,7 +90,7 @@ class StaticTzInfo(BaseTzInfo):
         return dt.replace(tzinfo=self)
 
     def __repr__(self):
-        return '<StaticTzInfo %r>' % (self._zone,)
+        return '<StaticTzInfo %r>' % (self.zone,)
 
 
 class DstTzInfo(BaseTzInfo):
@@ -105,7 +105,7 @@ class DstTzInfo(BaseTzInfo):
     _utc_transition_times = None # Sorted list of DST transition times in UTC
     _transition_info = None # [(utcoffset, dstoffset, tzname)] corresponding
                             # to _utc_transition_times entries
-    _zone = None
+    zone = None
 
     # Set in __init__
     _tzinfos = None
@@ -289,11 +289,11 @@ class DstTzInfo(BaseTzInfo):
             dst = 'STD'
         if self._utcoffset > _notime:
             return '<DstTzInfo %r %s+%s %s>' % (
-                    self._zone, self._tzname, self._utcoffset, dst
+                    self.zone, self._tzname, self._utcoffset, dst
                 )
         else:
             return '<DstTzInfo %r %s%s %s>' % (
-                    self._zone, self._tzname, self._utcoffset, dst
+                    self.zone, self._tzname, self._utcoffset, dst
                 )
 
 class AmbiguousTimeError(Exception):

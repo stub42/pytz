@@ -6,7 +6,7 @@ PYTHON=python2.3
 OLSON=./elsie.nci.nih.gov
 TESTARGS=
 TARGET=
-#TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
+#TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia Europe/Warsaw Europe/Vilnius
 #Mideast/Riyadh87
 STYLESHEET=../docutils-0.3.3/tools/stylesheets/default.css
 
@@ -26,6 +26,7 @@ test: test_tzinfo test_docs test_zdump
 	${PYTHON} gen_tests.py ${TARGET} && touch .mk_test
 
 test_zdump: .mk_test
+	${PYTHON} -c 'import compileall;compileall.compile_dir("build/dist")'
 	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
 
 test_tzinfo: .mk_test

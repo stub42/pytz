@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: __init__.py,v 1.11 2005/01/07 04:51:33 zenzen Exp $
+$Id: __init__.py,v 1.12 2005/02/15 20:21:41 zenzen Exp $
 
 datetime.tzinfo timezone definitions generated from the
 Olson timezone database:
@@ -11,11 +11,11 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-__rcs_id__  = '$Id: __init__.py,v 1.11 2005/01/07 04:51:33 zenzen Exp $'
-__version__ = '$Revision: 1.11 $'[11:-2]
+__rcs_id__  = '$Id: __init__.py,v 1.12 2005/02/15 20:21:41 zenzen Exp $'
+__version__ = '$Revision: 1.12 $'[11:-2]
 
 # The Olson database has historically been updated about 4 times a year
-OLSON_VERSION = '2005a'
+OLSON_VERSION = '2005e'
 VERSION = OLSON_VERSION
 #VERSION = OLSON_VERSION + '.2'
 
@@ -33,6 +33,8 @@ def timezone(zone):
     >>> from datetime import datetime, timedelta
     >>> utc = timezone('UTC')
     >>> eastern = timezone('US/Eastern')
+    >>> eastern.zone
+    'US/Eastern'
     >>> utc_dt = datetime(2002, 10, 27, 6, 0, 0, tzinfo=utc)
     >>> loc_dt = utc_dt.astimezone(eastern)
     >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'

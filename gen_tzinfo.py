@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.20 2005/01/07 04:51:30 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.21 2005/02/15 20:21:38 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -142,7 +142,7 @@ class StaticGen(Gen):
     def __init__(self, zone, utcoffset, tzname):
         self.zone = zone
         self.attributes = '\n'.join([
-            '    _zone = %s' % repr(zone),
+            '    zone = %s' % repr(zone),
             '    _utcoffset = timedelta(seconds=%d)' % (
                 utcoffset.days*24*60*60 + utcoffset.seconds,
                 ),
@@ -198,7 +198,7 @@ class DstGen(Gen):
             transition_info.append( (utcoffset, dst, tzname) )
 
         attributes = ['']
-        attributes.append('    _zone = %s' % repr(zone))
+        attributes.append('    zone = %s' % repr(zone))
         attributes.append('')
 
         attributes.append('    _utc_transition_times = [')
