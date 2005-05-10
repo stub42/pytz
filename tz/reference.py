@@ -1,16 +1,13 @@
 #!/usr/bin/env python
-
-TODO: REMOVE THIS FILE
-
 '''
-$Id: reference.py,v 1.5 2004/05/31 00:27:39 zenzen Exp $
+$Id: reference.py,v 1.1 2004/05/31 00:31:19 zenzen Exp $
 
 Reference tzinfo implementations from the Python docs.
 Used for testing against.
 '''
 
-__rcs_id__  = '$Id: reference.py,v 1.5 2004/05/31 00:27:39 zenzen Exp $'
-__version__ = '$Revision: 1.5 $'[11:-2]
+__rcs_id__  = '$Id: reference.py,v 1.1 2004/05/31 00:31:19 zenzen Exp $'
+__version__ = '$Revision: 1.1 $'[11:-2]
 
 from datetime import tzinfo, timedelta, datetime
 
@@ -104,9 +101,7 @@ def first_sunday_on_or_after(dt):
 DSTSTART = datetime(1, 4, 1, 2)
 # and ends at 2am (DST time; 1am standard time) on the last Sunday of Oct.
 # which is the first Sunday on or after Oct 25.
-# BUG: Changed DSTEND hour to 2, as results disagree with the Olsen database.
-#DSTEND = datetime(1, 10, 25, 1)
-DSTEND = datetime(1, 10, 25, 2)
+DSTEND = datetime(1, 10, 25, 1)
 
 class USTimeZone(tzinfo):
 

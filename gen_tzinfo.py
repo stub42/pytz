@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.3 2004/05/29 15:14:44 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.4 2004/05/31 00:27:39 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -10,13 +10,27 @@ from tzfile import TZFile
 from pprint import pprint
 from bisect import bisect_right
 
-def allzones(self):
+import tz
+
+zoneinfo = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 'build','etc','zoneinfo'
+        ))
+
+def allzones():
     ''' Return all available tzfile(5) files in the zoneinfo database '''
     zones = []
     for dirpath, dirnames, filenames in os.walk(zoneinfo):
-        zones.extend([os.path.join(dirpath,f) for f in filenames])
+        zones.extend([
+                os.path.join(dirpath,f) for f in filenames
+                if not f.endswith('.tab')
+                ])
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]
+    
+    # For debugging
+    zones = [z for z in zones if z in (
+            'US/Eastern', 'Australia/Melbourne', 'UTC'
+            )]
     return zones
 
 def dupe_src(destdir):
@@ -27,10 +41,11 @@ def dupe_src(destdir):
         if not os.path.isdir(f):
             shutil.copy(f, destdir)
 
-def gen_tzinfo(destdir, zoneinfo, zone):
+def gen_tzinfo(destdir, zone):
     ''' Create a .py file for the given timezone '''
     filename = os.path.join(zoneinfo, zone)
     tzfile = TZFile(filename)
+    zone = tz._munge_zone(zone)
     if len(tzfile.transitions) == 0:
         ttinfo = tzfile.ttinfo[0]
         generator = StaticGen(zone, ttinfo[0], ttinfo[2])
@@ -46,8 +61,15 @@ def gen_inits(destdir):
     for dirpath, dirnames, filenames in os.walk(destdir):
         if '__init__.py' not in filenames:
             f = os.path.join(dirpath, '__init__.py')
-            print 'Building %s' % f
             open(f, 'w').close()
+
+def add_allzones(filename):
+    ''' Append a list of all know timezones to the end of the file '''
+    outf = open(filename, 'a')
+
+    print >> outf, 'timezones = \\'
+    pprint(allzones(), outf)
+    outf.close()
 
         
 class Gen:
@@ -65,11 +87,6 @@ Generated from the Olson timezone database:
     ftp://elsie.nci.nih.gov/pub/tz*.tar.gz
 '''
 
-__rcs_id__  = '$Id: gen_tzinfo.py,v 1.3 2004/05/29 15:14:44 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
-
-__all__ = ['%(szone)s']
-
 from tz.tzinfo import %(base_class)s
 %(imps)s
 
@@ -79,6 +96,7 @@ class %(szone)s(%(base_class)s):
 
 %(szone)s = %(szone)s() # Singleton
 """ % vars()
+
 
 class StaticGen(Gen):
     base_class = 'StaticTzInfo'
@@ -96,10 +114,10 @@ class StaticGen(Gen):
             '    _tzname = %s' % repr(tzname),
             ])
 
+
 class DstGen(Gen):
     base_class = 'DstTzInfo'
     imps = '\n'.join([
-        'from tz.tzinfo import memorized_timedelta as timedelta',
         'from tz.tzinfo import memorized_datetime as datetime',
         'from tz.tzinfo import memorized_ttinfo as ttinfo',
         ])
@@ -114,13 +132,67 @@ class DstGen(Gen):
         transition_times = []
         transition_info = []
         for i in range(1,len(transitions)):
+            # transitions[i] == time, delta, dst, tzname
+
+            tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
+            inf = transitions[i][1:]
+
+            # seconds offset
+            utcoffset = inf[0]
+            utcoffset = utcoffset.days*24*60*60 + utcoffset.seconds
+
+            if not inf[1]:
+                dst = 0
+            else:
+                dst = inf[0] - transitions[i-1][1] # seconds dstoffset
+                dst = dst.seconds
+            tzname = inf[2]
+
+            if not dst:
+                # we are comming out of DST, so we need to adjust the
+                # transition time, which is local
+                prev_dst = transitions[i-1][1] - inf[0]
+                tt = tt - prev_dst
+            transition_times.append(tt)
+            transition_info.append( (utcoffset, dst, tzname) )
+
+        attributes = ['']
+        attributes.append('    _zone = %s' % repr(zone))
+        attributes.append('')
+
+        attributes.append('    _transition_times = [')
+        for i in range(0, len(transition_times)):
+            tt = transition_times[i]
+            delta, dst, tzname = transition_info[i]
+            comment = ' # %6d %5d %s' % transition_info[i]
+            attributes.append(
+                '        datetime(%4d, %2d, %2d, %2d, %2d),%s' % (
+                    tt.year, tt.month, tt.day, tt.hour, tt.minute, comment
+                    )
+                )
+        attributes.append('        ]')
+        attributes.append('')
+
+        attributes.append('    _transition_info = [')
+        for delta, dst, tzname in transition_info:
+            attributes.append(
+                '        ttinfo(%6s, %6d, %6r),' % (delta,dst,tzname)
+                )
+        attributes.append('        ]')
+        self.attributes = '\n'.join(attributes)
+ 
+        """
+
             tt = transitions[i][0]
             inf = transitions[i][1:]
 
-            if transitions[i][2]:
-                tt = tt + transitions[i-1][1] # Need last non-DST offset
-            else:
-                tt = tt + transitions[i][1]
+            # Convert transition time to localtime
+            tt = tt + transitions[i-1][1]
+
+            #if transitions[i][2]:
+            #    tt = tt + transitions[i-1][1] # Need last non-DST offset
+            #else:
+            #    tt = tt + transitions[i][1]
 
             transition_times.append(tt)
             transition_info.append(inf)
@@ -130,10 +202,19 @@ class DstGen(Gen):
         attributes.append('')
 
         attributes.append('    _transition_times = [')
-        for tt in transition_times:
-            attributes.append('        datetime(%4d, %2d, %2d, %2d, %2d),' % (
-                tt.year, tt.month, tt.day, tt.hour, tt.minute
-                ))
+        for i in range(0, len(transition_times)):
+            tt = transition_times[i]
+            delta, dst, tzname = transition_info[i]
+            if delta < timedelta(0):
+                delta = '-%s' % str(delta * -1)
+            else:
+                delta = '+%s' % str(delta)
+            comment = '%s dst=%d tzname=%s' % (delta, int(dst), tzname)
+            attributes.append(
+                '        datetime(%4d, %2d, %2d, %2d, %2d), # %s' % (
+                    tt.year, tt.month, tt.day, tt.hour, tt.minute, comment
+                    )
+                )
         attributes.append('        ]')
         attributes.append('')
 
@@ -146,14 +227,18 @@ class DstGen(Gen):
                 )
         attributes.append('        ]')
         self.attributes = '\n'.join(attributes)
+        """
 
-if __name__ == '__main__':
-    _destdir = os.path.join(os.path.abspath(sys.argv[1]), 'tz')
-    _zoneinfo = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), 'build','etc','zoneinfo'
-            ))
+
+def main(destdir):
+    _destdir = os.path.join(os.path.abspath(destdir), 'tz')
    
     dupe_src(_destdir)
-    gen_tzinfo(_destdir, _zoneinfo, 'UTC')
-    gen_tzinfo(_destdir, _zoneinfo, 'US/Eastern')
+    for zone in allzones():
+        gen_tzinfo(_destdir, zone)
     gen_inits(_destdir)
+    add_allzones(os.path.join(_destdir, '__init__.py'))
+
+if __name__ == '__main__':
+    main('build')
+

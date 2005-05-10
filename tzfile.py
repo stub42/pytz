@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzfile.py,v 1.5 2003/08/06 16:34:09 zenzen Exp $
+$Id: tzfile.py,v 1.6 2004/05/31 00:27:39 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzfile.py,v 1.5 2003/08/06 16:34:09 zenzen Exp $'
-__version__ = '$Revision: 1.5 $'[11:-2]
+__rcs_id__  = '$Id: tzfile.py,v 1.6 2004/05/31 00:27:39 zenzen Exp $'
+__version__ = '$Revision: 1.6 $'[11:-2]
 
 from struct import unpack,calcsize
 from cStringIO import StringIO
@@ -44,7 +44,7 @@ class TZFile:
         # Our ttinfo structures, detailing gmtoffset, isdst and abbriv index
         ttinfo_fmt = '>lBB'
         ttinfo_size = calcsize(ttinfo_fmt)
-        ttinfo = [ 
+        ttinfo = [
             unpack(ttinfo_fmt,inf.read(ttinfo_size)) for i in xrange(0,typecnt)
             ]
 
@@ -54,13 +54,18 @@ class TZFile:
         tznames_raw = inf.read(charcnt)
         assert tznames_raw[-1] == '\0'
         tznames_list = tznames_raw.split('\0')[:-1]
-        i = 0
-        tznames = {}
+        #i = 0
+        #tznames = {}
+        #for n in tznames_list:
+        #    tznames[i] = n
+        #    i += len(n) + 1
+        tznames = []
         for n in tznames_list:
-            tznames[i] = n
-            i += len(n) + 1
+            for i in range(0, len(n)):
+                tznames.append(n[i:])
+            tznames.append(None) # NULL terminator
 
-        # Make ttinfo more informativej
+        # Make ttinfo more informative
         ttinfo = [
             (timedelta(seconds=utcoffset),bool(is_dst),tznames[tzname_index])
                 for utcoffset,is_dst,tzname_index in ttinfo

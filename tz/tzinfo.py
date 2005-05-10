@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.2 2003/08/06 16:34:10 zenzen Exp $
+$Id: tzinfo.py,v 1.3 2004/05/31 00:27:40 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.2 2003/08/06 16:34:10 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.3 2004/05/31 00:27:40 zenzen Exp $'
+__version__ = '$Revision: 1.3 $'[11:-2]
 
 import datetime as datetime
 from bisect import bisect_right
@@ -35,20 +35,23 @@ def memorized_ttinfo(*args):
     try:
         return _ttinfo_cache[args]
     except KeyError:
-        ttinfo = (memorized_timedelta(args[0]), args[1], args[2])
+        ttinfo = (
+                memorized_timedelta(args[0]),
+                memorized_timedelta(args[1]),
+                args[2]
+                )
         _ttinfo_cache[args] = ttinfo
         return ttinfo
 
 class BaseTzInfo(datetime.tzinfo):
+    __slots__ = ()
     def __str__(self):
         return self._zone
-
-    def __repr__(self):
-        return 'tz.' + '.'.join(self._zone.split('/'))
 
 _notime = memorized_timedelta(0)
 
 class StaticTzInfo(BaseTzInfo):
+    __slots__ = ()
     _utcoffset = None
     _tzname = None
     _zone = None
@@ -65,31 +68,28 @@ class StaticTzInfo(BaseTzInfo):
     def __call__(self):
         return self # In case anyone thinks this is a Class and not an instance
 
-    def __str__(self):
-        return self._zone
-
     def __repr__(self):
         return '<StaticTzInfo %r>' % (self._zone,)
 
 class DstTzInfo(BaseTzInfo):
+    __slots__ = ()
     _transition_times = None
     _transition_info = None
     _zone = None
 
     def _lastTransition(self, dt):
-        dt = dt.replace(tzinfo = None)
-        idx = max(0,bisect_right(self._transition_times,dt)-1)
-        return self._transition_info[idx]
+        return self._transition_info[max(0, bisect_right(
+            self._transition_times, dt.replace(tzinfo=None)
+            )- 1)]
         
     def utcoffset(self, dt):
-        rv = self._lastTransition(dt)[0]
-        if type(rv) != type(_notime):
-            raise TypeError,'Got a %s' % (str(type(rv)))
-        return rv
+        return self._lastTransition(dt)[0]
 
     def dst(self, dt):
+        return self._lastTransition(dt)[1]
+
         dt = dt.replace(tzinfo = None)
-        dst_idx = max(0,bisect_right(self._transition_times,dt)-1)
+        dst_idx = max(0, bisect_right(self._transition_times, dt) - 1)
 
         # If not DST, no offset
         if not self._transition_info[dst_idx][1]:
@@ -108,9 +108,6 @@ class DstTzInfo(BaseTzInfo):
 
     def tzname(self, dt):
         return self._lastTransition(dt)[2]
-
-    def __str__(self):
-        return self._zone
 
     def __repr__(self):
         return '<DstTzInfo %r>' % (self._zone,)
