@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.8 2004/06/02 23:08:53 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.9 2004/06/02 23:18:28 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -147,8 +147,8 @@ class DstGen(Gen):
             tzname = inf[2]
 
             # datetime library precision for offsets is 1 minute
-            utcoffset = int((utcoffset + 30) / 60) * 60
-            dst = int((dst + 30) / 60) * 60
+            #utcoffset = int((utcoffset + 30) / 60) * 60
+            #dst = int((dst + 30) / 60) * 60
             transition_info.append( (utcoffset, dst, tzname) )
 
         attributes = ['']
@@ -161,8 +161,9 @@ class DstGen(Gen):
             delta, dst, tzname = transition_info[i]
             comment = ' # %6d %5d %s' % transition_info[i]
             attributes.append(
-                '        datetime(%4d, %2d, %2d, %2d, %2d),%s' % (
-                    tt.year, tt.month, tt.day, tt.hour, tt.minute, comment
+                '        datetime(%4d, %2d, %2d, %2d, %2d, %2d),%s' % (
+                    tt.year, tt.month, tt.day, tt.hour, tt.minute, tt.second,
+                    comment
                     )
                 )
         attributes.append('        ]')

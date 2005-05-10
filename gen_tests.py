@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.4 2004/06/02 19:39:53 zenzen Exp $
+$Id: gen_tests.py,v 1.5 2004/06/02 23:18:28 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.4 2004/06/02 19:39:53 zenzen Exp $'
-__version__ = '$Revision: 1.4 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.5 2004/06/02 23:18:28 zenzen Exp $'
+__version__ = '$Revision: 1.5 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -57,28 +57,6 @@ def test():
                 zone, utc_string, local_string, tzname, is_dst = m.groups()
             else:
                 raise RuntimeError, 'Dud line %r' % (line,)
-
-            """
-            We no longer need to support this behavior
-
-            # Get the next line, so we can fix the timezone acronym
-            # if necessary to match Python's end-of-dst behavior
-            try:
-                nline = lines[idx+1]
-            except IndexError:
-                nline = lines[idx-2]
-            m = re.match(
-                '^([^\s]+)\s+(.+\sUTC) \s+=\s+ (.+)\s([^\s]+) \s+isdst=(0|1)$',
-                nline, re.X
-                )
-            if m:
-                nzone, nutc_string, nlocal_string, ntzname, nis_dst = m.groups()
-            else:
-                raise RuntimeError, 'Dud line %r' % (nline,)
-
-            if int(is_dst) and not int(nis_dst):
-                tzname = ntzname
-            """
 
             # Add leading 0 to single character day of month
             if local_string[8] == ' ':
