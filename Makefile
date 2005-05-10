@@ -5,7 +5,7 @@ MAKE=make
 PYTHON=python2.3
 OLSEN=./elsie.nci.nih.gov
 TESTARGS=
-TARGET=
+TARGET=Europe/Amsterdam Europe/Moscow
 
 tz: build/etc/zoneinfo/UTC FORCE
 	${PYTHON} gen_tzinfo.py ${TARGET}; ${PYTHON} gen_tests.py ${TARGET}

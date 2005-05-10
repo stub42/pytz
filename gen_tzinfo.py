@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.10 2004/06/03 00:15:24 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.11 2004/06/03 02:47:19 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -148,7 +148,7 @@ class DstGen(Gen):
 
             # datetime library precision for offsets is 1 minute
             #utcoffset = int((utcoffset + 30) / 60) * 60
-            #dst = int((dst + 30) / 60) * 60
+            dst = int((dst + 30) / 60) * 60
             transition_info.append( (utcoffset, dst, tzname) )
 
         attributes = ['']
@@ -183,6 +183,7 @@ def main(destdir):
    
     dupe_src(_destdir)
     for zone in allzones():
+        print 'Generating %s.py' % zone
         gen_tzinfo(os.path.join(_destdir, 'zoneinfo'), zone)
     gen_inits(_destdir)
     add_allzones(os.path.join(_destdir, '__init__.py'))

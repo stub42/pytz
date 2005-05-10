@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.6 2004/06/03 00:15:24 zenzen Exp $
+$Id: gen_tests.py,v 1.7 2004/06/03 02:47:19 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.6 2004/06/03 00:15:24 zenzen Exp $'
-__version__ = '$Revision: 1.6 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.7 2004/06/03 02:47:19 zenzen Exp $'
+__version__ = '$Revision: 1.7 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -40,6 +40,7 @@ from datetime import tzinfo, timedelta, datetime
     """
 
     for zone in allzones():
+        print 'Generating test for %s in test_zdump.py' % (zone,)
         tname = zone.replace(
                 '+', '_plus_').replace('-', '_minus_').replace('/','_')
         print >> outf, '\ndef test_%s():' % tname
