@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.3 2004/05/31 22:51:18 zenzen Exp $
+$Id: gen_tests.py,v 1.4 2004/06/02 19:39:53 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.3 2004/05/31 22:51:18 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.4 2004/06/02 19:39:53 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
-import os, os.path, popen2, re
+import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
+import gen_tzinfo
 
 zdump = os.path.abspath(os.path.join(
         os.path.dirname(__file__), 'build','etc','zdump'
@@ -57,6 +58,9 @@ def test():
             else:
                 raise RuntimeError, 'Dud line %r' % (line,)
 
+            """
+            We no longer need to support this behavior
+
             # Get the next line, so we can fix the timezone acronym
             # if necessary to match Python's end-of-dst behavior
             try:
@@ -74,6 +78,7 @@ def test():
 
             if int(is_dst) and not int(nis_dst):
                 tzname = ntzname
+            """
 
             # Add leading 0 to single character day of month
             if local_string[8] == ' ':
@@ -119,6 +124,10 @@ if __name__ == '__main__':
 """
 
 if __name__ == '__main__':
+    try:
+        gen_tzinfo.target = sys.argv[1:]
+    except IndexError:
+        gen_tzinfo.target = None
     main()
 
 # vim: set filetype=python ts=4 sw=4 et

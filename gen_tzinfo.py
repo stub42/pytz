@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.6 2004/05/31 22:51:18 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.7 2004/06/02 19:39:53 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -26,11 +26,10 @@ def allzones():
                 ])
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]
-    
-    # For debugging
-    #zones = [z for z in zones if z in (
-    #        'US/Eastern', 'Australia/Melbourne', 'UTC'
-    #        )]
+   
+    if target:
+        wanted = target + ['US/Eastern', 'UTC']
+        zones = [z for z in zones if z in wanted]
     return zones
 
 def dupe_src(destdir):
@@ -143,10 +142,14 @@ class DstGen(Gen):
                         0, (datetime.min - delta, delta, dst, tzname)
                         )
 
+        utc_transition_times = []
         transition_times = []
         transition_info = []
         for i in range(0,len(transitions)):
             # transitions[i] == time, delta, dst, tzname
+
+            utc_tt = transitions[i][0]
+            utc_transition_times.append(utc_tt)
 
             try:
                 tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
@@ -168,7 +171,7 @@ class DstGen(Gen):
                 dst = dst.seconds
             tzname = inf[2]
 
-            if not dst:
+            if not dst and transitions[i-1][2]:
                 # we are comming out of DST, so we need to adjust the
                 # transition time, which is local
                 prev_dst = transitions[i-1][1] - inf[0]
@@ -182,6 +185,19 @@ class DstGen(Gen):
 
         attributes = ['']
         attributes.append('    _zone = %s' % repr(zone))
+        attributes.append('')
+
+        attributes.append('    _utc_transition_times = [')
+        for i in range(0, len(transition_times)):
+            tt = utc_transition_times[i]
+            delta, dst, tzname = transition_info[i]
+            comment = ' # %6d %5d %s' % transition_info[i]
+            attributes.append(
+                '        datetime(%4d, %2d, %2d, %2d, %2d),%s' % (
+                    tt.year, tt.month, tt.day, tt.hour, tt.minute, comment
+                    )
+                )
+        attributes.append('        ]')
         attributes.append('')
 
         attributes.append('    _transition_times = [')
@@ -216,5 +232,9 @@ def main(destdir):
     add_allzones(os.path.join(_destdir, '__init__.py'))
 
 if __name__ == '__main__':
+    try:
+        target = sys.argv[1:]
+    except IndexError:
+        target = None
     main('build')
 

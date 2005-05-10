@@ -5,9 +5,10 @@ MAKE=make
 PYTHON=python2.3
 OLSEN=./elsie.nci.nih.gov
 TESTARGS=
+TARGET=CST6CDT
 
 tz: build/etc/zoneinfo/UTC FORCE
-	${PYTHON} gen_tzinfo.py; ${PYTHON} gen_tests.py
+	${PYTHON} gen_tzinfo.py ${TARGET}; ${PYTHON} gen_tests.py ${TARGET}
 
 build/etc/zoneinfo/UTC: ${OLSEN}/src/africa build
 	${MAKE} -C ${OLSEN}/src TOPDIR=`pwd`/build install

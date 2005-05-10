@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.2 2004/05/31 20:44:35 zenzen Exp $
+$Id: test_tzinfo.py,v 1.3 2004/06/02 19:39:54 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.2 2004/05/31 20:44:35 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.3 2004/06/02 19:39:54 zenzen Exp $'
+__version__ = '$Revision: 1.3 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -154,6 +154,14 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(hours = 0),
         }
 
+
+class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
+    tzinfo = reference.Eastern
+
+
+class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
+    tzinfo = reference.Eastern
+
     def testHourBefore(self):
         # Python's datetime library has a bug, where the hour before
         # a daylight savings transition is one hour out. For example,
@@ -171,14 +179,6 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
         self._test_all(
                 self.transition_time - timedelta(seconds=1), self.after
                 )
-
-
-class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
-    tzinfo = reference.Eastern
-
-
-class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
-    tzinfo = reference.Eastern
 
 if __name__ == '__main__':
     unittest.main()
