@@ -1,4 +1,4 @@
-static char	elsieid[] = "@(#)zdump.c	7.57";
+static char	elsieid[] = "@(#)zdump.c	7.59";
 
 /*
 ** This code has been made independent of the rest of the time
@@ -151,6 +151,7 @@ static void	dumptime P((const struct tm * tmp));
 static time_t	hunt P((char * name, time_t lot, time_t	hit));
 static void	setabsolutes();
 static void	show P((char * zone, time_t t, int v));
+static const char *	tformat P((void));
 static time_t	yeartot P((long y));
 
 int
@@ -469,7 +470,7 @@ int	v;
 	if (v) {
 		tmp = gmtime(&t);
 		if (tmp == NULL) {
-			(void) printf("%g", (double) t);
+			(void) printf(tformat(), t);
 		} else {
 			dumptime(tmp);
 			(void) printf(" UTC");
@@ -502,6 +503,33 @@ struct tm *	tmp;
 		return &nada;
 	result = tzname[tmp->tm_isdst];
 	return (result == NULL) ? &nada : result;
+}
+
+/*
+** The code below can fail on certain theoretical systems;
+** it works on all known real-world systems as of 2004-12-30.
+*/
+
+static const char *
+tformat()
+{
+	if (0.5 == (time_t) 0.5) {	/* floating */
+		if (sizeof (time_t) > sizeof (double))
+			return "%Lg";
+		return "%g";
+	}
+	if (0 > (time_t) -1) {		/* signed */
+		if (sizeof (time_t) > sizeof (long))
+			return "%lld";
+		if (sizeof (time_t) > sizeof (int))
+			return "%ld";
+		return "%d";
+	}
+	if (sizeof (time_t) > sizeof (unsigned long))
+		return "%llu";
+	if (sizeof (time_t) > sizeof (unsigned int))
+		return "%lu";
+	return "%u";
 }
 
 static void
