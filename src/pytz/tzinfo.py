@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-'''$Id: tzinfo.py,v 1.5 2004/07/24 18:05:55 zenzen Exp $'''
+'''$Id: tzinfo.py,v 1.6 2004/07/24 21:21:28 zenzen Exp $'''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.5 2004/07/24 18:05:55 zenzen Exp $'
-__version__ = '$Revision: 1.5 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.6 2004/07/24 21:21:28 zenzen Exp $'
+__version__ = '$Revision: 1.6 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
@@ -77,8 +77,16 @@ class StaticTzInfo(BaseTzInfo):
         '''See datetime.tzinfo.tzname'''
         return self._tzname
 
+    def localize(self, dt, is_dst=False):
+        '''Convert naive time to local time'''
+        if dt.tzinfo is not None:
+            raise ValueError, 'Not naive datetime (tzinfo is already set)'
+        return dt.replace(tzinfo=self)
+
     def normalize(self, dt, is_dst=False):
         '''Correct the timezone information on the given datetime'''
+        if dt.tzinfo is None:
+            raise ValueError, 'Naive time - no tzinfo set'
         return dt.replace(tzinfo=self)
 
     def __repr__(self):
@@ -123,7 +131,7 @@ class DstTzInfo(BaseTzInfo):
         inf = self._transition_info[idx]
         return (dt + inf[0]).replace(tzinfo=self._tzinfos[inf])
 
-    def normalize(self, dt, is_dst=False):
+    def normalize(self, dt):
         '''Correct the timezone information on the given datetime
 
         If date arithmetic crosses DST boundaries, the tzinfo
@@ -132,10 +140,9 @@ class DstTzInfo(BaseTzInfo):
 
         To test, first we need to do some setup
 
-        >>> import pytz
-        >>> from datetime import datetime, timedelta
-        >>> utc = pytz.timezone('UTC')
-        >>> eastern = pytz.timezone('US/Eastern')
+        >>> from pytz import timezone
+        >>> utc = timezone('UTC')
+        >>> eastern = timezone('US/Eastern')
         >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
 
         We next create a datetime right on an end-of-DST transition point,
@@ -159,14 +166,32 @@ class DstTzInfo(BaseTzInfo):
         >>> before.strftime(fmt)
         '2002-10-27 01:50:00 EDT (-0400)'
 
-        This method is also required to correctly construct local times.
+        '''
+        if dt.tzinfo is None:
+            raise ValueError, 'Naive time - no tzinfo set'
+
+        # Convert dt in localtime to UTC
+        offset = dt.tzinfo._utcoffset
+        dt = dt.replace(tzinfo=None)
+        dt = dt - offset
+        # convert it back, and return it
+        return self.fromutc(dt)
+
+    def localize(self, dt, is_dst=False):
+        '''Convert naive time to local time.
+        
+        This method should be used to construct localtimes, rather
+        than passing a tzinfo argument to a datetime constructor.
+
         is_dst is used to determine the correct timezone in the ambigous
         period at the end of daylight savings time.
         
-        >>> amdam = pytz.timezone('Europe/Amsterdam')
-        >>> loc_dt  = datetime(2004, 10, 31, 2, 0, 0)
-        >>> loc_dt1 = amdam.normalize(loc_dt, is_dst=True)
-        >>> loc_dt2 = amdam.normalize(loc_dt, is_dst=False)
+        >>> from pytz import timezone
+        >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
+        >>> amdam = timezone('Europe/Amsterdam')
+        >>> dt  = datetime(2004, 10, 31, 2, 0, 0)
+        >>> loc_dt1 = amdam.localize(dt, is_dst=True)
+        >>> loc_dt2 = amdam.localize(dt, is_dst=False)
         >>> loc_dt1.strftime(fmt)
         '2004-10-31 02:00:00 CEST (+0200)'
         >>> loc_dt2.strftime(fmt)
@@ -178,24 +203,24 @@ class DstTzInfo(BaseTzInfo):
         times at the end of daylight savings
 
         >>> try:
-        ...     loc_dt1 = amdam.normalize(loc_dt, is_dst=None)
+        ...     loc_dt1 = amdam.localize(dt, is_dst=None)
         ... except AmbiguousTimeError:
         ...     print 'Oops'
         Oops
 
+        >>> loc_dt1 = amdam.localize(dt, is_dst=None)
+        Traceback (most recent call last):
+            [...]
+        AmbiguousTimeError: 2004-10-31 02:00:00
+
         is_dst defaults to False
         
-        >>> amdam.normalize(loc_dt) == amdam.normalize(loc_dt, False)
+        >>> amdam.localize(dt) == amdam.localize(dt, False)
         True
 
         '''
-        if dt.tzinfo:
-            # Convert dt in localtime to UTC
-            offset = dt.tzinfo._utcoffset
-            dt = dt.replace(tzinfo=None)
-            dt = dt - offset
-            # convert it back, and return it
-            return self.fromutc(dt)
+        if dt.tzinfo is not None:
+            raise ValueError, 'Not naive datetime (tzinfo is already set)'
 
         # Find the possibly correct timezones. We probably just have one,
         # but we might end up with two if we are in the end-of-DST
@@ -213,7 +238,7 @@ class DstTzInfo(BaseTzInfo):
         # If told to be strict, raise an exception since we have an
         # ambiguous case
         if is_dst is None:
-            raise AmbiguousTimeError(dt, self)
+            raise AmbiguousTimeError(dt)
 
         # Filter out the possiblilities that don't match the requested
         # is_dst

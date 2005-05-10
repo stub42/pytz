@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.6 2004/07/23 23:24:45 zenzen Exp $
+$Id: test_tzinfo.py,v 1.7 2004/07/24 21:21:28 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.6 2004/07/23 23:24:45 zenzen Exp $'
-__version__ = '$Revision: 1.6 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.7 2004/07/24 21:21:28 zenzen Exp $'
+__version__ = '$Revision: 1.7 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -283,31 +283,31 @@ class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
 
 
 class LocalTestCase(unittest.TestCase):
-    def testNormalizeZone(self):
+    def testLocalize(self):
         loc_tz = pytz.timezone('Europe/Amsterdam')
 
-        loc_time = loc_tz.normalize(datetime(1930, 5, 10, 0, 0, 0))
+        loc_time = loc_tz.localize(datetime(1930, 5, 10, 0, 0, 0))
         # Actually +00:19:32, but Python datetime rounds this
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'AMT+0020')
 
-        loc_time = loc_tz.normalize(datetime(1930, 5, 20, 0, 0, 0))
+        loc_time = loc_tz.localize(datetime(1930, 5, 20, 0, 0, 0))
         # Actually +00:19:32, but Python datetime rounds this
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'NST+0120')
 
-        loc_time = loc_tz.normalize(datetime(1940, 5, 10, 0, 0, 0))
+        loc_time = loc_tz.localize(datetime(1940, 5, 10, 0, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'NET+0020')
 
-        loc_time = loc_tz.normalize(datetime(1940, 5, 20, 0, 0, 0))
+        loc_time = loc_tz.localize(datetime(1940, 5, 20, 0, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CEST+0200')
 
-        loc_time = loc_tz.normalize(datetime(2004, 2, 1, 0, 0, 0))
+        loc_time = loc_tz.localize(datetime(2004, 2, 1, 0, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CET+0100')
 
-        loc_time = loc_tz.normalize(datetime(2004, 4, 1, 0, 0, 0))
+        loc_time = loc_tz.localize(datetime(2004, 4, 1, 0, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CEST+0200')
 
         tz = pytz.timezone('Europe/Amsterdam')
-        loc_time = loc_tz.normalize(datetime(1943, 3, 29, 1, 59, 59))
+        loc_time = loc_tz.localize(datetime(1943, 3, 29, 1, 59, 59))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CET+0100')
 
 
@@ -315,24 +315,28 @@ class LocalTestCase(unittest.TestCase):
         loc_tz = pytz.timezone('US/Eastern')
 
         # End of DST ambiguity check
-        loc_time = loc_tz.normalize(datetime(1918, 10, 27, 1, 59, 59), is_dst=1)
+        loc_time = loc_tz.localize(datetime(1918, 10, 27, 1, 59, 59), is_dst=1)
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EDT-0400')
 
-        loc_time = loc_tz.normalize(datetime(1918, 10, 27, 1, 59, 59), is_dst=0)
+        loc_time = loc_tz.localize(datetime(1918, 10, 27, 1, 59, 59), is_dst=0)
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EST-0500')
+
+        self.failUnlessRaises(pytz.AmbiguousTimeError,
+                loc_tz.localize, datetime(1918, 10, 27, 1, 59, 59), is_dst=None
+                )
 
         # Weird changes - war time and peace time both is_dst==True
 
-        loc_time = loc_tz.normalize(datetime(1942, 2, 9, 3, 0, 0))
+        loc_time = loc_tz.localize(datetime(1942, 2, 9, 3, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EWT-0400')
 
-        loc_time = loc_tz.normalize(datetime(1945, 8, 14, 19, 0, 0))
+        loc_time = loc_tz.localize(datetime(1945, 8, 14, 19, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EPT-0400')
 
-        loc_time = loc_tz.normalize(datetime(1945, 9, 30, 1, 0, 0), is_dst=1)
+        loc_time = loc_tz.localize(datetime(1945, 9, 30, 1, 0, 0), is_dst=1)
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EPT-0400')
 
-        loc_time = loc_tz.normalize(datetime(1945, 9, 30, 1, 0, 0), is_dst=0)
+        loc_time = loc_tz.localize(datetime(1945, 9, 30, 1, 0, 0), is_dst=0)
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EST-0500')
 
     def testNormalize(self):

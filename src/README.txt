@@ -104,8 +104,8 @@ on working with local times, this library provides a facility for
 constructing them almost unambiguously
 
 >>> loc_dt = datetime(2002, 10, 27, 1, 30, 00)
->>> est_dt = eastern.normalize(loc_dt, is_dst=True)
->>> edt_dt = eastern.normalize(loc_dt, is_dst=False)
+>>> est_dt = eastern.localize(loc_dt, is_dst=True)
+>>> edt_dt = eastern.localize(loc_dt, is_dst=False)
 >>> print est_dt.strftime(fmt), '/', edt_dt.strftime(fmt)
 2002-10-27 01:30:00 EDT-0400 / 2002-10-27 01:30:00 EST-0500
 
