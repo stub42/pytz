@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $
+$Id: test_tzinfo.py,v 1.2 2004/06/05 11:34:44 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $'
-__version__ = '$Revision: 1.1 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.2 2004/06/05 11:34:44 zenzen Exp $'
+__version__ = '$Revision: 1.2 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -80,7 +80,7 @@ class USEasternDSTStartTestCase(unittest.TestCase):
                 'Got %s. Wanted %s' % (str(dt_got),str(dt_wanted))
                 )
 
-    def _test_dst(self,utc_dt,wanted):
+    def _test_dst(self, utc_dt, wanted):
         dst = wanted['dst']
         dt = utc_dt.astimezone(self.tzinfo)
         self.failUnlessEqual(dt.dst(),dst,
@@ -89,10 +89,29 @@ class USEasternDSTStartTestCase(unittest.TestCase):
                 )
             )
 
+    def _test_arithmetic(self, utc_dt):
+        for days in range(-720, 720, 20):
+            dt = utc_dt.astimezone(self.tzinfo)
+            dt2 = dt + timedelta(days=days)
+            dt2 = dt2 - timedelta(days=days)
+            self.failUnlessEqual(dt, dt2)
+            self.failUnlessEqual(str(dt), str(dt2))
+
+    def _test_roundtrip(self, utc_dt):
+        self.failUnlessEqual(
+                utc_dt.astimezone(self.tzinfo).astimezone(UTC),
+                utc_dt,
+                )
+        self.failUnlessEqual(
+                str(utc_dt.astimezone(self.tzinfo).astimezone(UTC)),
+                str(utc_dt),
+                )
+
     def _test_all(self, utc_dt, wanted):
         self._test_utcoffset(utc_dt, wanted)
         self._test_tzname(utc_dt, wanted)
         self._test_dst(utc_dt, wanted)
+        self._test_arithmetic(utc_dt)
 
     def testDayBefore(self):
         self._test_all(

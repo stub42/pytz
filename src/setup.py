@@ -1,5 +1,5 @@
 '''
-$Id: setup.py,v 1.1 2004/06/05 09:53:54 zenzen Exp $
+$Id: setup.py,v 1.2 2004/06/05 11:34:44 zenzen Exp $
 Distribution setup script
 '''
 
@@ -38,7 +38,7 @@ setup (
     url = 'http://pytz.sourceforge.net',
     license = open('LICENSE.txt','r').read(),
     keywords = ['timezone','tzinfo', 'datetime'],
-    packages = ["pytz"],
+    packages = ["pytz", "pytz.zoneinfo"],
     #download_url='',
     platforms=['Independant'],
     classifiers = [

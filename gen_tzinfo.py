@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.14 2004/06/05 09:53:54 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.15 2004/06/05 11:34:43 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -37,6 +37,7 @@ def allzones():
     # of 5 seconds because of way too many zone changes, so the data isn't
     # 100% accurate anyway).
     zones = [z for z in zones if 'Riyadh8' not in z]
+    zones.sort()
     return zones
 
 def links():
