@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.15 2004/06/05 11:34:43 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.16 2004/07/19 22:31:45 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -117,13 +117,7 @@ class Gen:
         attributes = self.attributes
         imps = self.imps
 
-        print >> out, """'''
-tzinfo timezone information for %(zone)s.
-
-Generated from the Olson timezone database:
-    ftp://elsie.nci.nih.gov/pub/tz*.tar.gz
-'''
-
+        print >> out, """'''tzinfo timezone information for %(zone)s.'''
 from pytz.tzinfo import %(base_class)s
 %(imps)s
 
@@ -131,7 +125,7 @@ class %(szone)s(%(base_class)s):
     '''%(zone)s timezone definition. See datetime.tzinfo for details'''
 %(attributes)s
 
-%(szone)s = %(szone)s() # Singleton
+%(szone)s = %(szone)s()
 """ % vars()
 
 
@@ -155,8 +149,8 @@ class StaticGen(Gen):
 class DstGen(Gen):
     base_class = 'DstTzInfo'
     imps = '\n'.join([
-        'from pytz.tzinfo import memorized_datetime as datetime',
-        'from pytz.tzinfo import memorized_ttinfo as ttinfo',
+        'from pytz.tzinfo import memorized_datetime as d',
+        'from pytz.tzinfo import memorized_ttinfo as i',
         ])
 
     def __init__(self, zone, transitions):
@@ -194,9 +188,11 @@ class DstGen(Gen):
         for i in range(0, len(utc_transition_times)):
             tt = utc_transition_times[i]
             delta, dst, tzname = transition_info[i]
-            comment = ' # %6d %5d %s' % transition_info[i]
+            #comment = ' # %6d %5d %s' % transition_info[i]
+            comment = '' # Save space
             attributes.append(
-                '        datetime(%4d, %2d, %2d, %2d, %2d, %2d),%s' % (
+                #'        datetime(%4d, %2d, %2d, %2d, %2d, %2d),%s' % (
+                'd(%d,%d,%d,%d,%d,%d),%s' % ( # Save space
                     tt.year, tt.month, tt.day, tt.hour, tt.minute, tt.second,
                     comment
                     )
@@ -207,7 +203,8 @@ class DstGen(Gen):
         attributes.append('    _transition_info = [')
         for delta, dst, tzname in transition_info:
             attributes.append(
-                '        ttinfo(%6s, %6d, %6r),' % (delta,dst,tzname)
+                #'        ttinfo(%6s, %6d, %6r),' % (delta,dst,tzname)
+                'i(%s,%d,%r),' % (delta,dst,tzname) # Save space
                 )
         attributes.append('        ]')
         self.attributes = '\n'.join(attributes)
