@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzfile.py,v 1.3 2003/05/05 13:51:10 zenzen Exp $
+$Id: tzfile.py,v 1.4 2003/05/19 04:32:26 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzfile.py,v 1.3 2003/05/05 13:51:10 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: tzfile.py,v 1.4 2003/05/19 04:32:26 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
 from struct import unpack,calcsize
 from cStringIO import StringIO
@@ -60,46 +60,29 @@ class TZFile:
             tznames[i] = n
             i += len(n) + 1
 
+        # Make ttinfo more informativej
+        ttinfo = [
+            (timedelta(seconds=utcoffset),bool(is_dst),tznames[tzname_index]) 
+                for utcoffset,is_dst,tzname_index in ttinfo
+            ]
+
         self.transitions = [ ( 
-            transitions[i],         # epoch time of transition
-            ttinfo[lindexes[i]][0], # utc offset in seconds
-            bool(ttinfo[lindexes[i]][1]), # is DST
-            tznames[ttinfo[lindexes[i]][2]] # timezone abbreviation
+            datetime.utcfromtimestamp(transitions[i]), # naive time of trans
+            ttinfo[lindexes[i]][0], # utc offset
+            ttinfo[lindexes[i]][1], # is DST
+            ttinfo[lindexes[i]][2], # timezone abbreviation
             ) for i in xrange(0,len(transitions)) ]
 
-        # build transitions_mapping
-        m = {}
-        for t in self.transitions:
-            dt = datetime.utcfromtimestamp(t[0])
-            s = (dt, (timedelta(seconds=t[1]),t[2],t[3]))
-            if not m.has_key(dt.year):
-                m[dt.year] = [s]
-            else:
-                m[dt.year].append(s)
-        self.transitions_mapping = m
+        self.ttinfo = ttinfo
 
     def __repr__(self):
         return "TZFile(%s)" % repr(self.filename)
-
-    def asPython(self,indent=4):
-        out = StringIO()
-        print >> out,'['
-        indent -= 1
-        for t in self.transitions:
-            nice = asctime(gmtime(t[0])) + ' UTC'
-            print >> out, ' '*indent, 
-            print >> out, '(%11d,' % (t[0]),
-            print >> out, '%6d,' % (t[1]),
-            print >> out, '%-6s' % (repr(t[2]) + ','),
-            print >> out, '%-10s' % (repr(t[3]) + '),'),
-            print >> out, '#',nice
-        print >> out, ' '*indent, ']'
-        return out.getvalue()
 
 if __name__ == '__main__':
     import os.path
     base = os.path.join('elsie.nci.nih.gov','build','etc','zoneinfo')
     tz = TZFile(os.path.join(base,'Australia','Melbourne'))
     tz = TZFile(os.path.join(base,'US','Eastern'))
-    print tz.asPython(4)
+    pprint(tz.transitions)
+    #print tz.asPython(4)
     #print tz.transitions_mapping

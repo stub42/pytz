@@ -1,67 +1,117 @@
-from datetime import datetime,timedelta,tzinfo,MINYEAR
+from datetime import datetime,timedelta,tzinfo
 from tzfile import TZFile
 from pprint import pprint
+from bisect import bisect_right
 
 import os.path
 tzbase = os.path.join('elsie.nci.nih.gov','build','etc','zoneinfo')
 
 _notime = timedelta(0)
 
-class TZInfo(tzinfo):
-    def __init__(self,transitions='US/Eastern'):
-        if type(transitions) == type(''):
-            tzf = TZFile(os.path.join(tzbase,transitions))
-            transitions = tzf.transitions_mapping
-        self._transitions = transitions
-        try:
-            self._min_year = min(transitions.keys())
-        except ValueError:
-            self.utcoffset = lambda dt: _notime
-            self.dst = lambda dt: _notime
-            self.tzname = lambda dt: 'UTC'
+def TZInfo(zone='UTC'):
+    filename = os.path.join(tzbase,zone)
+    tzfile = TZFile(filename)
+    if len(tzfile.transitions) == 0:
+        ttinfo = tzfile.ttinfo[0]
+        return StaticTzInfo(ttinfo[0],ttinfo[2])
+    else:
+        return DstTzInfo(tzfile.transitions)
 
-    def _lastTransition(self,dt):
-        dt = dt.replace(tzinfo=None)
-        year = dt.year
+class StaticTzInfo(tzinfo):
+    def __init__(self,utcoffset=_notime,tzname='UTC'):
+        self._utcoffset = utcoffset
+        self._tzname = tzname
 
-        if year > 2037:
-            year = 2037
-        elif year < self._min_year:
-            year = self._min_year
+    def utcoffset(self,dt):
+        return self._utcoffset
 
-        possibles = self._transitions[year]
-        while dt < possibles[0][0]:
-            # last transition is previous year
-            year -= 1
-            possibles = self._transitions[year]
-        for t in possibles[::-1]:
-            if dt >= t[0]:
-                return t[1]
-        raise Error,'Unable to locate nearest DST transition time for %s' % (dt)
+    def dst(self,dt):
+        return _notime
 
+    def tzname(self,dt):
+        return self._tzname
+
+class DstTzInfo(tzinfo):
+    def __init__(self,transitions=[]):
+
+        # Yech. Our DST transition times need to be in local standard 
+        # time rather than UTC :-(
+
+        self._transition_times = []
+        self._transition_info = []
+        for i in range(1,len(transitions)):
+            tt = transitions[i][0]
+            inf = transitions[i][1:]
+            tt = tt + transitions[i-1][1] # Need last non-DST offset
+
+            # To convert to local standard time, we take our UTC time
+            # and add our nearest non-DST utcoffset
+            #if inf[1]:
+            #    tt = tt + transitions[i-1][1] # Need last non-DST offset
+            #else:
+            #    tt = tt + inf[0]
+
+            self._transition_times.append(tt)
+            self._transition_info.append(inf)
+            
+        #self._transition_times = [
+        #    transitions[i][0] + transitions[i-1][1]
+        #    for i in xrange(1,len(transitions))
+        #    ]
+        #self._transition_info = [t[1:] for t in transitions[1:]]
+
+        #self._transition_times = [t[0] for t in transitions]
+        #self._transition_info = [t[1:] for t in transitions]
+
+        #assert type(t[0]) == type(datetime.now())
+        #assert type(t[1]) == type(_notime)
+        #assert type(t[2]) == type(True)
+        #assert type(t[3]) == type('')
+
+    def _lastTransition(self, dt):
+        dt = dt.replace(tzinfo = None)
+        idx = max(0,bisect_right(self._transition_times,dt)-1)
+        return self._transition_info[idx]
+        
     def utcoffset(self, dt):
-        return self._lastTransition(dt)[0]
+        rv = self._lastTransition(dt)[0]
+        if type(rv) != type(timedelta(0)):
+            raise TypeError,'Got a %s' % (str(type(rv)))
+        return rv
 
     def dst(self, dt):
-        lt = self._lastTransition(dt)
-        if lt[1]:
-            offsets = [None,None]
-            for dt,t in self._transitions[dt.year]:
-                offsets[t[1]] = t[0]
-            try:
-                return offsets[1] - offsets[0]
-            except TypeError:
-                return None
-        else:
+        dt = dt.replace(tzinfo = None)
+        dst_idx = max(0,bisect_right(self._transition_times,dt)-1)
+
+        # If not DST, no offset
+        if not self._transition_info[dst_idx][1]:
             return _notime
+
+        assert self._transition_info[dst_idx] == self._lastTransition(dt)
+
+        non_idx = dst_idx - 1
+            # Currently assumes a DST timezone info always proceeded by non-DST
+        non_info = self._transition_info[non_idx]
+        while non_info[1]:
+            non_idx -= 1
+            non_info = self._transition_info[non_idx]
+
+        return self._transition_info[dst_idx][0] - non_info[0]
 
     def tzname(self, dt):
         return self._lastTransition(dt)[2]
 
-class Eastern(TZInfo):
-    def __init__(self):
-        TZInfo.__init__(self,'US/Eastern')
 
 if __name__ == '__main__':
-    eastern = TZInfo('US/Eastern')
-    pprint(eastern._transitions)
+    tz = TZInfo('Australia/Melbourne')
+    def show(dt):
+        print dt
+        print '-> dst() = %r' % (tz.dst(dt))
+        print '-> utcoffset() = %r' % (tz.utcoffset(dt))
+        print '-> tzname() = %r' % (tz.tzname(dt))
+    now = datetime.now(tz=tz)
+    show(now)
+    then = now + timedelta(days=30*6)
+    show(then)
+
+
