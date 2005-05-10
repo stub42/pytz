@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.18 2004/07/23 23:24:44 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.19 2004/07/24 18:05:54 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -187,15 +187,12 @@ class DstGen(Gen):
             tzname = inf[2]
 
             # Round utcoffset and dst to the nearest minute or the
-            # datetime library will complain
+            # datetime library will complain. Conversions to these timezones
+            # might be up to plus or minus 30 seconds out, but it is
+            # the best we can do.
             real_utcoffset = utcoffset
             utcoffset = int((utcoffset+30)/60)*60
             dst = int((dst+30)/60)*60
-            # And adjust the transition time to cope
-            try:
-                utc_tt = utc_tt + timedelta(seconds=real_utcoffset - utcoffset)
-            except OverflowError:
-                pass
             utc_transition_times.append(utc_tt)
 
             transition_info.append( (utcoffset, dst, tzname) )

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-'''
-$Id: tzinfo.py,v 1.4 2004/07/23 23:24:45 zenzen Exp $
-'''
+'''$Id: tzinfo.py,v 1.5 2004/07/24 18:05:55 zenzen Exp $'''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.4 2004/07/23 23:24:45 zenzen Exp $'
-__version__ = '$Revision: 1.4 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.5 2004/07/24 18:05:55 zenzen Exp $'
+__version__ = '$Revision: 1.5 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
@@ -57,6 +55,12 @@ class BaseTzInfo(tzinfo):
     
 
 class StaticTzInfo(BaseTzInfo):
+    '''A timezone that has a constant offset from UTC
+
+    These timezones are rare, as most regions have changed their
+    offset from UTC at some point in their history
+
+    '''
     def fromutc(self, dt):
         '''See datetime.tzinfo.fromutc'''
         return (dt + self._utcoffset).replace(tzinfo=self)
@@ -82,6 +86,13 @@ class StaticTzInfo(BaseTzInfo):
 
 
 class DstTzInfo(BaseTzInfo):
+    '''A timezone that has a variable offset from UTC
+   
+    The offset might change if daylight savings time comes into effect,
+    or at a point in history when the region decides to change their 
+    timezone definition. 
+
+    '''
     # Overridden in subclass
     _utc_transition_times = None # Sorted list of DST transition times in UTC
     _transition_info = None # [(utcoffset, dstoffset, tzname)] corresponding

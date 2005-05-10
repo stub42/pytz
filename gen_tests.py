@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.12 2004/07/23 23:24:44 zenzen Exp $
+$Id: gen_tests.py,v 1.13 2004/07/24 18:05:54 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.12 2004/07/23 23:24:44 zenzen Exp $'
-__version__ = '$Revision: 1.12 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.13 2004/07/24 18:05:54 zenzen Exp $'
+__version__ = '$Revision: 1.13 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -53,8 +53,6 @@ from datetime import tzinfo, timedelta, datetime
         prev_is_dst = False
         for idx in range(0, len(lines)):
             line = lines[idx]
-            #if '2002' not in line:
-            #    continue
             m = re.match(
                 '^([^\s]+)\s+(.+\sUTC) \s+=\s+ (.+)\s([^\s]+) \s+isdst=(0|1)$',
                 line, re.X
@@ -79,15 +77,10 @@ from datetime import tzinfo, timedelta, datetime
 
             # Urgh - utcoffset() and dst() have to be rounded to the nearest
             # minute, so we need to break our tests to match this limitation
-            real_offset = utc_dt - local_dt
+            real_offset = local_dt - utc_dt
             secs = real_offset.seconds + real_offset.days*86400
             fake_offset = timedelta(seconds=int((secs+30)/60)*60)
-            if prev_dt is not None and prev_dt.second == 59:
-                utc_dt = utc_dt + fake_offset - real_offset
-            elif utc_dt.second in (0,59):
-                local_dt = local_dt - fake_offset + real_offset
-            else:
-                utc_dt = utc_dt + fake_offset - real_offset
+            local_dt = utc_dt + fake_offset
 
             # If the naive time on the previous line is greater than on this
             # line, and we arn't seeing an end-of-dst transition, then
@@ -101,13 +94,6 @@ from datetime import tzinfo, timedelta, datetime
                 skip_local_test = False
             prev_is_dst = is_dst
             prev_dt = local_dt
-
-            # datetime resolution of 1 minute means the dst transition 
-            # might now be off by 30 seconds.
-            # Make 'instant before' tests '30 seconds before' to cope :-(
-            if utc_dt.second == 59 or local_dt.second == 59:
-                utc_dt = utc_dt - timedelta(seconds=30)
-                local_dt = local_dt - timedelta(seconds=30)
 
             local_string = '%s %s' % (
                     local_dt.strftime('%a %b %d %H:%M:%S %Y'), tzname
