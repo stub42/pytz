@@ -1,5 +1,5 @@
 '''
-$Id: setup.py,v 1.4 2004/07/19 23:18:42 zenzen Exp $
+$Id: setup.py,v 1.5 2004/07/25 01:34:20 zenzen Exp $
 Distribution setup script
 '''
 
@@ -32,7 +32,7 @@ for dirpath, dirname, filenames in os.walk(os.path.join('pytz','zoneinfo')):
 
 setup (
     name = 'pytz',
-    version = pytz.OLSEN_VERSION,
+    version = pytz.VERSION,
     description = 'World timezone definitions, modern and historical',
     long_description = ldesc,
     author = me,

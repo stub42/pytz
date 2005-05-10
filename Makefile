@@ -8,6 +8,7 @@ TESTARGS=
 TARGET=
 #TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
 #Mideast/Riyadh87
+STYLESHEET=../docutils-0.3.3/tools/stylesheets/default.css
 
 build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py src/pytz/tzinfo.py src/pytz/test_tzinfo.py src/README.txt
 	${PYTHON} gen_tzinfo.py ${TARGET}
@@ -36,12 +37,19 @@ test_docs: .mk_test
 build:
 	mkdir build
 
-sdist: build/dist
+dist: sdist
+
+
+sdist: build/dist build/dist/test_zdump.py.bz2
 	cd build/dist && \
 	${PYTHON} setup.py sdist --force-manifest --formats=bztar,gztar,zip
 
-#build/pytz.zip:	build/tz
-#	cd build && zip -9 -r pytz.zip pytz/__init__.py pytz/tzinfo.py pytz/zoneinfo
+build/dist/test_zdump.py.bz2: build/dist
+	cd build/dist && bzip2 -c9 < test_zdump.py > test_zdump.py.bz2
+
+README.html: src/README.txt build/dist
+	rst2html.py --embed-stylesheet --stylesheet-path=${STYLESHEET} \
+	    src/README.txt > build/dist/README.html
 
 FORCE:
 

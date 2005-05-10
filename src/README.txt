@@ -1,6 +1,9 @@
 pytz - World Timezone Definitions for Python
 ============================================
 
+:Author: Stuart Bishop <stuart@stuartbishop.net>
+:Version: $Revision: 1.10 $
+
 Introduction
 ~~~~~~~~~~~~
 
@@ -10,14 +13,7 @@ or higher. It also solves the issue of ambiguous times at the end
 of daylight savings, which you can read more about in the Python
 Library Reference (datetime.tzinfo).
 
-536 of the Olsen timezones are supported. The missing few are for
-Riyadh Solar Time in 1987, 1988 and 1989. As Saudi Arabia gave up
-trying to cope with their timezone definition, I see no reason to
-complicate my code further to cope with them. (I understand the
-intention was to set sunset to 0:00 local time, the start of the
-Islamic day. In the best case caused the DST offset to change daily
-and worst case caused the DST offset to change each instant depending
-on how you interpreted the ruling.)
+546 of the Olsen timezones are supported [*]_.
 
 Note that if you perform date arithmetic on local times that cross
 DST boundaries, the results may be in an incorrect timezone (ie.
@@ -46,7 +42,7 @@ Example & Usage
 >>> eastern = timezone('US/Eastern')
 >>> fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
-The sanest way of dealing with times is to always work in UTC,
+The preferred way of dealing with times is to always work in UTC,
 converting to localtime only when generating output to be read
 by humans.
 
@@ -56,7 +52,7 @@ by humans.
 '2002-10-27 01:00:00 EST-0500'
 
 This library also allows you to do date arithmetic using local
-times, althogh it is more complicated than working in UTC as you
+times, although it is more complicated than working in UTC as you
 need to use the `normalize` method to handle daylight savings time
 and other timezone transitions. In this example, `loc_dt` is set
 to the instant when daylight savings time ends in the US/Eastern
@@ -72,7 +68,18 @@ timezone.
 '2002-10-27 01:10:00 EST-0500'
 
 Creating localtimes is also tricky, and the reason why working with
-local times is not recommended. 
+local times is not recommended. Unfortunately, you cannot just pass
+a 'tzinfo' argument when constructing a datetime (see the next section
+for more details)
+
+>>> dt = datetime(2002, 10, 27, 1, 30, 0)
+>>> dt1 = eastern.localize(dt, is_dst=True)
+>>> dt1.strftime(fmt)
+'2002-10-27 01:30:00 EDT-0400'
+>>> dt2 = eastern.localize(dt, is_dst=False)
+>>> dt2.strftime(fmt)
+'2002-10-27 01:30:00 EST-0500'
+
 
 Problems with Localtime
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,7 +105,7 @@ before of after the end-of-daylight-savings-time transition.
 As you can see, the system has chosen one for you and there is a 50%
 chance of it being out by one hour. For some applications, this does
 not matter. However, if you are trying to schedule meetings with people
-in different timezones or analize log files it is not acceptable. The
+in different timezones or analyze log files it is not acceptable. The
 best and simplest solution is to stick with using UTC. If you insist
 on working with local times, this library provides a facility for
 constructing them almost unambiguously
@@ -109,7 +116,7 @@ constructing them almost unambiguously
 >>> print est_dt.strftime(fmt), '/', edt_dt.strftime(fmt)
 2002-10-27 01:30:00 EDT-0400 / 2002-10-27 01:30:00 EST-0500
 
-Note that althogh this handles many cases, it is still not possible
+Note that although this handles many cases, it is still not possible
 to handle all. In cases where countries change their timezone definitions,
 cases like the end-of-daylight-savings-time occur with no way of resolving
 the ambiguity. For example, in 1915 Warsaw switched from Warsaw time to
@@ -141,11 +148,11 @@ Latest Versions
 ~~~~~~~~~~~~~~~
 
 This package will be updated after releases of the Olsen timezone database.
-The latest version can be downloaded from sourceforge_. The code that
-is used to generate this distribution is available in the sourceforge_
+The latest version can be downloaded from Sourceforge_. The code that
+is used to generate this distribution is available in the Sourceforge_
 project's CVS repository.
 
-.. _sourceforge: http://sourceforge.net/projects/pytz/
+.. _Sourceforge: http://sourceforge.net/projects/pytz/
 
 
 Issues & Limitations
@@ -168,4 +175,14 @@ Contact
 ~~~~~~~
 
 Stuart Bishop <stuart@stuartbishop.net>
+
+.. [*]  The missing few are for Riyadh Solar Time in 1987, 1988 and 1989.
+	As Saudi Arabia gave up trying to cope with their timezone
+	definition, I see no reason to complicate my code further
+	to cope with them.  (I understand the intention was to set
+	sunset to 0:00 local time, the start of the Islamic day.
+	In the best case caused the DST offset to change daily and
+	worst case caused the DST offset to change each instant
+	depending on how you interpreted the ruling.)
+
 

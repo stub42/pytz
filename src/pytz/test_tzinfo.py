@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.7 2004/07/24 21:21:28 zenzen Exp $
+$Id: test_tzinfo.py,v 1.8 2004/07/25 01:34:20 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.7 2004/07/24 21:21:28 zenzen Exp $'
-__version__ = '$Revision: 1.7 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.8 2004/07/25 01:34:20 zenzen Exp $'
+__version__ = '$Revision: 1.8 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -13,6 +13,8 @@ sys.path.insert(0, os.pardir)
 import unittest, doctest
 from datetime import datetime, tzinfo, timedelta
 import pytz, reference
+
+fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
 NOTIME = timedelta(0)
 
@@ -106,16 +108,13 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
             # Make sure arithmetic crossing DST boundaries ends
             # up in the correct timezone after normalization
-            fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
             self.failUnlessEqual(
                     (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
                     self.tzinfo.normalize(dt + delta).strftime(fmt),
-                    #(dt + delta).strftime(fmt),
                     'Incorrect result for delta==%d days.  Wanted %r. Got %r'%(
                         days,
                         (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
                         self.tzinfo.normalize(dt + delta).strftime(fmt),
-                        #(dt + delta).strftime(fmt),
                         )
                     )
 
@@ -372,6 +371,15 @@ class LocalTestCase(unittest.TestCase):
         self.failUnlessEqual(
                 utc_dt.strftime('%Y-%m-%d %H:%M:%S %Z%z'),
                 '1914-01-01 13:40:00 UTC+0000'
+                )
+
+    def no_testCreateLocaltime(self):
+        # It would be nice if this worked, but it doesn't.
+        tz = pytz.timezone('Europe/Amsterdam')
+        dt = datetime(2004, 10, 31, 2, 0, 0, tzinfo=tz)
+        self.failUnlessEqual(
+                dt.strftime(fmt),
+                '2004-10-31 02:00:00 CET+0100'
                 )
 
 def test_suite():
