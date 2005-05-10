@@ -1,7 +1,9 @@
 '''
-$Id: test_tzinfo.py,v 1.5 2004/03/19 04:23:29 zenzen Exp $
+$Id: test_tzinfo.py,v 1.6 2004/05/29 15:14:44 zenzen Exp $
 '''
-import sys
+import sys, os
+sys.path.insert(0, os.curdir)
+
 import re
 import unittest
 import pickle
@@ -11,10 +13,10 @@ import os.path
 #from tzinfo import TZInfo
 import datetime
 #from datetime import datetime,timedelta,tzinfo
-from time import strptime 
+from time import strptime
 import reference
+
 import tz
-import gen_tzinfo
 
 utc_tzinfo = reference.utc
 
@@ -140,7 +142,9 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
 transitions_cache = {}
 
 class ZDumpTransitionTimesTestCase(unittest.TestCase):
-    zdump = os.path.join('elsie.nci.nih.gov','build','etc','zdump')
+    zdump = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), 'build','etc','zdump'
+            ))
 
     def transitions(self,zone):
         try:
@@ -232,7 +236,10 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
 def fillZDumpTest(cls):
     ''' Add tests to ZDump '''
     zones = []
-    for dirpath, dirnames, filenames in os.walk(gen_tzinfo.zoneinfo):
+    zoneinfo = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 'build', 'etc', 'zoneinfo'
+        ))
+    for dirpath, dirnames, filenames in os.walk(zoneinfo):
         zones.extend([os.path.join(dirpath,f) for f in filenames])
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]

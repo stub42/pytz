@@ -1,12 +1,14 @@
+#!/usr/bin/env python
+'''
+$Id: gen_tzinfo.py,v 1.3 2004/05/29 15:14:44 zenzen Exp $
+'''
+import sys, os, os.path, shutil
+
+from glob import glob
 from datetime import datetime,timedelta,tzinfo
 from tzfile import TZFile
 from pprint import pprint
 from bisect import bisect_right
-
-import sys, os, os.path
-zoneinfo = os.path.join(
-    os.path.dirname(__file__),'elsie.nci.nih.gov','build','etc','zoneinfo'
-    )
 
 def allzones(self):
     ''' Return all available tzfile(5) files in the zoneinfo database '''
@@ -17,7 +19,16 @@ def allzones(self):
     zones = [z[stripnum:] for z in zones]
     return zones
 
-def gen_tzinfo(zone):
+def dupe_src(destdir):
+    ''' Copy ./tz to our dest directory '''
+    if not os.path.isdir(destdir):
+        os.makedirs(destdir)
+    for f in glob(os.path.join('tz','*')):
+        if not os.path.isdir(f):
+            shutil.copy(f, destdir)
+
+def gen_tzinfo(destdir, zoneinfo, zone):
+    ''' Create a .py file for the given timezone '''
     filename = os.path.join(zoneinfo, zone)
     tzfile = TZFile(filename)
     if len(tzfile.transitions) == 0:
@@ -25,33 +36,20 @@ def gen_tzinfo(zone):
         generator = StaticGen(zone, ttinfo[0], ttinfo[2])
     else:
         generator = DstGen(zone, tzfile.transitions)
-    out_name = os.path.join('tz',zone + '.py')
-    assert os.path.isdir('tz')
-    build_path(os.path.dirname(out_name))
+    out_name = os.path.join(destdir, zone + '.py')
+    if not os.path.isdir(os.path.dirname(out_name)):
+        os.makedirs(os.path.dirname(out_name))
     generator.write(open(out_name,'w'))
 
-init_src = """'''
-tzinfo implementations generated from the Olson timezone database:
-    ftp://elsie.nci.nih.gov/pub/tz*.tar.gz
-'''
-"""
+def gen_inits(destdir):
+    ''' Create required __init__.py's '''
+    for dirpath, dirnames, filenames in os.walk(destdir):
+        if '__init__.py' not in filenames:
+            f = os.path.join(dirpath, '__init__.py')
+            print 'Building %s' % f
+            open(f, 'w').close()
 
-def build_path(path):
-    '''Make directories, and stick in required __init__.py's'''
-    if not os.path.isdir(path):
-        os.makedirs(os.path.dirname(out_name))
-    assert os.path.abspath(path) != os.path.normpath(path )
-    d = path
-    while d != '':
-        init = os.path.join(d, '__init__.py')
-        if not os.path.exists(init):
-            print 'Building %s' % init
-            print >> open(init,'w'), init_src
-
-        d = os.path.dirname(d)
-
-
-
+        
 class Gen:
     def write(self, out):
         zone = self.zone
@@ -67,8 +65,8 @@ Generated from the Olson timezone database:
     ftp://elsie.nci.nih.gov/pub/tz*.tar.gz
 '''
 
-__rcs_id__  = '$Id: gen_tzinfo.py,v 1.2 2003/08/06 16:34:09 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
+__rcs_id__  = '$Id: gen_tzinfo.py,v 1.3 2004/05/29 15:14:44 zenzen Exp $'
+__version__ = '$Revision: 1.3 $'[11:-2]
 
 __all__ = ['%(szone)s']
 
@@ -150,5 +148,12 @@ class DstGen(Gen):
         self.attributes = '\n'.join(attributes)
 
 if __name__ == '__main__':
-    gen_tzinfo('UTC')
-    gen_tzinfo('US/Eastern')
+    _destdir = os.path.join(os.path.abspath(sys.argv[1]), 'tz')
+    _zoneinfo = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), 'build','etc','zoneinfo'
+            ))
+   
+    dupe_src(_destdir)
+    gen_tzinfo(_destdir, _zoneinfo, 'UTC')
+    gen_tzinfo(_destdir, _zoneinfo, 'US/Eastern')
+    gen_inits(_destdir)
