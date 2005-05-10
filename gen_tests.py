@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.1 2004/05/31 00:31:19 zenzen Exp $
+$Id: gen_tests.py,v 1.2 2004/05/31 20:44:35 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.1 2004/05/31 00:31:19 zenzen Exp $'
-__version__ = '$Revision: 1.1 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.2 2004/05/31 20:44:35 zenzen Exp $'
+__version__ = '$Revision: 1.2 $'[11:-2]
 
 import os, os.path, popen2, re
 from gen_tzinfo import allzones
@@ -44,26 +44,45 @@ def test():
         zd_out, zd_in = popen2.popen2('%s -v %s' % (zdump, zone))
         zd_in.close()
         lines = zd_out.readlines()
-        for line in lines:
-            if '2002' not in line:
-                continue
+        for idx in range(0, len(lines)):
+            line = lines[idx]
+            #if '2002' not in line:
+            #    continue
             m = re.match(
-                '^([^\s]+) \s+ (.* \s UTC) \s+=\s+ (.*) \s+ isdst=(0|1)$',
+                '^([^\s]+) \s+ (.* \s UTC) \s+=\s+ (.*)\s(\w+) \s+isdst=(0|1)$',
                 line, re.X
                 )
             if m:
-                zone, utc_string, local_string, is_dst = m.groups()
+                zone, utc_string, local_string, tzname, is_dst = m.groups()
             else:
                 raise RuntimeError, 'Dud line %r' % (line,)
+
+            # Get the next line, so we can fix the timezone acronym
+            # if necessary to match Python's end-of-dst behavior
+            try:
+                nline = lines[idx+1]
+            except IndexError:
+                nline = lines[idx-2]
+            m = re.match(
+                '^([^\s]+) \s+ (.* \s UTC) \s+=\s+ (.*)\s(\w+) \s+isdst=(0|1)$',
+                nline, re.X
+                )
+            if m:
+                nzone, nutc_string, nlocal_string, ntzname, nis_dst = m.groups()
+            else:
+                raise RuntimeError, 'Dud line %r' % (nline,)
+
+            if int(is_dst) and not int(nis_dst):
+                tzname = ntzname
 
             # Add leading 0 to single character day of month
             if local_string[8] == ' ':
                 local_string = local_string[:8] + '0' + local_string[9:]
+            local_string = '%s %s' % (local_string, tzname)
 
             print >> outf, '    >>> aszone(%s, %s)' % (
                     repr(utc_string), repr(zone)
                     )
-            local_string = ('is_dst=%d   ' % int(is_dst)) + local_string
             print >> outf, '   ',
             print >> outf, repr(local_string)
             print >> outf
@@ -89,10 +108,7 @@ def aszone(utc_string, zone):
     utc_t = strptime(utc_string, '%a %b %d %H:%M:%S %Y UTC')[:6] + (0, utc_tz)
     utc_datetime = datetime(*utc_t)
     loc_datetime = utc_datetime.astimezone(loc_tz)
-    return 'is_dst=%d   %s' % (
-        int(bool(loc_datetime.dst())),
-        loc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'),
-        )
+    return '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
 
 def _test():
     import doctest, test_zdump

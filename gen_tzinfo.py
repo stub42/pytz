@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.4 2004/05/31 00:27:39 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.5 2004/05/31 20:44:35 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -123,16 +123,35 @@ class DstGen(Gen):
         ])
 
     def __init__(self, zone, transitions):
-
         self.zone = zone
 
-        # Yech. Our DST transition times need to be in local standard 
-        # time rather than UTC :-(
+        # if first transition is in dst, add an extra one before it that
+        # isn't
+        if transitions[0][2]:
+            for nondst in transitions:
+                if not nondst[2]:
+                    break
+            delta = nondst[1]
+            dst = nondst[2]
+            tzname = nondst[3]
+            if delta > timedelta(0):
+                transitions.insert(
+                        0, (datetime.min, delta, dst, tzname)
+                        )
+            else:
+                transitions.insert(
+                        0, (datetime.min - delta, delta, dst, tzname)
+                        )
 
         transition_times = []
         transition_info = []
-        for i in range(1,len(transitions)):
+        for i in range(0,len(transitions)):
             # transitions[i] == time, delta, dst, tzname
+
+            try:
+                tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
+            except IndexError:
+                tt = transitions[i][0] + transitions[i+1][1] # Local, naive time
 
             tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
             inf = transitions[i][1:]
@@ -181,54 +200,6 @@ class DstGen(Gen):
         attributes.append('        ]')
         self.attributes = '\n'.join(attributes)
  
-        """
-
-            tt = transitions[i][0]
-            inf = transitions[i][1:]
-
-            # Convert transition time to localtime
-            tt = tt + transitions[i-1][1]
-
-            #if transitions[i][2]:
-            #    tt = tt + transitions[i-1][1] # Need last non-DST offset
-            #else:
-            #    tt = tt + transitions[i][1]
-
-            transition_times.append(tt)
-            transition_info.append(inf)
-
-        attributes = ['']
-        attributes.append('    _zone = %s' % repr(zone))
-        attributes.append('')
-
-        attributes.append('    _transition_times = [')
-        for i in range(0, len(transition_times)):
-            tt = transition_times[i]
-            delta, dst, tzname = transition_info[i]
-            if delta < timedelta(0):
-                delta = '-%s' % str(delta * -1)
-            else:
-                delta = '+%s' % str(delta)
-            comment = '%s dst=%d tzname=%s' % (delta, int(dst), tzname)
-            attributes.append(
-                '        datetime(%4d, %2d, %2d, %2d, %2d), # %s' % (
-                    tt.year, tt.month, tt.day, tt.hour, tt.minute, comment
-                    )
-                )
-        attributes.append('        ]')
-        attributes.append('')
-
-        attributes.append('    _transition_info = [')
-        for delta, dst, tzname in transition_info:
-            delta = 24 * 60 * 60 * delta.days + delta.seconds
-
-            attributes.append(
-                '        ttinfo(%6s, %d, %6r),' % (delta,int(dst),tzname)
-                )
-        attributes.append('        ]')
-        self.attributes = '\n'.join(attributes)
-        """
-
 
 def main(destdir):
     _destdir = os.path.join(os.path.abspath(destdir), 'tz')

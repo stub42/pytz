@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.3 2004/05/31 00:27:40 zenzen Exp $
+$Id: tzinfo.py,v 1.4 2004/05/31 20:44:35 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.3 2004/05/31 00:27:40 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.4 2004/05/31 20:44:35 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
-import datetime as datetime
+from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
 
 _timedelta_cache = {}
@@ -15,7 +15,7 @@ def memorized_timedelta(seconds):
     try:
         return _timedelta_cache[seconds]
     except KeyError:
-        delta = datetime.timedelta(seconds=seconds)
+        delta = timedelta(seconds=seconds)
         _timedelta_cache[seconds] = delta
         return delta
 
@@ -25,7 +25,7 @@ def memorized_datetime(*args):
     try:
         return _datetime_cache[args]
     except KeyError:
-        dt = datetime.datetime(*args)
+        dt = datetime(*args)
         _datetime_cache[args] = dt
         return dt
 
@@ -43,7 +43,7 @@ def memorized_ttinfo(*args):
         _ttinfo_cache[args] = ttinfo
         return ttinfo
 
-class BaseTzInfo(datetime.tzinfo):
+class BaseTzInfo(tzinfo):
     __slots__ = ()
     def __str__(self):
         return self._zone
@@ -78,33 +78,15 @@ class DstTzInfo(BaseTzInfo):
     _zone = None
 
     def _lastTransition(self, dt):
-        return self._transition_info[max(0, bisect_right(
-            self._transition_times, dt.replace(tzinfo=None)
-            )- 1)]
+        dt = dt.replace(tzinfo=None)
+        idx = max(0, bisect_right(self._transition_times, dt) - 1)
+        return self._transition_info[idx]
         
     def utcoffset(self, dt):
         return self._lastTransition(dt)[0]
 
     def dst(self, dt):
         return self._lastTransition(dt)[1]
-
-        dt = dt.replace(tzinfo = None)
-        dst_idx = max(0, bisect_right(self._transition_times, dt) - 1)
-
-        # If not DST, no offset
-        if not self._transition_info[dst_idx][1]:
-            return _notime
-
-        assert self._transition_info[dst_idx] == self._lastTransition(dt)
-
-        non_idx = dst_idx - 1
-            # Currently assumes a DST timezone info always proceeded by non-DST
-        non_info = self._transition_info[non_idx]
-        while non_info[1]:
-            non_idx -= 1
-            non_info = self._transition_info[non_idx]
-
-        return self._transition_info[dst_idx][0] - non_info[0]
 
     def tzname(self, dt):
         return self._lastTransition(dt)[2]
