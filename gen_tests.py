@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.13 2004/07/24 18:05:54 zenzen Exp $
+$Id: gen_tests.py,v 1.14 2004/07/24 23:28:11 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.13 2004/07/24 18:05:54 zenzen Exp $'
-__version__ = '$Revision: 1.13 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.14 2004/07/24 23:28:11 zenzen Exp $'
+__version__ = '$Revision: 1.14 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -104,7 +104,7 @@ from datetime import tzinfo, timedelta, datetime
             tmp1 = line.split()[0]
             tmp2 = line[len(tmp1):].strip()
 
-            print >> outf, '# %s\n# %s\n' % (tmp1, tmp2)
+            print >> outf, '        # %s\n        # %s\n' % (tmp1, tmp2)
             print >> outf, '        self.failUnlessEqual('
             print >> outf, '            aszone(%r, %r),' % (utc_string, zone)
             print >> outf, '                   %r,' % (local_string,)
@@ -142,7 +142,7 @@ def asutc(loc_string, zone, is_dst):
     loc_tz = timezone(zone)
     loc_string = ' '.join(loc_string.split()[:-1]) # Remove timezone
     loc_t = strptime(loc_string, '%a %b %d %H:%M:%S %Y')[:6]
-    loc_datetime = loc_tz.normalize(datetime(*loc_t), is_dst=is_dst)
+    loc_datetime = loc_tz.localize(datetime(*loc_t), is_dst=is_dst)
     utc_datetime = loc_datetime.astimezone(utc_tz)
     return '%s' % (utc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
 
