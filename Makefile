@@ -6,10 +6,10 @@ PYTHON=python2.3
 OLSEN=./elsie.nci.nih.gov
 TESTARGS=-v
 TARGET=
-#TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
+TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
 #Mideast/Riyadh87
 
-build/tz: build/etc/zoneinfo/UTC gen_tzinfo.py
+build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py
 	${PYTHON} gen_tzinfo.py ${TARGET}
 
 clean:
@@ -21,18 +21,24 @@ build/etc/zoneinfo/UTC: ${OLSEN}/src/africa build
 
 test: test_tzinfo test_zdump
 
-.mk_test: build/tz/test_tzinfo.py build/tz/test_zdump.py gen_tests.py build/tz
+.mk_test: build/dist gen_tests.py
 	${PYTHON} gen_tests.py ${TARGET} && touch .mk_test
-    
 
 test_tzinfo: .mk_test
-	cd build/tz && ${PYTHON} test_tzinfo.py ${TESTARGS}
+	cd build/dist/pytz && ${PYTHON} test_tzinfo.py ${TESTARGS}
 
 test_zdump: .mk_test
-	cd build/tz && ${PYTHON} test_zdump.py ${TESTARGS}
+	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
 
 build:
 	mkdir build
+
+sdist: build/dist
+	cd build/dist && \
+	${PYTHON} setup.py sdist --force-manifest --formats=bztar,gztar,zip
+
+#build/pytz.zip:	build/tz
+#	cd build && zip -9 -r pytz.zip pytz/__init__.py pytz/tzinfo.py pytz/zoneinfo
 
 FORCE:
 

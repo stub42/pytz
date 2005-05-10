@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.9 2004/06/04 07:48:17 zenzen Exp $
+$Id: gen_tests.py,v 1.10 2004/06/05 09:53:54 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.9 2004/06/04 07:48:17 zenzen Exp $'
-__version__ = '$Revision: 1.9 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.10 2004/06/05 09:53:54 zenzen Exp $'
+__version__ = '$Revision: 1.10 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -17,7 +17,7 @@ zdump = os.path.abspath(os.path.join(
 
 def main():
     dest_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'build', 'tz')
+            os.path.join(os.path.dirname(__file__), 'build', 'dist')
             )
     if not os.path.isdir(dest_dir):
         os.makedirs(dest_dir)
@@ -31,10 +31,9 @@ Daylight savings time transition tests generated from the Olsen
 timezone database using the reference zdump implementation.
 '''
     
-import sys, os, unittest
-sys.path.insert(0, os.pardir)
+import unittest
 from time import strptime
-from __init__ import timezone
+from pytz import timezone
 
 from datetime import tzinfo, timedelta, datetime
     """

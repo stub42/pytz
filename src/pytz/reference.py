@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 '''
-$Id: reference.py,v 1.1 2004/05/31 00:31:19 zenzen Exp $
+$Id: reference.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $
 
 Reference tzinfo implementations from the Python docs.
 Used for testing against.
 '''
 
-__rcs_id__  = '$Id: reference.py,v 1.1 2004/05/31 00:31:19 zenzen Exp $'
+__rcs_id__  = '$Id: reference.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $'
 __version__ = '$Revision: 1.1 $'[11:-2]
 
 from datetime import tzinfo, timedelta, datetime

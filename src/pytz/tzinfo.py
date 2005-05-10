@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.9 2004/06/04 07:48:19 zenzen Exp $
+$Id: tzinfo.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.9 2004/06/04 07:48:19 zenzen Exp $'
-__version__ = '$Revision: 1.9 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $'
+__version__ = '$Revision: 1.1 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right

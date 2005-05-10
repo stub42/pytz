@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.3 2004/06/02 19:39:54 zenzen Exp $
+$Id: test_tzinfo.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.3 2004/06/02 19:39:54 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $'
+__version__ = '$Revision: 1.1 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
 
 import unittest
 from datetime import datetime, tzinfo, timedelta
-import tz, reference
+import pytz, reference
 
 NOTIME = timedelta(0)
 
@@ -20,7 +20,7 @@ UTC = reference.utc
 
 class BasicTest(unittest.TestCase):
     def testUTC(self):
-        UTC = tz.timezone('UTC')
+        UTC = pytz.timezone('UTC')
         now = datetime.now(tz=UTC)
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
@@ -35,7 +35,7 @@ class BasicTest(unittest.TestCase):
 
 
 class USEasternDSTStartTestCase(unittest.TestCase):
-    tzinfo = tz.timezone('US/Eastern')
+    tzinfo = pytz.timezone('US/Eastern')
 
     # 24 hours before DST changeover
     transition_time = datetime(2002, 4, 7, 7, 0, 0, tzinfo=UTC)
@@ -141,7 +141,7 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
 
 class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
-    tzinfo = tz.timezone('US/Eastern')
+    tzinfo = pytz.timezone('US/Eastern')
     transition_time = datetime(2002, 10, 27, 6, 0, 0, tzinfo=UTC)
     before = {
         'tzname': 'EDT',

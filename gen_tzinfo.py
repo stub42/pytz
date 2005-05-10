@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.13 2004/06/04 07:48:17 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.14 2004/06/05 09:53:54 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -10,7 +10,8 @@ from tzfile import TZFile
 from pprint import pprint
 from bisect import bisect_right
 
-import tz
+sys.path.insert(0, 'src')
+import pytz
 
 zoneinfo = os.path.abspath(os.path.join(
         os.path.dirname(__file__), 'build','etc','zoneinfo'
@@ -38,11 +39,28 @@ def allzones():
     zones = [z for z in zones if 'Riyadh8' not in z]
     return zones
 
+def links():
+    inf_name = 'elsie.nci.nih.gov/src/backward'
+    l = {}
+    for line in open(inf_name):
+        if line.strip().startswith('#') or not line.strip():
+            continue
+        link, new_name, old_name = line.split()
+        assert link == 'Link', 'Got %s' % repr(line)
+    return l
+
 def dupe_src(destdir):
-    ''' Copy ./tz to our dest directory '''
+    ''' Copy ./src to our dest directory '''
     if not os.path.isdir(destdir):
         os.makedirs(destdir)
-    for f in glob(os.path.join('tz','*')):
+    for f in glob(os.path.join('src','*')):
+        if not os.path.isdir(f):
+            shutil.copy(f, destdir)
+
+    destdir = os.path.join(destdir, 'pytz')
+    if not os.path.isdir(destdir):
+        os.makedirs(destdir)
+    for f in glob(os.path.join('src','pytz', '*')):
         if not os.path.isdir(f):
             shutil.copy(f, destdir)
 
@@ -50,7 +68,7 @@ def gen_tzinfo(destdir, zone):
     ''' Create a .py file for the given timezone '''
     filename = os.path.join(zoneinfo, zone)
     tzfile = TZFile(filename)
-    zone = tz._munge_zone(zone)
+    zone = pytz._munge_zone(zone)
     if len(tzfile.transitions) == 0:
         ttinfo = tzfile.ttinfo[0]
         generator = StaticGen(zone, ttinfo[0], ttinfo[2])
@@ -72,7 +90,20 @@ def add_allzones(filename):
     ''' Append a list of all know timezones to the end of the file '''
     outf = open(filename, 'a')
 
-    print >> outf, 'timezones = \\'
+    obsolete_zones = links().keys()
+
+    cz = [z for z in allzones() if 
+        (len(z.split('/')) == 2 or z in ('UTC', 'GMT'))
+        and z not in obsolete_zones
+        and not z.startswith('SystemV/')
+        and not z.startswith('Etc/')
+        ]
+
+    print >> outf, 'common_timezones = \\'
+    pprint(cz, outf)
+    print >> outf
+
+    print >> outf, 'all_timezones = \\'
     pprint(allzones(), outf)
     outf.close()
 
@@ -92,7 +123,7 @@ Generated from the Olson timezone database:
     ftp://elsie.nci.nih.gov/pub/tz*.tar.gz
 '''
 
-from tz.tzinfo import %(base_class)s
+from pytz.tzinfo import %(base_class)s
 %(imps)s
 
 class %(szone)s(%(base_class)s):
@@ -106,7 +137,7 @@ class %(szone)s(%(base_class)s):
 class StaticGen(Gen):
     base_class = 'StaticTzInfo'
     imps = '\n'.join([
-        'from tz.tzinfo import memorized_timedelta as timedelta',
+        'from pytz.tzinfo import memorized_timedelta as timedelta',
         ])
 
     def __init__(self, zone, utcoffset, tzname):
@@ -123,8 +154,8 @@ class StaticGen(Gen):
 class DstGen(Gen):
     base_class = 'DstTzInfo'
     imps = '\n'.join([
-        'from tz.tzinfo import memorized_datetime as datetime',
-        'from tz.tzinfo import memorized_ttinfo as ttinfo',
+        'from pytz.tzinfo import memorized_datetime as datetime',
+        'from pytz.tzinfo import memorized_ttinfo as ttinfo',
         ])
 
     def __init__(self, zone, transitions):
@@ -182,14 +213,14 @@ class DstGen(Gen):
  
 
 def main(destdir):
-    _destdir = os.path.join(os.path.abspath(destdir), 'tz')
+    _destdir = os.path.join(os.path.abspath(destdir), 'dist')
    
     dupe_src(_destdir)
     for zone in allzones():
         print 'Generating %s.py' % zone
-        gen_tzinfo(os.path.join(_destdir, 'zoneinfo'), zone)
+        gen_tzinfo(os.path.join(_destdir, 'pytz', 'zoneinfo'), zone)
     gen_inits(_destdir)
-    add_allzones(os.path.join(_destdir, '__init__.py'))
+    add_allzones(os.path.join(_destdir, 'pytz', '__init__.py'))
 
 if __name__ == '__main__':
     try:
