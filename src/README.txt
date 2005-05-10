@@ -71,8 +71,10 @@ for inclusion in other open source projects.
 Latest Versions
 ~~~~~~~~~~~~~~~
 
-This module will be updated after releases of the Olsen timezone database.
-The latest version can be downloaded from sourceforge_.
+This package will be updated after releases of the Olsen timezone database.
+The latest version can be downloaded from sourceforge_. The code that
+is used to generate this distribution is available in the sourceforge_
+project's CVS repository.
 
 .. _sourceforge: http://sourceforge.net/projects/pytz/
 
