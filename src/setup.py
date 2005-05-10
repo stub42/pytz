@@ -1,5 +1,5 @@
 '''
-$Id: setup.py,v 1.3 2004/06/05 12:57:22 zenzen Exp $
+$Id: setup.py,v 1.4 2004/07/19 23:18:42 zenzen Exp $
 Distribution setup script
 '''
 
@@ -43,7 +43,7 @@ setup (
     license = open('LICENSE.txt','r').read(),
     keywords = ['timezone','tzinfo', 'datetime', 'olsen', 'time'],
     packages = packages,
-    #download_url='',
+    download_url='http://sourceforge.net/project/showfiles.php?group_id=79122',
     platforms=['Independant'],
     classifiers = [
         'Development Status :: 6 - Mature',
