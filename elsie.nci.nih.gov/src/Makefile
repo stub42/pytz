@@ -1,4 +1,4 @@
-# @(#)Makefile	7.92
+# @(#)Makefile	7.94
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -103,6 +103,8 @@ LDLIBS=
 #  -DLOCALE_HOME=\"path\" if locales are in "path", not "/usr/lib/locale"
 #  -DHAVE_UNISTD_H=0 if your compiler lacks a "unistd.h" (Microsoft C++ 7?)
 #  -DHAVE_UTMPX_H=1 if your compiler has a "utmpx.h"
+#  -DSTRICTLY_STANDARD_ASCTIME=1 if you want a strictly standard (and arguably
+#	broken) version of asctime (see asctime.c for details)	
 #  -DTZDEFRULESTRING=\",date/time,date/time\" to default to the specified
 #	DST transitions if the time zone files cannot be accessed
 #  -DTZ_DOMAIN=\"foo\" to use "foo" for gettext domain name; default is "tz"
@@ -244,8 +246,8 @@ CC=		$(cc) -DTZDIR=\"$(TZDIR)\"
 
 TZCSRCS=	zic.c localtime.c asctime.c scheck.c ialloc.c
 TZCOBJS=	zic.o localtime.o asctime.o scheck.o ialloc.o
-TZDSRCS=	zdump.c localtime.c asctime.c ialloc.c
-TZDOBJS=	zdump.o localtime.o asctime.o ialloc.o
+TZDSRCS=	zdump.c localtime.c ialloc.c
+TZDOBJS=	zdump.o localtime.o ialloc.o
 DATESRCS=	date.c localtime.c logwtmp.c strftime.c asctime.c
 DATEOBJS=	date.o localtime.o logwtmp.o strftime.o asctime.o
 LIBSRCS=	localtime.c asctime.c difftime.c

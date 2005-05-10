@@ -5,7 +5,7 @@
 
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)asctime.c	7.9";
+static char	elsieid[] = "@(#)asctime.c	7.22";
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
@@ -14,8 +14,50 @@ static char	elsieid[] = "@(#)asctime.c	7.9";
 #include "private.h"
 #include "tzfile.h"
 
+#if STRICTLY_STANDARD_ASCTIME
+#define ASCTIME_FMT	"%.3s %.3s%3d %.2d:%.2d:%.2d %ld\n"
+#define ASCTIME_FMT_B	ASCTIME_FMT
+#else /* !STRICTLY_STANDARD_ASCTIME */
 /*
-** A la ISO/IEC 9945-1, ANSI/IEEE Std 1003.1, Second Edition, 1996-07-12.
+** Some systems only handle "%.2d"; others only handle "%02d";
+** "%02.2d" makes (most) everybody happy.
+** At least some versions of gcc warn about the %02.2d; ignore the warning.
+*/
+/*
+** All years associated with 32-bit time_t values are exactly four digits long;
+** some years associated with 64-bit time_t values are not.
+** Vintage programs are coded for years that are always four digits long
+** and may assume that the newline always lands in the same place.
+** For years that are less than four digits, we pad the output with
+** spaces before the newline to get the newline in the traditional place.
+*/
+#define ASCTIME_FMT	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d %-4ld\n"
+/*
+** For years that are more than four digits we put extra spaces before the year
+** so that code trying to overwrite the newline won't end up overwriting
+** a digit within a year and truncating the year (operating on the assumption
+** that no output is better than wrong output).
+*/
+#define ASCTIME_FMT_B	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d     %ld\n"
+#endif /* !STRICTLY_STANDARD_ASCTIME */
+
+#define STD_ASCTIME_BUF_SIZE	26
+/*
+** Big enough for something such as
+** ??? ???-2147483648 -2147483648:-2147483648:-2147483648     -2147483648\n
+** (two three-character abbreviations, five strings denoting integers,
+** seven explicit spaces, two explicit colons, a newline,
+** and a trailing ASCII nul).
+** The values above are for systems where an int is 32 bits and are provided
+** as an example; the define below calculates the maximum for the system at
+** hand.
+*/
+#define MAX_ASCTIME_BUF_SIZE	(2*3+5*INT_STRLEN_MAXIMUM(int)+7+2+1+1)
+
+static char	buf_asctime[MAX_ASCTIME_BUF_SIZE];
+
+/*
+** A la ISO/IEC 9945-1, ANSI/IEEE Std 1003.1, 2004 Edition.
 */
 
 char *
@@ -32,6 +74,8 @@ char *				buf;
 	};
 	register const char *	wn;
 	register const char *	mn;
+	long			year;
+	char			result[MAX_ASCTIME_BUF_SIZE];
 
 	if (timeptr->tm_wday < 0 || timeptr->tm_wday >= DAYSPERWEEK)
 		wn = "???";
@@ -39,36 +83,36 @@ char *				buf;
 	if (timeptr->tm_mon < 0 || timeptr->tm_mon >= MONSPERYEAR)
 		mn = "???";
 	else	mn = mon_name[timeptr->tm_mon];
+	year = timeptr->tm_year + (long) TM_YEAR_BASE;
 	/*
-	** The X3J11-suggested format is
-	**	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d %d\n"
-	** Since the .2 in 02.2d is ignored, we drop it.
+	** We avoid using snprintf since it's not available on all systems.
 	*/
-	(void) sprintf(buf, "%.3s %.3s%3d %02d:%02d:%02d %d\n",
+	(void) sprintf(result,
+		((year >= -999 && year <= 9999) ? ASCTIME_FMT : ASCTIME_FMT_B),
 		wn, mn,
 		timeptr->tm_mday, timeptr->tm_hour,
 		timeptr->tm_min, timeptr->tm_sec,
-		TM_YEAR_BASE + timeptr->tm_year);
-	return buf;
+		year);
+	if (strlen(result) < STD_ASCTIME_BUF_SIZE || buf == buf_asctime) {
+		(void) strcpy(buf, result);
+		return buf;
+	} else {
+#ifdef EOVERFLOW
+		errno = EOVERFLOW;
+#else /* !defined EOVERFLOW */
+		errno = EINVAL;
+#endif /* !defined EOVERFLOW */
+		return NULL;
+	}
 }
 
 /*
-** A la X3J11, with core dump avoidance.
+** A la ISO/IEC 9945-1, ANSI/IEEE Std 1003.1, 2004 Edition.
 */
 
 char *
 asctime(timeptr)
 register const struct tm *	timeptr;
 {
-	/*
-	** Big enough for something such as
-	** ??? ???-2147483648 -2147483648:-2147483648:-2147483648 -2147483648\n
-	** (two three-character abbreviations, five strings denoting integers,
-	** three explicit spaces, two explicit colons, a newline,
-	** and a trailing ASCII nul).
-	*/
-	static char		result[3 * 2 + 5 * INT_STRLEN_MAXIMUM(int) +
-					3 + 2 + 1 + 1];
-
-	return asctime_r(timeptr, result);
+	return asctime_r(timeptr, buf_asctime);
 }

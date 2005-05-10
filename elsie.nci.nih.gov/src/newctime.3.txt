@@ -36,10 +36,16 @@ SYNOPSIS
 DESCRIPTION
      Ctime converts a long integer, pointed to by clock,
      representing the time in seconds since 00:00:00 UTC, 1970-
-     01-01, and returns a pointer to a 26-character string of the
-     form
+     01-01, and returns a pointer to a string of the form
                      Thu Nov 24 18:22:48 1986\n\0
-     All the fields have constant width.
+     Years requiring fewer than four characters are padded with
+     trailing spaces.  For years longer than four characters, the
+     string is of the form
+                  Thu Nov 24 18:22:48     81986\n\0
+     with five spaces before the year.  This unusual format is
+     designed to make it less likely that older software that
+     expects exactly 26 bytes of output will mistakenly output
+     misleading values for out-of-range years.
 
      Localtime and gmtime return pointers to ``tm'' structures,
      described below.  Localtime corrects for the time zone and
@@ -52,8 +58,8 @@ DESCRIPTION
      Gmtime converts to Coordinated Universal Time.
 
      Asctime converts a time value contained in a ``tm''
-     structure to a 26-character string, as shown in the above
-     example, and returns a pointer to the string.
+     structure to a string, as shown in the above example, and
+     returns a pointer to the string.
 
      Mktime converts the broken-down time, expressed as local
      time, in the structure pointed to by tm into a calendar time
@@ -127,6 +133,15 @@ NOTES
      struct tm points to a static array of characters, which will
      also be overwritten at the next call (and by calls to
      tzset).
+
+     Asctime and ctime behave strangely for years before 1000 or
+     after 9999.  The 1989 and 1999 editions of the C Standard
+     say that years from -99 through 999 are converted without
+     extra spaces, but this conflicts with longstanding tradition
+     and with this implementation.  Traditional implementations
+     of these two functions are restricted to years in the range
+     1900 through 2099.  To avoid this portability mess, new
+     programs should use strftime instead.
 
      Avoid using out-of-range values with mktime when setting up
      lunch with promptness sticklers in Riyadh.
