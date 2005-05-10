@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.10 2004/06/05 09:53:54 zenzen Exp $
+$Id: gen_tests.py,v 1.11 2004/07/22 01:44:30 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.10 2004/06/05 09:53:54 zenzen Exp $'
-__version__ = '$Revision: 1.10 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.11 2004/07/22 01:44:30 zenzen Exp $'
+__version__ = '$Revision: 1.11 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -63,11 +63,19 @@ from datetime import tzinfo, timedelta, datetime
             # Add leading 0 to single character day of month
             if local_string[8] == ' ':
                 local_string = local_string[:8] + '0' + local_string[9:]
+            if utc_string[8] == ' ':
+                utc_string = utc_string[:8] + '0' + utc_string[9:]
             local_string = '%s %s' % (local_string, tzname)
 
             print >> outf, '        self.failUnlessEqual('
             print >> outf, '            aszone(%r, %r),' % (utc_string, zone)
             print >> outf, '                   %r,' % (local_string,)
+            print >> outf, '            )\n'
+            print >> outf, '        self.failUnlessEqual('
+            print >> outf, '            asutc(%r, %r, is_dst=%s),' % (
+                    local_string, zone, bool(int(is_dst))
+                    )
+            print >> outf, '                  %r,' % (utc_string,)
             print >> outf, '            )\n'
 
     print >> outf, """
@@ -92,6 +100,14 @@ def aszone(utc_string, zone):
     # Make sure tzinfo.utcoffset() works as wanted
     '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %z'))
     return '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
+
+def asutc(loc_string, zone, is_dst):
+    loc_tz = timezone(zone)
+    loc_string = ' '.join(loc_string.split()[:-1]) # Remove timezone
+    loc_t = strptime(loc_string, '%a %b %d %H:%M:%S %Y')[:6]
+    loc_datetime = loc_tz.normalize(datetime(*loc_t), is_dst=is_dst)
+    utc_datetime = loc_datetime.astimezone(utc_tz)
+    return '%s' % (utc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
 
 if __name__ == '__main__':
     unittest.main()

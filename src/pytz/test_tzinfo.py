@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.4 2004/06/06 10:07:00 zenzen Exp $
+$Id: test_tzinfo.py,v 1.5 2004/07/22 01:44:31 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.4 2004/06/06 10:07:00 zenzen Exp $'
-__version__ = '$Revision: 1.4 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.5 2004/07/22 01:44:31 zenzen Exp $'
+__version__ = '$Revision: 1.5 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
 
-import unittest
+import unittest, doctest
 from datetime import datetime, tzinfo, timedelta
 import pytz, reference
 
@@ -181,6 +181,33 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(hours = 0),
         }
 
+class USEasternEPTStartTestCase(USEasternDSTStartTestCase):
+    transition_time = datetime(1945, 8, 14, 23, 0, 0, tzinfo=UTC)
+    before = {
+        'tzname': 'EWT',
+        'utcoffset': timedelta(hours = -4),
+        'dst': timedelta(hours = 1),
+        }
+    after = {
+        'tzname': 'EPT',
+        'utcoffset': timedelta(hours = -4),
+        'dst': timedelta(hours = 1),
+        }
+
+class USEasternEPTEndTestCase(USEasternDSTStartTestCase):
+    transition_time = datetime(1945, 9, 30, 6, 0, 0, tzinfo=UTC)
+    before = {
+        'tzname': 'EPT',
+        'utcoffset': timedelta(hours = -4),
+        'dst': timedelta(hours = 1),
+        }
+    after = {
+        'tzname': 'EST',
+        'utcoffset': timedelta(hours = -5),
+        'dst': timedelta(hours = 0),
+        }
+
+
 
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
     tzinfo = reference.Eastern
@@ -215,8 +242,76 @@ class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
         pass
 
 
+class LocalTestCase(unittest.TestCase):
+    def testNormalizeZone(self):
+        loc_tz = pytz.timezone('Europe/Amsterdam')
+
+        loc_time = loc_tz.normalize(datetime(1930, 5, 10, 0, 0, 0))
+        # Actually +00:19:32, but Python datetime rounds this
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'AMT+0020')
+
+        loc_time = loc_tz.normalize(datetime(1930, 5, 20, 0, 0, 0))
+        # Actually +00:19:32, but Python datetime rounds this
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'NST+0120')
+
+        loc_time = loc_tz.normalize(datetime(1940, 5, 10, 0, 0, 0))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'NET+0020')
+
+        loc_time = loc_tz.normalize(datetime(1940, 5, 20, 0, 0, 0))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CEST+0200')
+
+        loc_time = loc_tz.normalize(datetime(2004, 2, 1, 0, 0, 0))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CET+0100')
+
+        loc_time = loc_tz.normalize(datetime(2004, 4, 1, 0, 0, 0))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CEST+0200')
+
+        # Weird changes - war time and peace time both is_dst==True
+        loc_tz = pytz.timezone('US/Eastern')
+        loc_time = loc_tz.normalize(datetime(1942, 2, 9, 3, 0, 0))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EWT-0400')
+
+        loc_time = loc_tz.normalize(datetime(1945, 8, 14, 19, 0, 0))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EPT-0400')
+
+        loc_time = loc_tz.normalize(datetime(1945, 9, 30, 1, 0, 0), is_dst=1)
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EPT-0400')
+
+        loc_time = loc_tz.normalize(datetime(1945, 9, 30, 1, 0, 0), is_dst=0)
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EST-0500')
+
+    def testNormalize(self):
+        tz = pytz.timezone('US/Eastern')
+        dt = datetime(2004, 4, 4, 7, 0, 0, tzinfo=UTC).astimezone(tz)
+        dt2 = dt - timedelta(minutes=10)
+        self.failUnlessEqual(
+                dt2.strftime('%Y-%m-%d %H:%M:%S %Z%z'),
+                '2004-04-04 02:50:00 EDT-0400'
+                )
+
+        dt2 = tz.normalize(dt2)
+        self.failUnlessEqual(
+                dt2.strftime('%Y-%m-%d %H:%M:%S %Z%z'),
+                '2004-04-04 01:50:00 EST-0500'
+                )
+
+
+def test_suite():
+    suite = unittest.TestSuite()
+    suite.addTest(doctest.DocTestSuite('pytz'))
+    suite.addTest(doctest.DocTestSuite('pytz.tzinfo'))
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(
+        __import__('__main__')
+        ))
+    return suite
+
 if __name__ == '__main__':
-    unittest.main()
+    suite = test_suite()
+    if '-v' in sys.argv:
+        runner = unittest.TextTestRunner(verbosity=2)
+    else:
+        runner = unittest.TextTestRunner()
+    runner.run(suite)
 
 # vim: set filetype=python ts=4 sw=4 et
 

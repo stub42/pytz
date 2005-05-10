@@ -9,7 +9,7 @@ TARGET=
 #TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
 #Mideast/Riyadh87
 
-build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py
+build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py src/pytz/tzinfo.py
 	${PYTHON} gen_tzinfo.py ${TARGET}
 
 clean:
@@ -19,19 +19,16 @@ clean:
 build/etc/zoneinfo/UTC: ${OLSEN}/src/africa build
 	${MAKE} -C ${OLSEN}/src TOPDIR=`pwd`/build install
 
-test: test_tzinfo test_zdump test_pytz
+test: test_zdump test_pytz
 
 .mk_test: build/dist gen_tests.py
 	${PYTHON} gen_tests.py ${TARGET} && touch .mk_test
 
-test_tzinfo: .mk_test
-	cd build/dist/pytz && ${PYTHON} test_tzinfo.py ${TESTARGS}
-
 test_zdump: .mk_test
 	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
 
-test_pytz: .mk_test
-	cd build/dist/pytz && ${PYTHON} __init__.py ${TESTARGS}
+test_tzinfo: .mk_test
+	cd build/dist/pytz && ${PYTHON} test_tzinfo.py ${TESTARGS}
 
 build:
 	mkdir build
