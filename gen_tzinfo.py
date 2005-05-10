@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.12 2004/06/03 03:04:10 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.13 2004/06/04 07:48:17 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -30,6 +30,12 @@ def allzones():
     if target:
         wanted = target + ['US/Eastern', 'UTC']
         zones = [z for z in zones if z in wanted]
+    # Does not cope with Riyadh87-89 - it appears this region went
+    # on solar time during this period and their DST offset changed
+    # minute to minute (the Olsen database could only capture a precision
+    # of 5 seconds because of way too many zone changes, so the data isn't
+    # 100% accurate anyway).
+    zones = [z for z in zones if 'Riyadh8' not in z]
     return zones
 
 def dupe_src(destdir):
@@ -103,13 +109,13 @@ class StaticGen(Gen):
         'from tz.tzinfo import memorized_timedelta as timedelta',
         ])
 
-    imp = 'from tz.tzinfo import _mem, _mem_clear'
-
     def __init__(self, zone, utcoffset, tzname):
         self.zone = zone
         self.attributes = '\n'.join([
             '    _zone = %s' % repr(zone),
-            '    _utcoffset = timedelta(%d)' % utcoffset.seconds,
+            '    _utcoffset = timedelta(seconds=%d)' % (
+                utcoffset.days*24*60*60 + utcoffset.seconds,
+                ),
             '    _tzname = %s' % repr(tzname),
             ])
 
@@ -143,12 +149,9 @@ class DstGen(Gen):
                 dst = 0
             else:
                 dst = inf[0] - transitions[i-1][1] # seconds dstoffset
-                dst = dst.seconds
+                dst = dst.seconds + dst.days*86400
             tzname = inf[2]
 
-            # datetime library precision for offsets is 1 minute
-            # dst = int((dst + 30) / 60) * 60
-            #utcoffset = int((utcoffset + 30) / 60) * 60
             transition_info.append( (utcoffset, dst, tzname) )
 
         attributes = ['']

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.8 2004/06/03 03:04:10 zenzen Exp $
+$Id: gen_tests.py,v 1.9 2004/06/04 07:48:17 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.8 2004/06/03 03:04:10 zenzen Exp $'
-__version__ = '$Revision: 1.8 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.9 2004/06/04 07:48:17 zenzen Exp $'
+__version__ = '$Revision: 1.9 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -31,7 +31,7 @@ Daylight savings time transition tests generated from the Olsen
 timezone database using the reference zdump implementation.
 '''
     
-import sys, os
+import sys, os, unittest
 sys.path.insert(0, os.pardir)
 from time import strptime
 from __init__ import timezone
@@ -43,8 +43,8 @@ from datetime import tzinfo, timedelta, datetime
         print 'Generating test for %s in test_zdump.py' % (zone,)
         tname = zone.replace(
                 '+', '_plus_').replace('-', '_minus_').replace('/','_')
-        print >> outf, '\ndef test_%s():' % tname
-        print >> outf, "    '''"
+        print >> outf, 'class test_%s(unittest.TestCase):' % tname
+        print >> outf, '    def test(self):'
         zd_out, zd_in = popen2.popen2('%s -v %s' % (zdump, zone))
         zd_in.close()
         lines = zd_out.readlines()
@@ -66,14 +66,10 @@ from datetime import tzinfo, timedelta, datetime
                 local_string = local_string[:8] + '0' + local_string[9:]
             local_string = '%s %s' % (local_string, tzname)
 
-            print >> outf, '    >>> aszone(%s, %s)' % (
-                    repr(utc_string), repr(zone)
-                    )
-            print >> outf, '   ',
-            print >> outf, repr(local_string)
-            print >> outf
-        print >> outf, "    '''"
-    
+            print >> outf, '        self.failUnlessEqual('
+            print >> outf, '            aszone(%r, %r),' % (utc_string, zone)
+            print >> outf, '                   %r,' % (local_string,)
+            print >> outf, '            )\n'
 
     print >> outf, """
 
@@ -98,12 +94,9 @@ def aszone(utc_string, zone):
     '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %z'))
     return '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
 
-def _test():
-    import doctest, test_zdump
-    return doctest.testmod(test_zdump)
-
 if __name__ == '__main__':
-    _test()
+    unittest.main()
+
 """
 
 if __name__ == '__main__':
