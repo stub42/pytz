@@ -67,8 +67,8 @@ Generated from the Olson timezone database:
     ftp://elsie.nci.nih.gov/pub/tz*.tar.gz
 '''
 
-__rcs_id__  = '$Id: gen_tzinfo.py,v 1.1 2003/06/29 09:22:01 zenzen Exp $'
-__version__ = '$Revision: 1.1 $'[11:-2]
+__rcs_id__  = '$Id: gen_tzinfo.py,v 1.2 2003/08/06 16:34:09 zenzen Exp $'
+__version__ = '$Revision: 1.2 $'[11:-2]
 
 __all__ = ['%(szone)s']
 
@@ -141,10 +141,10 @@ class DstGen(Gen):
 
         attributes.append('    _transition_info = [')
         for delta, dst, tzname in transition_info:
-            delta = delta.seconds
+            delta = 24 * 60 * 60 * delta.days + delta.seconds
 
             attributes.append(
-                '        ttinfo(%6s, %d, %6r),' % (delta, int(dst), tzname)
+                '        ttinfo(%6s, %d, %6r),' % (delta,int(dst),tzname)
                 )
         attributes.append('        ]')
         self.attributes = '\n'.join(attributes)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.1 2003/06/29 09:22:01 zenzen Exp $
+$Id: tzinfo.py,v 1.2 2003/08/06 16:34:10 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.1 2003/06/29 09:22:01 zenzen Exp $'
-__version__ = '$Revision: 1.1 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.2 2003/08/06 16:34:10 zenzen Exp $'
+__version__ = '$Revision: 1.2 $'[11:-2]
 
 import datetime as datetime
 from bisect import bisect_right
@@ -15,7 +15,7 @@ def memorized_timedelta(seconds):
     try:
         return _timedelta_cache[seconds]
     except KeyError:
-        delta = datetime.timedelta(seconds)
+        delta = datetime.timedelta(seconds=seconds)
         _timedelta_cache[seconds] = delta
         return delta
 
@@ -65,6 +65,12 @@ class StaticTzInfo(BaseTzInfo):
     def __call__(self):
         return self # In case anyone thinks this is a Class and not an instance
 
+    def __str__(self):
+        return self._zone
+
+    def __repr__(self):
+        return '<StaticTzInfo %r>' % (self._zone,)
+
 class DstTzInfo(BaseTzInfo):
     _transition_times = None
     _transition_info = None
@@ -76,9 +82,7 @@ class DstTzInfo(BaseTzInfo):
         return self._transition_info[idx]
         
     def utcoffset(self, dt):
-        print 'Last transition: %r' % (self._lastTransition(dt),)
         rv = self._lastTransition(dt)[0]
-        print 'rv: %r' % (rv,)
         if type(rv) != type(_notime):
             raise TypeError,'Got a %s' % (str(type(rv)))
         return rv
@@ -105,3 +109,8 @@ class DstTzInfo(BaseTzInfo):
     def tzname(self, dt):
         return self._lastTransition(dt)[2]
 
+    def __str__(self):
+        return self._zone
+
+    def __repr__(self):
+        return '<DstTzInfo %r>' % (self._zone,)

@@ -1,5 +1,5 @@
 '''
-$Id: test_tzinfo.py,v 1.3 2003/06/29 09:22:01 zenzen Exp $
+$Id: test_tzinfo.py,v 1.4 2003/08/06 16:34:09 zenzen Exp $
 '''
 import sys
 import re
@@ -7,19 +7,22 @@ import unittest
 import pickle
 import popen2
 import os.path
-import tzinfo
-from tzinfo import TZInfo
+#import tzinfo
+#from tzinfo import TZInfo
 import datetime
 #from datetime import datetime,timedelta,tzinfo
 from time import strptime 
 import reference
+import tz
+import tzinfo
 
 utc_tzinfo = reference.utc
 
 class UTCTestCase(unittest.TestCase):
     def test_TZInfoUTC(self):
         # Test UTC as defined by TZInfo
-        UTC = TZInfo('UTC')
+        #UTC = TZInfo('UTC')
+        UTC = tz.timezone('UTC')
         now = datetime.datetime.now(tz=UTC)
         self.failUnless(now.utcoffset() == datetime.timedelta(0))
         self.failUnless(now.dst() == datetime.timedelta(0))
@@ -34,7 +37,8 @@ class UTCTestCase(unittest.TestCase):
 
 
 class USEasternDSTStartTestCase(unittest.TestCase):
-    tzinfo = TZInfo('US/Eastern')
+    #tzinfo = TZInfo('US/Eastern')
+    tzinfo = tz.timezone('US/Eastern')
 
     # 24 hours before DST kicks in
     dayBefore = datetime.datetime(2002, 4, 6, 7, 0, 0, tzinfo=utc_tzinfo)
@@ -123,7 +127,8 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
 
 class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
-    tzinfo = TZInfo('US/Eastern')
+    #tzinfo = TZInfo('US/Eastern')
+    tzinfo = tz.timezone('US/Eastern')
     dayBefore = datetime.datetime(2002, 10, 26, 6, 0, 0, tzinfo=utc_tzinfo)
     before_tzname = 'EDT'
     before_utcoffset = datetime.timedelta(hours = -4)
@@ -145,7 +150,8 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
             transitions_cache[zone] = []
             (zd_out,zd_in) = popen2.popen2('%s -v %s' % (self.zdump,zone))
             zd_in.close()
-            tzinfo = TZInfo(zone)
+            #tzinfo = TZInfo(zone)
+            tzinfo = tz.timezone(zone)
             lines = zd_out.readlines()
             lines = lines[15:-15]
             for line in lines:
@@ -170,10 +176,6 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
             utc = datetime.datetime(*args)
             loc = utc.astimezone(tz)
 
-            # Convert loc to naieve time
-            nloc = loc.replace(tzinfo=None)
-            nwanted = datetime.datetime(*loc_t[:6])
-
             self.failUnlessEqual(is_dst,loc.dst() != datetime.timedelta(0),
                 'Incorrect is_dst for %s. Wanted %s' % (loc,is_dst)
                 )
@@ -184,8 +186,14 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
                     )
                 )
 
+            # Convert loc to naieve time
+            nloc = loc.replace(tzinfo=None)
+            nwanted = datetime.datetime(*loc_t[:6])
+
             self.failUnlessEqual(nwanted,nloc,
-                'Got %s from %s. Wanted %s' % (loc,utc,nwanted)
+                'Got %s from %s using tzinfo %r. Wanted %s)' % (
+                    loc,utc,tz,nwanted
+                    )
                 )
 
 
