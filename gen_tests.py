@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.2 2004/05/31 20:44:35 zenzen Exp $
+$Id: gen_tests.py,v 1.3 2004/05/31 22:51:18 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.2 2004/05/31 20:44:35 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.3 2004/05/31 22:51:18 zenzen Exp $'
+__version__ = '$Revision: 1.3 $'[11:-2]
 
 import os, os.path, popen2, re
 from gen_tzinfo import allzones
@@ -49,7 +49,7 @@ def test():
             #if '2002' not in line:
             #    continue
             m = re.match(
-                '^([^\s]+) \s+ (.* \s UTC) \s+=\s+ (.*)\s(\w+) \s+isdst=(0|1)$',
+                '^([^\s]+)\s+(.+\sUTC) \s+=\s+ (.+)\s([^\s]+) \s+isdst=(0|1)$',
                 line, re.X
                 )
             if m:
@@ -64,7 +64,7 @@ def test():
             except IndexError:
                 nline = lines[idx-2]
             m = re.match(
-                '^([^\s]+) \s+ (.* \s UTC) \s+=\s+ (.*)\s(\w+) \s+isdst=(0|1)$',
+                '^([^\s]+)\s+(.+\sUTC) \s+=\s+ (.+)\s([^\s]+) \s+isdst=(0|1)$',
                 nline, re.X
                 )
             if m:

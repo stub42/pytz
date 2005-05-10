@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.5 2004/05/31 20:44:35 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.6 2004/05/31 22:51:18 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -28,9 +28,9 @@ def allzones():
     zones = [z[stripnum:] for z in zones]
     
     # For debugging
-    zones = [z for z in zones if z in (
-            'US/Eastern', 'Australia/Melbourne', 'UTC'
-            )]
+    #zones = [z for z in zones if z in (
+    #        'US/Eastern', 'Australia/Melbourne', 'UTC'
+    #        )]
     return zones
 
 def dupe_src(destdir):
@@ -152,8 +152,9 @@ class DstGen(Gen):
                 tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
             except IndexError:
                 tt = transitions[i][0] + transitions[i+1][1] # Local, naive time
+            except OverflowError:
+                tt = datetime.min
 
-            tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
             inf = transitions[i][1:]
 
             # seconds offset
@@ -173,6 +174,10 @@ class DstGen(Gen):
                 prev_dst = transitions[i-1][1] - inf[0]
                 tt = tt - prev_dst
             transition_times.append(tt)
+
+            # datetime library precision for offsets is 1 minute
+            utcoffset = int((utcoffset + 30) / 60) * 60
+            dst = int((dst + 30) / 60) * 60
             transition_info.append( (utcoffset, dst, tzname) )
 
         attributes = ['']
