@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.16 2004/07/19 22:31:45 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.17 2004/07/22 00:56:19 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -174,7 +174,12 @@ class DstGen(Gen):
             if not inf[1]:
                 dst = 0
             else:
-                dst = inf[0] - transitions[i-1][1] # seconds dstoffset
+                # Locate the last non-dst transition
+                for j in range(i-1, -1, -1):
+                    prev_trans = transitions[j]
+                    if not prev_trans[2]:
+                        break
+                dst = inf[0] - prev_trans[1] # seconds dstoffset
                 dst = dst.seconds + dst.days*86400
             tzname = inf[2]
 
