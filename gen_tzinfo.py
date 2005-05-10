@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.17 2004/07/22 00:56:19 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.18 2004/07/23 23:24:44 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -36,7 +36,11 @@ def allzones():
     # minute to minute (the Olsen database could only capture a precision
     # of 5 seconds because of way too many zone changes, so the data isn't
     # 100% accurate anyway).
-    zones = [z for z in zones if 'Riyadh8' not in z]
+    # 'Factory' and 'localtime' appear to be Olsen reference code specific
+    # and are skipped
+    zones = [z for z in zones if 'Riyadh8' not in z and z not in [
+        'Factory', 'localtime'
+        ]]
     zones.sort()
     return zones
 
@@ -163,7 +167,6 @@ class DstGen(Gen):
             # transitions[i] == time, delta, dst, tzname
 
             utc_tt = transitions[i][0]
-            utc_transition_times.append(utc_tt)
 
             inf = transitions[i][1:]
 
@@ -182,6 +185,18 @@ class DstGen(Gen):
                 dst = inf[0] - prev_trans[1] # seconds dstoffset
                 dst = dst.seconds + dst.days*86400
             tzname = inf[2]
+
+            # Round utcoffset and dst to the nearest minute or the
+            # datetime library will complain
+            real_utcoffset = utcoffset
+            utcoffset = int((utcoffset+30)/60)*60
+            dst = int((dst+30)/60)*60
+            # And adjust the transition time to cope
+            try:
+                utc_tt = utc_tt + timedelta(seconds=real_utcoffset - utcoffset)
+            except OverflowError:
+                pass
+            utc_transition_times.append(utc_tt)
 
             transition_info.append( (utcoffset, dst, tzname) )
 

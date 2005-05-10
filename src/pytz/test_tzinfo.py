@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.5 2004/07/22 01:44:31 zenzen Exp $
+$Id: test_tzinfo.py,v 1.6 2004/07/23 23:24:45 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.5 2004/07/22 01:44:31 zenzen Exp $'
-__version__ = '$Revision: 1.5 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.6 2004/07/23 23:24:45 zenzen Exp $'
+__version__ = '$Revision: 1.6 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -16,19 +16,18 @@ import pytz, reference
 
 NOTIME = timedelta(0)
 
-UTC = reference.utc
+UTC = pytz.timezone('UTC')
+REF_UTC = reference.utc
 
 class BasicTest(unittest.TestCase):
     def testUTC(self):
-        UTC = pytz.timezone('UTC')
         now = datetime.now(tz=UTC)
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
         self.failUnless(now.timetuple() == now.utctimetuple())
 
     def testReferenceUTC(self):
-        UTC = reference.utc
-        now = datetime.now(tz=UTC)
+        now = datetime.now(tz=REF_UTC)
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
         self.failUnless(now.timetuple() == now.utctimetuple())
@@ -39,6 +38,10 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
     # 24 hours before DST changeover
     transition_time = datetime(2002, 4, 7, 7, 0, 0, tzinfo=UTC)
+
+    # Increase for 'flexible' DST transitions due to 1 minute granularity
+    # of Python's datetime library
+    instant = timedelta(seconds=1)
 
     # before transition
     before = {
@@ -138,7 +141,7 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
     def testInstantBefore(self):
         self._test_all(
-                self.transition_time - timedelta(seconds=1), self.before
+                self.transition_time - self.instant, self.before
                 )
 
     def testTransition(self):
@@ -148,7 +151,7 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
     def testInstantAfter(self):
         self._test_all(
-                self.transition_time + timedelta(seconds=1), self.after
+                self.transition_time + self.instant, self.after
                 )
 
     def testHourAfter(self):
@@ -181,6 +184,7 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(hours = 0),
         }
 
+
 class USEasternEPTStartTestCase(USEasternDSTStartTestCase):
     transition_time = datetime(1945, 8, 14, 23, 0, 0, tzinfo=UTC)
     before = {
@@ -193,6 +197,7 @@ class USEasternEPTStartTestCase(USEasternDSTStartTestCase):
         'utcoffset': timedelta(hours = -4),
         'dst': timedelta(hours = 1),
         }
+
 
 class USEasternEPTEndTestCase(USEasternDSTStartTestCase):
     transition_time = datetime(1945, 9, 30, 6, 0, 0, tzinfo=UTC)
@@ -207,6 +212,41 @@ class USEasternEPTEndTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(hours = 0),
         }
 
+
+class WarsawWMTEndTestCase(USEasternDSTStartTestCase):
+    # In 1915, Warsaw changed from Warsaw to Central European time.
+    # This involved the clocks being set backwards, causing a end-of-DST
+    # like situation without DST being involved.
+    tzinfo = pytz.timezone('Europe/Warsaw')
+    transition_time = datetime(1915, 8, 4, 22, 36, 0, tzinfo=UTC)
+    before = {
+        'tzname': 'WMT',
+        'utcoffset': timedelta(hours=1, minutes=24),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'CET',
+        'utcoffset': timedelta(hours=1),
+        'dst': timedelta(0),
+        }
+
+
+class VilniusWMTEndTestCase(USEasternDSTStartTestCase):
+    # At the end of 1916, Vilnius changed timezones putting its clock
+    # forward by 11 minutes 35 seconds. Neither timezone was in DST mode.
+    tzinfo = pytz.timezone('Europe/Vilnius')
+    instant = timedelta(seconds=31)
+    transition_time = datetime(1916, 12, 31, 22, 36, 00, tzinfo=UTC)
+    before = {
+        'tzname': 'WMT',
+        'utcoffset': timedelta(hours=1, minutes=24),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'KMT',
+        'utcoffset': timedelta(hours=1, minutes=36), # Really 1:35:36
+        'dst': timedelta(0),
+        }
 
 
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
@@ -266,8 +306,23 @@ class LocalTestCase(unittest.TestCase):
         loc_time = loc_tz.normalize(datetime(2004, 4, 1, 0, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CEST+0200')
 
-        # Weird changes - war time and peace time both is_dst==True
+        tz = pytz.timezone('Europe/Amsterdam')
+        loc_time = loc_tz.normalize(datetime(1943, 3, 29, 1, 59, 59))
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'CET+0100')
+
+
+        # Switch to US
         loc_tz = pytz.timezone('US/Eastern')
+
+        # End of DST ambiguity check
+        loc_time = loc_tz.normalize(datetime(1918, 10, 27, 1, 59, 59), is_dst=1)
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EDT-0400')
+
+        loc_time = loc_tz.normalize(datetime(1918, 10, 27, 1, 59, 59), is_dst=0)
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EST-0500')
+
+        # Weird changes - war time and peace time both is_dst==True
+
         loc_time = loc_tz.normalize(datetime(1942, 2, 9, 3, 0, 0))
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EWT-0400')
 
@@ -295,6 +350,25 @@ class LocalTestCase(unittest.TestCase):
                 '2004-04-04 01:50:00 EST-0500'
                 )
 
+    def testPartialMinuteOffsets(self):
+        # utcoffset in Amsterdam was not a whole minute until 1937
+        # However, we fudge this by rounding them, as the Python
+        # datetime library 
+        tz = pytz.timezone('Europe/Amsterdam')
+        utc_dt = datetime(1914, 1, 1, 13, 40, 28, tzinfo=UTC) # correct
+        utc_dt = utc_dt.replace(second=0) # But we need to fudge it
+        loc_dt = utc_dt.astimezone(tz)
+        self.failUnlessEqual(
+                loc_dt.strftime('%Y-%m-%d %H:%M:%S %Z%z'),
+                '1914-01-01 14:00:00 AMT+0020'
+                )
+
+        # And get back...
+        utc_dt = loc_dt.astimezone(UTC)
+        self.failUnlessEqual(
+                utc_dt.strftime('%Y-%m-%d %H:%M:%S %Z%z'),
+                '1914-01-01 13:40:00 UTC+0000'
+                )
 
 def test_suite():
     suite = unittest.TestSuite()

@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.11 2004/07/22 01:44:30 zenzen Exp $
+$Id: gen_tests.py,v 1.12 2004/07/23 23:24:44 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.11 2004/07/22 01:44:30 zenzen Exp $'
-__version__ = '$Revision: 1.11 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.12 2004/07/23 23:24:44 zenzen Exp $'
+__version__ = '$Revision: 1.12 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
 import gen_tzinfo
+from time import strptime
+from datetime import datetime, timedelta
 
 zdump = os.path.abspath(os.path.join(
         os.path.dirname(__file__), 'build','etc','zdump'
@@ -24,7 +26,7 @@ def main():
     
     outf_name = os.path.join(dest_dir, 'test_zdump.py')
     outf = open(outf_name, 'w')
-    print >> outf, """
+    print >> outf, """\
 #!/usr/bin/env python
 '''
 Daylight savings time transition tests generated from the Olsen
@@ -47,6 +49,8 @@ from datetime import tzinfo, timedelta, datetime
         zd_out, zd_in = popen2.popen2('%s -v %s' % (zdump, zone))
         zd_in.close()
         lines = zd_out.readlines()
+        prev_dt = None
+        prev_is_dst = False
         for idx in range(0, len(lines)):
             line = lines[idx]
             #if '2002' not in line:
@@ -60,23 +64,72 @@ from datetime import tzinfo, timedelta, datetime
             else:
                 raise RuntimeError, 'Dud line %r' % (line,)
 
-            # Add leading 0 to single character day of month
-            if local_string[8] == ' ':
-                local_string = local_string[:8] + '0' + local_string[9:]
-            if utc_string[8] == ' ':
-                utc_string = utc_string[:8] + '0' + utc_string[9:]
-            local_string = '%s %s' % (local_string, tzname)
+            def to_datetime(s):
+                bits = s.split()
+                tz_abbr = bits[-1]
+                s = ' '.join(bits[:-1])
+                try:
+                    return datetime(*strptime(s, '%a %b %d %H:%M:%S %Y')[:6])
+                except:
+                    print 's==%s'%repr(s)
+                    raise
 
+            local_dt = to_datetime('%s %s' % (local_string, tzname))
+            utc_dt = to_datetime(utc_string)
+
+            # Urgh - utcoffset() and dst() have to be rounded to the nearest
+            # minute, so we need to break our tests to match this limitation
+            real_offset = utc_dt - local_dt
+            secs = real_offset.seconds + real_offset.days*86400
+            fake_offset = timedelta(seconds=int((secs+30)/60)*60)
+            if prev_dt is not None and prev_dt.second == 59:
+                utc_dt = utc_dt + fake_offset - real_offset
+            elif utc_dt.second in (0,59):
+                local_dt = local_dt - fake_offset + real_offset
+            else:
+                utc_dt = utc_dt + fake_offset - real_offset
+
+            # If the naive time on the previous line is greater than on this
+            # line, and we arn't seeing an end-of-dst transition, then
+            # we can't do our local->utc test since we are in an ambiguous
+            # time period (ie. we have wound back the clock but don't have
+            # differing is_dst flags to resolve the ambiguity)
+            if prev_dt is not None and prev_dt > local_dt and \
+                    bool(prev_is_dst) == bool(is_dst):
+                skip_local_test = True
+            else:
+                skip_local_test = False
+            prev_is_dst = is_dst
+            prev_dt = local_dt
+
+            # datetime resolution of 1 minute means the dst transition 
+            # might now be off by 30 seconds.
+            # Make 'instant before' tests '30 seconds before' to cope :-(
+            if utc_dt.second == 59 or local_dt.second == 59:
+                utc_dt = utc_dt - timedelta(seconds=30)
+                local_dt = local_dt - timedelta(seconds=30)
+
+            local_string = '%s %s' % (
+                    local_dt.strftime('%a %b %d %H:%M:%S %Y'), tzname
+                    )
+            utc_string = '%s UTC' % utc_dt.strftime('%a %b %d %H:%M:%S %Y')
+
+
+            tmp1 = line.split()[0]
+            tmp2 = line[len(tmp1):].strip()
+
+            print >> outf, '# %s\n# %s\n' % (tmp1, tmp2)
             print >> outf, '        self.failUnlessEqual('
             print >> outf, '            aszone(%r, %r),' % (utc_string, zone)
             print >> outf, '                   %r,' % (local_string,)
             print >> outf, '            )\n'
-            print >> outf, '        self.failUnlessEqual('
-            print >> outf, '            asutc(%r, %r, is_dst=%s),' % (
-                    local_string, zone, bool(int(is_dst))
-                    )
-            print >> outf, '                  %r,' % (utc_string,)
-            print >> outf, '            )\n'
+            if not skip_local_test:
+                print >> outf, '        self.failUnlessEqual('
+                print >> outf, '            asutc(%r, %r, is_dst=%d),' % (
+                        local_string, zone, int(is_dst)
+                        )
+                print >> outf, '                  %r,' % (utc_string,)
+                print >> outf, '            )\n'
 
     print >> outf, """
 
@@ -97,8 +150,6 @@ def aszone(utc_string, zone):
     utc_t = strptime(utc_string, '%a %b %d %H:%M:%S %Y UTC')[:6] + (0, utc_tz)
     utc_datetime = datetime(*utc_t)
     loc_datetime = utc_datetime.astimezone(loc_tz)
-    # Make sure tzinfo.utcoffset() works as wanted
-    '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %z'))
     return '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
 
 def asutc(loc_string, zone, is_dst):

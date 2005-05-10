@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.3 2004/07/22 01:44:31 zenzen Exp $
+$Id: tzinfo.py,v 1.4 2004/07/23 23:24:45 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.3 2004/07/22 01:44:31 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.4 2004/07/23 23:24:45 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
+from sets import Set
 
 _timedelta_cache = {}
 def memorized_timedelta(seconds):
@@ -56,6 +57,10 @@ class BaseTzInfo(tzinfo):
     
 
 class StaticTzInfo(BaseTzInfo):
+    def fromutc(self, dt):
+        '''See datetime.tzinfo.fromutc'''
+        return (dt + self._utcoffset).replace(tzinfo=self)
+    
     def utcoffset(self,dt):
         '''See datetime.tzinfo.utcoffset'''
         return self._utcoffset
@@ -181,52 +186,78 @@ class DstTzInfo(BaseTzInfo):
             # convert it back, and return it
             return self.fromutc(dt)
 
-        # vvv NEW vvv
-        loc_dt = dt.replace(tzinfo=self)
-        offset_a = loc_dt.tzinfo._utcoffset
-        loc_dt = self.normalize(loc_dt)
-        offset_b = loc_dt.tzinfo._utcoffset
-        loc_dt = loc_dt + offset_a - offset_b
+        # Find the possibly correct timezones. We probably just have one,
+        # but we might end up with two if we are in the end-of-DST
+        # transition period. Or possibly more in some particularly confused
+        # location...
+        possible_loc_dt = Set()
+        for tzinfo in self._tzinfos.values():
+            loc_dt = tzinfo.normalize(dt.replace(tzinfo=tzinfo))
+            if loc_dt.replace(tzinfo=None) == dt:
+                possible_loc_dt.add(loc_dt)
 
-        # If we are in the DST transition period, adjust as per is_dst
-        if loc_dt.tzinfo._dst:
-            return loc_dt # if dst, no ambiguity (only prob. when exiting)
+        if len(possible_loc_dt) == 1:
+            return possible_loc_dt.pop()
 
-        if is_dst is not None and not is_dst:
-            return loc_dt # Got the requested zone - short circuit
+        # If told to be strict, raise an exception since we have an
+        # ambiguous case
+        if is_dst is None:
+            raise AmbiguousTimeError(dt, self)
 
-        day_before = self.normalize(loc_dt - timedelta(days=1))
-        dst_offset = day_before.dst()
-        just_before = self.normalize(loc_dt - dst_offset)
-        if just_before.tzinfo._dst:
-            if is_dst is None:
-                raise AmbiguousTimeError(dt,self)
-            return loc_dt.replace(tzinfo=just_before.tzinfo)
-        return loc_dt
+        # Filter out the possiblilities that don't match the requested
+        # is_dst
+        filtered_possible_loc_dt = [
+            p for p in possible_loc_dt
+                if bool(p.tzinfo._dst) == is_dst
+            ]
 
+        # Hopefully we only have one possibility left. Return it.
+        if len(filtered_possible_loc_dt) == 1:
+            return filtered_possible_loc_dt[0]
+
+        if len(filtered_possible_loc_dt) == 0:
+            filtered_possible_loc_dt = list(possible_loc_dt)
+
+        # If we get this far, we have in a wierd timezone transition
+        # where the clocks have been wound back but is_dst is the same
+        # in both (eg. Europe/Warsaw 1915 when they switched to CET).
+        # At this point, we just have to guess unless we allow more
+        # hints to be passed in (such as the UTC offset or abbreviation),
+        # but that is just getting silly.
+        #
+        # Choose the earliest (by UTC) applicable timezone.
+        def mycmp(a,b):
+            return cmp(
+                    a.replace(tzinfo=None) - a.tzinfo._utcoffset,
+                    b.replace(tzinfo=None) - b.tzinfo._utcoffset,
+                    )
+        filtered_possible_loc_dt.sort(mycmp)
+        return filtered_possible_loc_dt[0]
+        
     def utcoffset(self, dt):
         '''See datetime.tzinfo.utcoffset'''
-        # Round to nearest minute or datetime.strftime will complain
-        secs = self._utcoffset.seconds + self._utcoffset.days*86400
-        return memorized_timedelta(seconds=int((secs+30)/60)*60)
+        return self._utcoffset
 
     def dst(self, dt):
         '''See datetime.tzinfo.dst'''
-        # Round to nearest minute or datetime.strftime will complain
-        return memorized_timedelta(seconds=int((self._dst.seconds+30)/60)*60)
+        return self._dst
 
     def tzname(self, dt):
         '''See datetime.tzinfo.tzname'''
         return self._tzname
 
     def __repr__(self):
+        if self._dst:
+            dst = 'DST'
+        else:
+            dst = 'STD'
         if self._utcoffset > _notime:
-            return '<DstTzInfo %r %s+%s>' % (
-                    self._zone, self._tzname, self._utcoffset
+            return '<DstTzInfo %r %s+%s %s>' % (
+                    self._zone, self._tzname, self._utcoffset, dst
                 )
         else:
-            return '<DstTzInfo %r %s%s>' % (
-                    self._zone, self._tzname, self._utcoffset
+            return '<DstTzInfo %r %s%s %s>' % (
+                    self._zone, self._tzname, self._utcoffset, dst
                 )
 
 class AmbiguousTimeError(Exception):
