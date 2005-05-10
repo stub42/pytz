@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.7 2004/06/03 00:15:25 zenzen Exp $
+$Id: tzinfo.py,v 1.8 2004/06/03 03:04:11 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.7 2004/06/03 00:15:25 zenzen Exp $'
-__version__ = '$Revision: 1.7 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.8 2004/06/03 03:04:11 zenzen Exp $'
+__version__ = '$Revision: 1.8 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
@@ -104,10 +104,13 @@ class DstTzInfo(BaseTzInfo):
         return (dt + inf[0]).replace(tzinfo=self._tzinfos[inf])
 
     def utcoffset(self, dt):
-        return self._utcoffset
+        # Round to nearest minute or datetime.strftime will complain
+        secs = self._utcoffset.seconds + self._utcoffset.days*86400
+        return timedelta(seconds=int((secs+30)/60)*60)
 
     def dst(self, dt):
-        return self._dst
+        # Round to nearest minute or datetime.strftime will complain
+        return timedelta(seconds=int((self._dst.seconds+30)/60)*60)
 
     def tzname(self, dt):
         return self._tzname

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.7 2004/06/03 02:47:19 zenzen Exp $
+$Id: gen_tests.py,v 1.8 2004/06/03 03:04:10 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.7 2004/06/03 02:47:19 zenzen Exp $'
-__version__ = '$Revision: 1.7 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.8 2004/06/03 03:04:10 zenzen Exp $'
+__version__ = '$Revision: 1.8 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -94,6 +94,8 @@ def aszone(utc_string, zone):
     utc_t = strptime(utc_string, '%a %b %d %H:%M:%S %Y UTC')[:6] + (0, utc_tz)
     utc_datetime = datetime(*utc_t)
     loc_datetime = utc_datetime.astimezone(loc_tz)
+    # Make sure tzinfo.utcoffset() works as wanted
+    '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %z'))
     return '%s' % (loc_datetime.strftime('%a %b %d %H:%M:%S %Y %Z'))
 
 def _test():

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.11 2004/06/03 02:47:19 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.12 2004/06/03 03:04:10 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -147,8 +147,8 @@ class DstGen(Gen):
             tzname = inf[2]
 
             # datetime library precision for offsets is 1 minute
+            # dst = int((dst + 30) / 60) * 60
             #utcoffset = int((utcoffset + 30) / 60) * 60
-            dst = int((dst + 30) / 60) * 60
             transition_info.append( (utcoffset, dst, tzname) )
 
         attributes = ['']
