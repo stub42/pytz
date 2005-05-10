@@ -1,4 +1,4 @@
-# @(#)Makefile	7.98
+# @(#)Makefile	7.102
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -91,7 +91,6 @@ LDLIBS=
 #  -DHAVE_GETTEXT=1 if `gettext' works (GNU, Linux, Solaris); also see LDLIBS
 #  -DHAVE_INCOMPATIBLE_CTIME_R=1 if your system's time.h declares
 #	ctime_r and asctime_r incompatibly with the POSIX standard (Solaris 8).
-#  -DHAVE_LONG_DOUBLE=1 if your compiler supports the `long double' type
 #  -DHAVE_SETTIMEOFDAY=0 if settimeofday does not exist (SVR0?)
 #  -DHAVE_SETTIMEOFDAY=1 if settimeofday has just 1 arg (SVR4)
 #  -DHAVE_SETTIMEOFDAY=2 if settimeofday uses 2nd arg (4.3BSD)
@@ -394,6 +393,15 @@ public:		$(ENCHILADA) zic
 		$(AWK) -f checktab.awk $(PRIMARY_YDATA)
 		tar cf - $(DOCS) $(SOURCES) $(MISC) *.[1-8].txt | gzip -9 > tzcode.tar.gz
 		tar cf - $(DATA) | gzip -9 > tzdata.tar.gz
+
+typecheck:	
+		make clean
+		for i in "long long" double unsigned; \
+		do \
+			make CFLAGS="-D_TIME_T \"-Dtime_t=$$i\"" ; \
+			./zdump -v US/Eastern ; \
+			make clean ; \
+		done
 
 zonenames:	$(TDATA)
 		@$(AWK) '/^Zone/ { print $$2 } /^Link/ { print $$3 }' $(TDATA)

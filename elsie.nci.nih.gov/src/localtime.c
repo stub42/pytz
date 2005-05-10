@@ -1,11 +1,17 @@
 /*
+** XXX--do the right thing if time_t is double and
+** the value fed to gmtime or localtime is very very negative or
+** very very positive (which causes problems with the days-and-rem logic).
+*/
+
+/*
 ** This file is in the public domain, so clarified as of
 ** 1996-06-05 by Arthur David Olson (arthur_david_olson@nih.gov).
 */
 
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)localtime.c	7.80";
+static char	elsieid[] = "@(#)localtime.c	7.83";
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
@@ -409,6 +415,33 @@ register struct state * const	sp;
 						return -1;
 			}
 		}
+		/*
+		** Out-of-sort ats should mean we're running on a
+		** signed time_t system but using a data file with
+		** unsigned values (or vice versa).
+		*/
+		for (i = 0; i < sp->timecnt - 2; ++i)
+			if (sp->ats[i] > sp->ats[i + 1]) {
+				++i;
+				if (TYPE_SIGNED(time_t)) {
+					/*
+					** Ignore the end (easy).
+					*/
+					sp->timecnt = i;
+				} else {
+					/*
+					** Ignore the beginning (harder).
+					*/
+					register int	j;
+
+					for (j = 0; j + i < sp->timecnt; ++j) {
+						sp->ats[j] = sp->ats[j + i];
+						sp->types[j] = sp->types[j + i];
+					}
+					sp->timecnt = j;
+				}
+				break;
+			}
 	}
 	return 0;
 }
@@ -1188,7 +1221,7 @@ register struct tm * const		tmp;
 		}
 	}
 	days = *timep / SECSPERDAY;
-	rem = *timep % SECSPERDAY;
+	rem = *timep - ((time_t) days) * SECSPERDAY;
 #ifdef mc68k
 	if (*timep == 0x80000000) {
 		/*
@@ -1219,7 +1252,8 @@ register struct tm * const		tmp;
 	if (tmp->tm_wday < 0)
 		tmp->tm_wday += DAYSPERWEEK;
 	y = EPOCH_YEAR;
-#define LEAPS_THRU_END_OF(y)	((y) / 4 - (y) / 100 + (y) / 400)
+#define IPQ(i, p)	((i) / (p) - (((i) % (p)) < 0))
+#define LEAPS_THRU_END_OF(y)	(IPQ((y), 4) - IPQ((y), 100) + IPQ((y), 400))
 	while (days < 0 || days >= (long) year_lengths[yleap = isleap(y)]) {
 		register long	newy;
 
@@ -1450,7 +1484,7 @@ const int		do_norm_secs;
 	** assuming two's complement arithmetic.
 	** If time_t is unsigned, then (1 << bits) is just above the median.
 	*/
-	t = TYPE_SIGNED(time_t) ? 0 : (((time_t) 1) << bits);
+	t = TYPE_SIGNED(time_t) ? 0 : (((unsigned long) 1) << bits);
 	for ( ; ; ) {
 		(*funcp)(&t, offset, &mytm);
 		dir = tmcomp(&mytm, &yourtm);
@@ -1460,8 +1494,8 @@ const int		do_norm_secs;
 			if (bits < 0)
 				--t; /* may be needed if new t is minimal */
 			else if (dir > 0)
-				t -= ((time_t) 1) << bits;
-			else	t += ((time_t) 1) << bits;
+				t -= ((long) 1) << bits;
+			else	t += ((long) 1) << bits;
 			continue;
 		}
 		if (yourtm.tm_isdst < 0 || mytm.tm_isdst == yourtm.tm_isdst)
