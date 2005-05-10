@@ -2,7 +2,7 @@ pytz - World Timezone Definitions for Python
 ============================================
 
 Introduction
-------------
+~~~~~~~~~~~~
 
 pytz brings the Olson tz database into Python. This library allows
 accurate and cross platform timezone calculations using Python 2.3 or
@@ -33,7 +33,7 @@ values.
 
 
 Installation
-------------
+~~~~~~~~~~~~
 
 This is a standard Python distutils distribution. To install the
 package, run the following command as an administrative user::
@@ -42,7 +42,7 @@ package, run the following command as an administrative user::
 
 
 Example & Usage
----------------
+~~~~~~~~~~~~~~~
 
     >>> from datetime import datetime, timedelta
     >>> from pytz import timezone
@@ -62,14 +62,14 @@ Example & Usage
 
 
 License
--------
+~~~~~~~
 
 BSD style license. I'm happy to relicense this code if necessary 
 for inclusion in other open source projects.
 
 
 Latest Versions
----------------
+~~~~~~~~~~~~~~~
 
 This module will be updated after releases of the Olsen timezone database.
 The latest version can be downloaded from sourceforge_.
@@ -78,7 +78,7 @@ The latest version can be downloaded from sourceforge_.
 
 
 Further Reading
----------------
+~~~~~~~~~~~~~~~
 
 More info than you want to know about timezones::
 
@@ -86,7 +86,7 @@ More info than you want to know about timezones::
 
 
 Contact
--------
+~~~~~~~
 
 Stuart Bishop <stuart@stuartbishop.net>
 
