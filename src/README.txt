@@ -1,5 +1,8 @@
+pytz - World Timezone Definitions for Python
+============================================
+
 Introduction
-============
+------------
 
 pytz brings the Olson tz database into Python. This library allows
 accurate and cross platform timezone calculations using Python 2.3 or
@@ -19,6 +22,14 @@ the intention was to set sunset to 0:00 local time, the start of the
 Islamic day. In the best case caused the DST offset to change daily 
 and worst case caused the DST offset to change each instant depending 
 on how you interpreted the ruling.)
+
+Note that if you perform date arithmetic on local times that cross DST
+boundaries, the results may be in an incorrect timezone (ie. subtract
+1 minute from 2002-10-27 1:00 EST and you get 2002-10-27 0:59 EST instead
+of the correct 2002-10-27 1:59 EDT). This cannot be resolved without
+modifying the Python datetime implementation. However, these tzinfo
+classes provide a normalize() method which allows you to correct these
+values.
 
 Installation
 ------------
@@ -47,6 +58,8 @@ Example & Usage
     >>> loc_dt.strftime(fmt)
     '2002-10-27 01:00:00 EST (-0500)'
     >>> (loc_dt - timedelta(minutes=10)).strftime(fmt)
+    '2002-10-27 00:50:00 EST (-0500)'
+    >>> eastern.normalize(loc_dt - timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:50:00 EDT (-0400)'
     >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:10:00 EST (-0500)'

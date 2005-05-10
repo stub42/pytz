@@ -4,9 +4,9 @@
 MAKE=make
 PYTHON=python2.3
 OLSEN=./elsie.nci.nih.gov
-TESTARGS=-v
+TESTARGS=
 TARGET=
-TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
+#TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
 #Mideast/Riyadh87
 
 build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.3 2004/06/05 12:57:22 zenzen Exp $
+$Id: test_tzinfo.py,v 1.4 2004/06/06 10:07:00 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.3 2004/06/05 12:57:22 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.4 2004/06/06 10:07:00 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -89,8 +89,10 @@ class USEasternDSTStartTestCase(unittest.TestCase):
                 )
             )
 
-    def _test_arithmetic(self, utc_dt):
-        for days in range(-720, 720, 20):
+    def test_arithmetic(self):
+        utc_dt = self.transition_time
+
+        for days in range(-420, 720, 20):
             delta = timedelta(days=days)
 
             # Make sure we can get back where we started
@@ -100,29 +102,24 @@ class USEasternDSTStartTestCase(unittest.TestCase):
             self.failUnlessEqual(dt, dt2)
 
             # Make sure arithmetic crossing DST boundaries ends
-            # up in the correct timezone
+            # up in the correct timezone after normalization
             fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
             self.failUnlessEqual(
-                    (dt + delta).strftime(fmt),
                     (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
+                    self.tzinfo.normalize(dt + delta).strftime(fmt),
+                    #(dt + delta).strftime(fmt),
+                    'Incorrect result for delta==%d days.  Wanted %r. Got %r'%(
+                        days,
+                        (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
+                        self.tzinfo.normalize(dt + delta).strftime(fmt),
+                        #(dt + delta).strftime(fmt),
+                        )
                     )
-
-
-    def _test_roundtrip(self, utc_dt):
-        self.failUnlessEqual(
-                utc_dt.astimezone(self.tzinfo).astimezone(UTC),
-                utc_dt,
-                )
-        self.failUnlessEqual(
-                str(utc_dt.astimezone(self.tzinfo).astimezone(UTC)),
-                str(utc_dt),
-                )
 
     def _test_all(self, utc_dt, wanted):
         self._test_utcoffset(utc_dt, wanted)
         self._test_tzname(utc_dt, wanted)
         self._test_dst(utc_dt, wanted)
-        self._test_arithmetic(utc_dt)
 
     def testDayBefore(self):
         self._test_all(
@@ -187,6 +184,9 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
 
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
     tzinfo = reference.Eastern
+    def test_arithmetic(self):
+        # Reference implementation cannot handle this
+        pass
 
 
 class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
@@ -209,6 +209,11 @@ class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
         self._test_all(
                 self.transition_time - timedelta(seconds=1), self.after
                 )
+
+    def test_arithmetic(self):
+        # Reference implementation cannot handle this
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

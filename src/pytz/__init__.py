@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: __init__.py,v 1.2 2004/06/05 12:57:22 zenzen Exp $
+$Id: __init__.py,v 1.3 2004/06/06 10:07:00 zenzen Exp $
 
 datetime.tzinfo timezone definitions generated from the
 Olson timezone database:
@@ -11,8 +11,8 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-__rcs_id__  = '$Id: __init__.py,v 1.2 2004/06/05 12:57:22 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
+__rcs_id__  = '$Id: __init__.py,v 1.3 2004/06/06 10:07:00 zenzen Exp $'
+__version__ = '$Revision: 1.3 $'[11:-2]
 
 # The Olsen database has historically been updated about 4 times a year
 OLSEN_VERSION = '2004a'
@@ -33,6 +33,8 @@ def timezone(zone):
     >>> loc_dt.strftime(fmt)
     '2002-10-27 01:00:00 EST (-0500)'
     >>> (loc_dt - timedelta(minutes=10)).strftime(fmt)
+    '2002-10-27 00:50:00 EST (-0500)'
+    >>> eastern.normalize(loc_dt - timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:50:00 EDT (-0400)'
     >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:10:00 EST (-0500)'
@@ -50,7 +52,7 @@ def timezone(zone):
     for bit in zone_bits[1:]:
         rv = getattr(rv, bit)
 
-    # Return class from that module
+    # Return instance from that module
     rv = getattr(rv, zone_bits[-1])
     assert type(rv) != type(sys)
     return rv
