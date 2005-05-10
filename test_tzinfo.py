@@ -1,5 +1,5 @@
 '''
-$Id: test_tzinfo.py,v 1.4 2003/08/06 16:34:09 zenzen Exp $
+$Id: test_tzinfo.py,v 1.5 2004/03/19 04:23:29 zenzen Exp $
 '''
 import sys
 import re
@@ -14,7 +14,7 @@ import datetime
 from time import strptime 
 import reference
 import tz
-import tzinfo
+import gen_tzinfo
 
 utc_tzinfo = reference.utc
 
@@ -232,7 +232,7 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
 def fillZDumpTest(cls):
     ''' Add tests to ZDump '''
     zones = []
-    for dirpath, dirnames, filenames in os.walk(tzinfo.zoneinfo):
+    for dirpath, dirnames, filenames in os.walk(gen_tzinfo.zoneinfo):
         zones.extend([os.path.join(dirpath,f) for f in filenames])
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]

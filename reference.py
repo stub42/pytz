@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 '''
-$Id: reference.py,v 1.3 2003/08/06 16:34:09 zenzen Exp $
+$Id: reference.py,v 1.4 2004/03/19 04:23:29 zenzen Exp $
 
 Reference tzinfo implementations from the Python docs.
 Used for testing against.
 '''
 
-__rcs_id__  = '$Id: reference.py,v 1.3 2003/08/06 16:34:09 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: reference.py,v 1.4 2004/03/19 04:23:29 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
 from datetime import tzinfo, timedelta, datetime
 
@@ -102,7 +102,6 @@ DSTSTART = datetime(1, 4, 1, 2)
 # and ends at 2am (DST time; 1am standard time) on the last Sunday of Oct.
 # which is the first Sunday on or after Oct 25.
 DSTEND = datetime(1, 10, 25, 1)
-#DSTEND = datetime(1, 10, 25, 2)
 
 class USTimeZone(tzinfo):
 
