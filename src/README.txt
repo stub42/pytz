@@ -2,7 +2,7 @@ pytz - World Timezone Definitions for Python
 ============================================
 
 :Author: Stuart Bishop <stuart@stuartbishop.net>
-:Version: $Revision: 1.11 $
+:Version: $Revision: 1.12 $
 
 Introduction
 ~~~~~~~~~~~~
@@ -165,7 +165,7 @@ computers that move roam through multiple timezones.
 License
 ~~~~~~~
 
-BSD style license. I'm happy to relicense this code if necessary 
+MIT license. I'm happy to relicense this code if necessary 
 for inclusion in other open source projects.
 
 
@@ -187,6 +187,11 @@ Issues & Limitations
   such as Europe/Amsterdam pre 1937 will be up to 30 seconds out. This is 
   a limitation of the Python datetime library.
 
+- If you think a timezone definition is incorrect, I probably can't fix
+  it. pytz is a direct translation of the Olsen timezone database, and
+  changes to the timezone definitions need to be made to this source.
+  If you find errors they should be reported to the time zone mailing
+  list, linked from http://www.twinsun.com/tz/tz-link.htm
 
 Further Reading
 ~~~~~~~~~~~~~~~
