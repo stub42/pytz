@@ -1,4 +1,4 @@
-# @(#)Makefile	7.94
+# @(#)Makefile	7.98
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -103,8 +103,6 @@ LDLIBS=
 #  -DLOCALE_HOME=\"path\" if locales are in "path", not "/usr/lib/locale"
 #  -DHAVE_UNISTD_H=0 if your compiler lacks a "unistd.h" (Microsoft C++ 7?)
 #  -DHAVE_UTMPX_H=1 if your compiler has a "utmpx.h"
-#  -DSTRICTLY_STANDARD_ASCTIME=1 if you want a strictly standard (and arguably
-#	broken) version of asctime (see asctime.c for details)	
 #  -DTZDEFRULESTRING=\",date/time,date/time\" to default to the specified
 #	DST transitions if the time zone files cannot be accessed
 #  -DTZ_DOMAIN=\"foo\" to use "foo" for gettext domain name; default is "tz"
@@ -269,8 +267,8 @@ TABDATA=	iso3166.tab zone.tab
 DATA=		$(YDATA) $(NDATA) $(SDATA) $(TABDATA) leapseconds yearistype.sh
 WEB_PAGES=	tz-art.htm tz-link.htm
 MISC=		usno1988 usno1989 usno1989a usno1995 usno1997 usno1998 \
-			itca.jpg $(WEB_PAGES) checktab.awk
-ENCHILADA=	$(DOCS) $(SOURCES) $(DATA) $(MISC) workman.sh
+			itca.jpg $(WEB_PAGES) checktab.awk workman.sh
+ENCHILADA=	$(DOCS) $(SOURCES) $(DATA) $(MISC)
 
 # And for the benefit of csh users on systems that assume the user
 # shell should be used to handle commands in Makefiles. . .

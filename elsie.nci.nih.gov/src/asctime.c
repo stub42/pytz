@@ -5,7 +5,7 @@
 
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)asctime.c	7.22";
+static char	elsieid[] = "@(#)asctime.c	7.29";
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
@@ -14,10 +14,6 @@ static char	elsieid[] = "@(#)asctime.c	7.22";
 #include "private.h"
 #include "tzfile.h"
 
-#if STRICTLY_STANDARD_ASCTIME
-#define ASCTIME_FMT	"%.3s %.3s%3d %.2d:%.2d:%.2d %ld\n"
-#define ASCTIME_FMT_B	ASCTIME_FMT
-#else /* !STRICTLY_STANDARD_ASCTIME */
 /*
 ** Some systems only handle "%.2d"; others only handle "%02d";
 ** "%02.2d" makes (most) everybody happy.
@@ -29,17 +25,20 @@ static char	elsieid[] = "@(#)asctime.c	7.22";
 ** Vintage programs are coded for years that are always four digits long
 ** and may assume that the newline always lands in the same place.
 ** For years that are less than four digits, we pad the output with
-** spaces before the newline to get the newline in the traditional place.
+** leading zeroes to get the newline in the traditional place.
+** The -4 ensures that we get four characters of output even if
+** we call a strftime variant that produces fewer characters for some years.
+** The ISO C 1999 and POSIX 1003.1-2004 standards prohibit padding the year,
+** but many implementations pad anyway; most likely the standards are buggy.
 */
-#define ASCTIME_FMT	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d %-4ld\n"
+#define ASCTIME_FMT	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d %-4s\n"
 /*
 ** For years that are more than four digits we put extra spaces before the year
 ** so that code trying to overwrite the newline won't end up overwriting
 ** a digit within a year and truncating the year (operating on the assumption
 ** that no output is better than wrong output).
 */
-#define ASCTIME_FMT_B	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d     %ld\n"
-#endif /* !STRICTLY_STANDARD_ASCTIME */
+#define ASCTIME_FMT_B	"%.3s %.3s%3d %02.2d:%02.2d:%02.2d     %s\n"
 
 #define STD_ASCTIME_BUF_SIZE	26
 /*
@@ -74,7 +73,7 @@ char *				buf;
 	};
 	register const char *	wn;
 	register const char *	mn;
-	long			year;
+	char			year[INT_STRLEN_MAXIMUM(int) + 2];
 	char			result[MAX_ASCTIME_BUF_SIZE];
 
 	if (timeptr->tm_wday < 0 || timeptr->tm_wday >= DAYSPERWEEK)
@@ -83,12 +82,18 @@ char *				buf;
 	if (timeptr->tm_mon < 0 || timeptr->tm_mon >= MONSPERYEAR)
 		mn = "???";
 	else	mn = mon_name[timeptr->tm_mon];
-	year = timeptr->tm_year + (long) TM_YEAR_BASE;
+	/*
+	** Use strftime's %Y to generate the year, to avoid overflow problems
+	** when computing timeptr->tm_year + TM_YEAR_BASE.
+	** Assume that strftime is unaffected by other out-of-range members
+	** (e.g., timeptr->tm_mday) when processing "%Y".
+	*/
+	(void) strftime(year, sizeof year, "%Y", timeptr);
 	/*
 	** We avoid using snprintf since it's not available on all systems.
 	*/
-	(void) sprintf(result,
-		((year >= -999 && year <= 9999) ? ASCTIME_FMT : ASCTIME_FMT_B),
+	(void) sprintf(result, 
+		((strlen(year) <= 4) ? ASCTIME_FMT : ASCTIME_FMT_B),
 		wn, mn,
 		timeptr->tm_mday, timeptr->tm_hour,
 		timeptr->tm_min, timeptr->tm_sec,

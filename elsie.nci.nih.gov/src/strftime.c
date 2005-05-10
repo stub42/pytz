@@ -1,12 +1,6 @@
-/*
-** XXX To do: figure out correct (as distinct from standard-mandated)
-** output for "two digits of year" and "century" formats when
-** the year is negative or less than 100. --ado, 2004-09-09
-*/
-
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)strftime.c	7.67";
+static char	elsieid[] = "@(#)strftime.c	7.74";
 /*
 ** Based on the UCB version with the ID appearing below.
 ** This is ANSIish only when "multibyte character == plain character".
@@ -114,17 +108,14 @@ static const struct lc_time_T	C_time_locale = {
 
 static char *	_add P((const char *, char *, const char *));
 static char *	_conv P((int, const char *, char *, const char *));
-static char *	_lconv P((long, const char *, char *, const char *));
 static char *	_fmt P((const char *, const struct tm *, char *, const char *, int *));
-
-size_t strftime P((char *, size_t, const char *, const struct tm *));
+static char *	_yconv P((int, int, int, int, char *, const char *));
 
 extern char *	tzname[];
 
 #ifndef YEAR_2000_NAME
 #define YEAR_2000_NAME	"CHECK_STRFTIME_FORMATS_FOR_TWO_DIGIT_YEARS"
 #endif /* !defined YEAR_2000_NAME */
-
 
 #define IN_NONE	0
 #define IN_SOME	1
@@ -217,9 +208,8 @@ label:
 				** something completely different.
 				** (ado, 1993-05-24)
 				*/
-				pt = _conv((int) ((t->tm_year +
-					(long) TM_YEAR_BASE) / 100),
-					"%02d", pt, ptlim);
+				pt = _yconv(t->tm_year, TM_YEAR_BASE, 1, 0,
+					pt, ptlim);
 				continue;
 			case 'c':
 				{
@@ -387,13 +377,14 @@ label:
 ** (ado, 1996-01-02)
 */
 				{
-					long	year;
+					int	year;
+					int	base;
 					int	yday;
 					int	wday;
 					int	w;
 
 					year = t->tm_year;
-					year += TM_YEAR_BASE;
+					base = TM_YEAR_BASE;
 					yday = t->tm_yday;
 					wday = t->tm_wday;
 					for ( ; ; ) {
@@ -401,7 +392,7 @@ label:
 						int	bot;
 						int	top;
 
-						len = isleap(year) ?
+						len = isleap_sum(year, base) ?
 							DAYSPERLYEAR :
 							DAYSPERNYEAR;
 						/*
@@ -420,7 +411,7 @@ label:
 							top += DAYSPERWEEK;
 						top += len;
 						if (yday >= top) {
-							++year;
+							++base;
 							w = 1;
 							break;
 						}
@@ -429,8 +420,8 @@ label:
 								DAYSPERWEEK);
 							break;
 						}
-						--year;
-						yday += isleap(year) ?
+						--base;
+						yday += isleap_sum(year, base) ?
 							DAYSPERLYEAR :
 							DAYSPERNYEAR;
 					}
@@ -446,9 +437,9 @@ label:
 							pt, ptlim);
 					else if (*format == 'g') {
 						*warnp = IN_ALL;
-						pt = _conv(int(year % 100),
-							"%02d", pt, ptlim);
-					} else	pt = _lconv(year, "%04ld",
+						pt = _yconv(year, base, 0, 1,
+							pt, ptlim);
+					} else	pt = _yconv(year, base, 1, 1,
 							pt, ptlim);
 				}
 				continue;
@@ -486,13 +477,12 @@ label:
 				continue;
 			case 'y':
 				*warnp = IN_ALL;
-				pt = _conv((int) ((t->tm_year +
-					(long) TM_YEAR_BASE) % 100),
-					"%02d", pt, ptlim);
+				pt = _yconv(t->tm_year, TM_YEAR_BASE, 0, 1,
+					pt, ptlim);
 				continue;
 			case 'Y':
-				pt = _lconv(t->tm_year + (long) TM_YEAR_BASE,
-					"%04ld", pt, ptlim);
+				pt = _yconv(t->tm_year, TM_YEAR_BASE, 1, 1,
+					pt, ptlim);
 				continue;
 			case 'Z':
 #ifdef TM_ZONE
@@ -556,9 +546,10 @@ label:
 					diff = -diff;
 				} else	sign = "+";
 				pt = _add(sign, pt, ptlim);
-				diff /= 60;
-				pt = _conv((diff/60)*100 + diff%60,
-					"%04d", pt, ptlim);
+				diff /= SECSPERMIN;
+				diff = (diff / MINSPERHOUR) * 100 +
+					(diff % MINSPERHOUR);
+				pt = _conv(diff, "%04d", pt, ptlim);
 				}
 				continue;
 			case '+':
@@ -596,19 +587,6 @@ const char * const	ptlim;
 }
 
 static char *
-_lconv(n, format, pt, ptlim)
-const long		n;
-const char * const	format;
-char * const		pt;
-const char * const	ptlim;
-{
-	char	buf[INT_STRLEN_MAXIMUM(long) + 1];
-
-	(void) sprintf(buf, format, n);
-	return _add(buf, pt, ptlim);
-}
-
-static char *
 _add(str, pt, ptlim)
 const char *		str;
 char *			pt;
@@ -616,6 +594,47 @@ const char * const	ptlim;
 {
 	while (pt < ptlim && (*pt = *str++) != '\0')
 		++pt;
+	return pt;
+}
+
+/*
+** POSIX and the C Standard are unclear or inconsistent about
+** what %C and %y do if the year is negative or exceeds 9999.
+** Use the convention that %C concatenated with %y yields the
+** same output as %Y, and that %Y contains at least 4 bytes,
+** with more only if necessary.
+*/
+
+static char *
+_yconv(a, b, convert_top, convert_yy, pt, ptlim)
+const int		a;
+const int		b;
+const int		convert_top;
+const int		convert_yy;
+char *			pt;
+const char * const	ptlim;
+{
+	register int	lead;
+	register int	trail;
+
+#define DIVISOR	100
+	trail = a % DIVISOR + b % DIVISOR;
+	lead = a / DIVISOR + b / DIVISOR + trail / DIVISOR;
+	trail %= DIVISOR;
+	if (trail < 0 && lead > 0) {
+		trail += DIVISOR;
+		--lead;
+	} else if (lead < 0 && trail > 0) {
+		trail -= DIVISOR;
+		++lead;
+	}
+	if (convert_top) {
+		if (lead == 0 && trail < 0)
+			pt = _add("-0", pt, ptlim);
+		else	pt = _conv(lead, "%02d", pt, ptlim);
+	}
+	if (convert_yy)
+		pt = _conv(((trail < 0) ? -trail : trail), "%02d", pt, ptlim);
 	return pt;
 }
 

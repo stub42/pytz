@@ -39,10 +39,10 @@ DESCRIPTION
      01-01, and returns a pointer to a string of the form
                      Thu Nov 24 18:22:48 1986\n\0
      Years requiring fewer than four characters are padded with
-     trailing spaces.  For years longer than four characters, the
+     leading zeroes.  For years longer than four characters, the
      string is of the form
                   Thu Nov 24 18:22:48     81986\n\0
-     with five spaces before the year.  This unusual format is
+     with five spaces before the year.  These unusual formats are
      designed to make it less likely that older software that
      expects exactly 26 bytes of output will mistakenly output
      misleading values for out-of-range years.
@@ -50,7 +50,7 @@ DESCRIPTION
      Localtime and gmtime return pointers to ``tm'' structures,
      described below.  Localtime corrects for the time zone and
      any time zone adjustments (such as Daylight Saving Time in
-     the U.S.A.).  After filling in the ``tm'' structure,
+     the United States).  After filling in the ``tm'' structure,
      localtime sets the tm_isdst'th element of tzname to a
      pointer to an ASCII string that's the time zone abbreviation
      to be used with localtime's return value.

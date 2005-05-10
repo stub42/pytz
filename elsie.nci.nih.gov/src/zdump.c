@@ -1,4 +1,4 @@
-static char	elsieid[] = "@(#)zdump.c	7.40";
+static char	elsieid[] = "@(#)zdump.c	7.47";
 
 /*
 ** This code has been made independent of the rest of the time
@@ -61,8 +61,15 @@ static char	elsieid[] = "@(#)zdump.c	7.40";
 #endif /* !defined DAYSPERNYEAR */
 
 #ifndef isleap
-#define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
+#define isleap(y) (((y) % 4) == 0 && (((y) % 100) != 0 || ((y) % 400) == 0))
 #endif /* !defined isleap */
+
+#ifndef isleap_sum
+/*
+** See tzfile.h for details on isleap_sum.
+*/
+#define isleap_sum(a, b)	isleap((a) % 400 + (b) % 400)
+#endif /* !defined isleap_sum */
 
 #if HAVE_GETTEXT
 #include "locale.h"	/* for setlocale */
@@ -321,7 +328,7 @@ struct tm *	oldp;
 		return -delta(oldp, newp);
 	result = 0;
 	for (tmy = oldp->tm_year; tmy < newp->tm_year; ++tmy)
-		result += DAYSPERNYEAR + isleap(tmy + (long) TM_YEAR_BASE);
+		result += DAYSPERNYEAR + isleap_sum(tmy, TM_YEAR_BASE);
 	result += newp->tm_yday - oldp->tm_yday;
 	result *= HOURSPERDAY;
 	result += newp->tm_hour - oldp->tm_hour;
@@ -384,6 +391,8 @@ register const struct tm *	timeptr;
 	};
 	register const char *	wn;
 	register const char *	mn;
+	register int		lead;
+	register int		trail;
 
 	/*
 	** The packaged versions of localtime and gmtime never put out-of-range
@@ -398,9 +407,23 @@ register const struct tm *	timeptr;
 		(int) (sizeof mon_name / sizeof mon_name[0]))
 			mn = "???";
 	else		mn = mon_name[timeptr->tm_mon];
-	(void) printf("%.3s %.3s%3d %.2d:%.2d:%.2d %ld",
+	(void) printf("%.3s %.3s%3d %.2d:%.2d:%.2d ",
 		wn, mn,
 		timeptr->tm_mday, timeptr->tm_hour,
-		timeptr->tm_min, timeptr->tm_sec,
-		timeptr->tm_year + (long) TM_YEAR_BASE);
+		timeptr->tm_min, timeptr->tm_sec);
+#define DIVISOR	10
+	trail = timeptr->tm_year % DIVISOR + TM_YEAR_BASE % DIVISOR;
+	lead = timeptr->tm_year / DIVISOR + TM_YEAR_BASE / DIVISOR +
+		trail / DIVISOR;
+	trail %= DIVISOR;
+	if (trail < 0 && lead > 0) {
+		trail += DIVISOR;
+		--lead;
+	} else if (lead < 0 && trail > 0) {
+		trail -= DIVISOR;
+		++lead;
+	}
+	if (lead == 0)
+		(void) printf("%d", trail);
+	else	(void) printf("%d%d", lead, ((trail < 0) ? -trail : trail));
 }
