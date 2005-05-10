@@ -34,7 +34,8 @@ POSIXRULES=	America/New_York
 
 # Everything gets put in subdirectories of. . .
 
-TOPDIR=		`pwd`/../build
+TOPDIR=		/usr/local
+TOPDIR=        `pwd`/../build
 
 # "Compiled" time zone information is placed in the "TZDIR" directory
 # (and subdirectories).
@@ -209,7 +210,7 @@ GCC_DEBUG_FLAGS = -Dlint -g -O -fno-common \
 # before the first Monday in January when a "%V" format is used and January 1
 # falls on a Friday, Saturday, or Sunday.
 
-CFLAGS=$(GCC_DEBUG_FLAGS)
+CFLAGS=
 
 # If you want zic's -s option used when installing, uncomment the next line
 # ZFLAGS=	-s
