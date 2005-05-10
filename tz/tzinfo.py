@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzinfo.py,v 1.6 2004/06/02 22:27:25 zenzen Exp $
+$Id: tzinfo.py,v 1.7 2004/06/03 00:15:25 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.6 2004/06/02 22:27:25 zenzen Exp $'
-__version__ = '$Revision: 1.6 $'[11:-2]
+__rcs_id__  = '$Id: tzinfo.py,v 1.7 2004/06/03 00:15:25 zenzen Exp $'
+__version__ = '$Revision: 1.7 $'[11:-2]
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
@@ -71,6 +71,8 @@ class StaticTzInfo(BaseTzInfo):
     def __repr__(self):
         return '<StaticTzInfo %r>' % (self._zone,)
 
+ZERO = timedelta(0)
+
 class DstTzInfo(BaseTzInfo):
     __slots__ = ()
     _utc_transition_times = None
@@ -89,7 +91,9 @@ class DstTzInfo(BaseTzInfo):
         else:
             _tzinfos = {}
             self._tzinfos = _tzinfos
-            for inf in self._transition_info:
+            self._utcoffset, self._dst, self._tzname = self._transition_info[0]
+            _tzinfos[self._transition_info[0]] = self
+            for inf in self._transition_info[1:]:
                 if not _tzinfos.has_key(inf):
                     _tzinfos[inf] = self.__class__(inf, _tzinfos)
 
@@ -109,6 +113,11 @@ class DstTzInfo(BaseTzInfo):
         return self._tzname
 
     def __repr__(self):
-        return '<DstTzInfo %r %r>' % (
-                self._zone, self._tzname
+        if self._utcoffset > ZERO:
+            return '<DstTzInfo %r %s+%s>' % (
+                    self._zone, self._tzname, self._utcoffset
+                )
+        else:
+            return '<DstTzInfo %r %s%s>' % (
+                    self._zone, self._tzname, self._utcoffset
                 )

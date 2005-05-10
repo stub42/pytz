@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.5 2004/06/02 23:18:28 zenzen Exp $
+$Id: gen_tests.py,v 1.6 2004/06/03 00:15:24 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.5 2004/06/02 23:18:28 zenzen Exp $'
-__version__ = '$Revision: 1.5 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.6 2004/06/03 00:15:24 zenzen Exp $'
+__version__ = '$Revision: 1.6 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -26,22 +26,24 @@ def main():
     outf = open(outf_name, 'w')
     print >> outf, """
 #!/usr/bin/env python
-
+'''
+Daylight savings time transition tests generated from the Olsen
+timezone database using the reference zdump implementation.
+'''
+    
 import sys, os
 sys.path.insert(0, os.pardir)
 from time import strptime
 from __init__ import timezone
 
 from datetime import tzinfo, timedelta, datetime
-
-def test():
-    '''
-    Daylight savings time transition tests generated from the Olsen
-    timezone database using the reference zdump implementation.
-    
     """
 
     for zone in allzones():
+        tname = zone.replace(
+                '+', '_plus_').replace('-', '_minus_').replace('/','_')
+        print >> outf, '\ndef test_%s():' % tname
+        print >> outf, "    '''"
         zd_out, zd_in = popen2.popen2('%s -v %s' % (zdump, zone))
         zd_in.close()
         lines = zd_out.readlines()
@@ -69,10 +71,10 @@ def test():
             print >> outf, '   ',
             print >> outf, repr(local_string)
             print >> outf
+        print >> outf, "    '''"
     
 
     print >> outf, """
-    '''
 
 ZERO = timedelta(0)
 class UTC(tzinfo):

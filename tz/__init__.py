@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: __init__.py,v 1.3 2004/05/31 00:27:40 zenzen Exp $
+$Id: __init__.py,v 1.4 2004/06/03 00:15:25 zenzen Exp $
 
 datetime.tzinfo timezone definitions generated from the
 Olson timezone database:
@@ -11,8 +11,8 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-__rcs_id__  = '$Id: __init__.py,v 1.3 2004/05/31 00:27:40 zenzen Exp $'
-__version__ = '$Revision: 1.3 $'[11:-2]
+__rcs_id__  = '$Id: __init__.py,v 1.4 2004/06/03 00:15:25 zenzen Exp $'
+__version__ = '$Revision: 1.4 $'[11:-2]
 
 # The Olsen database has historically been updated about 4 times a year
 OLSEN_VERSION = '2004a'
@@ -24,7 +24,7 @@ import sys
 def timezone(zone):
     ''' Return a datetime.tzinfo implementation for the given timezone '''
     zone = _munge_zone(zone)
-    zone_bits = zone.split('/')
+    zone_bits = ['zoneinfo'] + zone.split('/')
 
     # Load zone's module
     module_name = '.'.join(zone_bits)
@@ -38,6 +38,7 @@ def timezone(zone):
 
     # Return class from that module
     rv = getattr(rv, zone_bits[-1])
+    assert type(rv) != type(sys)
     return rv
 
 def _munge_zone(zone):

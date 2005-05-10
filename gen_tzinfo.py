@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.9 2004/06/02 23:18:28 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.10 2004/06/03 00:15:24 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -183,7 +183,7 @@ def main(destdir):
    
     dupe_src(_destdir)
     for zone in allzones():
-        gen_tzinfo(_destdir, zone)
+        gen_tzinfo(os.path.join(_destdir, 'zoneinfo'), zone)
     gen_inits(_destdir)
     add_allzones(os.path.join(_destdir, '__init__.py'))
 

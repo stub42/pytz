@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzfile.py,v 1.7 2004/06/02 23:08:53 zenzen Exp $
+$Id: tzfile.py,v 1.8 2004/06/03 00:15:24 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzfile.py,v 1.7 2004/06/02 23:08:53 zenzen Exp $'
-__version__ = '$Revision: 1.7 $'[11:-2]
+__rcs_id__  = '$Id: tzfile.py,v 1.8 2004/06/03 00:15:24 zenzen Exp $'
+__version__ = '$Revision: 1.8 $'[11:-2]
 
 from struct import unpack,calcsize
 from cStringIO import StringIO
@@ -79,13 +79,16 @@ class TZFile:
             ttinfo[lindexes[i]][2], # timezone abbreviation
             ) for i in range(0,len(transitions)) ]
 
-        # Early dates use the first standard time ttinfo
-        i = 0
-        while ttinfo[i][1]:
-            i += 1
-        self.transitions.insert(
-                0, (datetime.min, ttinfo[i][0], ttinfo[i][1], ttinfo[i][2])
-                )
+        if len(self.transitions) > 0:
+            # Early dates use the first standard time ttinfo
+            i = 0
+            while ttinfo[i][1]:
+                i += 1
+            self.transitions.insert(
+                    0, (datetime.min, ttinfo[i][0], ttinfo[i][1], ttinfo[i][2])
+                    )
+            if self.transitions[0][1:] == self.transitions[1][1:]:
+                del self.transitions[1]
 
         self.ttinfo = ttinfo
 
