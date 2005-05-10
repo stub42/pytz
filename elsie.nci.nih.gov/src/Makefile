@@ -34,7 +34,7 @@ POSIXRULES=	America/New_York
 
 # Everything gets put in subdirectories of. . .
 
-TOPDIR=		../build
+TOPDIR=		`pwd`/../build
 
 # "Compiled" time zone information is placed in the "TZDIR" directory
 # (and subdirectories).
