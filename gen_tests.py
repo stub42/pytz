@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: gen_tests.py,v 1.14 2004/07/24 23:28:11 zenzen Exp $
+$Id: gen_tests.py,v 1.15 2005/01/07 04:51:30 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.14 2004/07/24 23:28:11 zenzen Exp $'
-__version__ = '$Revision: 1.14 $'[11:-2]
+__rcs_id__  = '$Id: gen_tests.py,v 1.15 2005/01/07 04:51:30 zenzen Exp $'
+__version__ = '$Revision: 1.15 $'[11:-2]
 
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
@@ -29,7 +29,7 @@ def main():
     print >> outf, """\
 #!/usr/bin/env python
 '''
-Daylight savings time transition tests generated from the Olsen
+Daylight savings time transition tests generated from the Olson
 timezone database using the reference zdump implementation.
 '''
     

@@ -2,7 +2,7 @@ pytz - World Timezone Definitions for Python
 ============================================
 
 :Author: Stuart Bishop <stuart@stuartbishop.net>
-:Version: $Revision: 1.12 $
+:Version: $Revision: 1.13 $
 
 Introduction
 ~~~~~~~~~~~~
@@ -13,7 +13,7 @@ or higher. It also solves the issue of ambiguous times at the end
 of daylight savings, which you can read more about in the Python
 Library Reference (datetime.tzinfo).
 
-Amost all (over 540) of the Olsen timezones are supported [*]_.
+Amost all (over 540) of the Olson timezones are supported [*]_.
 
 Note that if you perform date arithmetic on local times that cross
 DST boundaries, the results may be in an incorrect timezone (ie.
@@ -172,7 +172,7 @@ for inclusion in other open source projects.
 Latest Versions
 ~~~~~~~~~~~~~~~
 
-This package will be updated after releases of the Olsen timezone database.
+This package will be updated after releases of the Olson timezone database.
 The latest version can be downloaded from Sourceforge_. The code that
 is used to generate this distribution is available in the Sourceforge_
 project's CVS repository.
@@ -188,7 +188,7 @@ Issues & Limitations
   a limitation of the Python datetime library.
 
 - If you think a timezone definition is incorrect, I probably can't fix
-  it. pytz is a direct translation of the Olsen timezone database, and
+  it. pytz is a direct translation of the Olson timezone database, and
   changes to the timezone definitions need to be made to this source.
   If you find errors they should be reported to the time zone mailing
   list, linked from http://www.twinsun.com/tz/tz-link.htm

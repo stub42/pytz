@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: __init__.py,v 1.10 2005/01/07 04:15:35 zenzen Exp $
+$Id: __init__.py,v 1.11 2005/01/07 04:51:33 zenzen Exp $
 
 datetime.tzinfo timezone definitions generated from the
 Olson timezone database:
@@ -11,13 +11,15 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-__rcs_id__  = '$Id: __init__.py,v 1.10 2005/01/07 04:15:35 zenzen Exp $'
-__version__ = '$Revision: 1.10 $'[11:-2]
+__rcs_id__  = '$Id: __init__.py,v 1.11 2005/01/07 04:51:33 zenzen Exp $'
+__version__ = '$Revision: 1.11 $'[11:-2]
 
-# The Olsen database has historically been updated about 4 times a year
-OLSEN_VERSION = '2005a'
-VERSION = OLSEN_VERSION
-#VERSION = OLSEN_VERSION + '.2'
+# The Olson database has historically been updated about 4 times a year
+OLSON_VERSION = '2005a'
+VERSION = OLSON_VERSION
+#VERSION = OLSON_VERSION + '.2'
+
+OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
 __all__ = ['timezone', 'all_timezones', 'common_timezones']
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.19 2004/07/24 18:05:54 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.20 2005/01/07 04:51:30 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -33,10 +33,10 @@ def allzones():
         zones = [z for z in zones if z in wanted]
     # Does not cope with Riyadh87-89 - it appears this region went
     # on solar time during this period and their DST offset changed
-    # minute to minute (the Olsen database could only capture a precision
+    # minute to minute (the Olson database could only capture a precision
     # of 5 seconds because of way too many zone changes, so the data isn't
     # 100% accurate anyway).
-    # 'Factory' and 'localtime' appear to be Olsen reference code specific
+    # 'Factory' and 'localtime' appear to be Olson reference code specific
     # and are skipped
     zones = [z for z in zones if 'Riyadh8' not in z and z not in [
         'Factory', 'localtime'

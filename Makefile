@@ -3,7 +3,7 @@
 
 MAKE=make
 PYTHON=python2.3
-OLSEN=./elsie.nci.nih.gov
+OLSON=./elsie.nci.nih.gov
 TESTARGS=
 TARGET=
 #TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
@@ -14,11 +14,11 @@ build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py src/pytz/tzinfo.py src/pytz/tes
 	${PYTHON} gen_tzinfo.py ${TARGET}
 
 clean:
-	rm -rf build; make -C ${OLSEN}/src clean; \
+	rm -rf build; make -C ${OLSON}/src clean; \
 	find . -name \*.pyc | xargs rm -f
 
-build/etc/zoneinfo/UTC: ${OLSEN}/src/africa build
-	${MAKE} -C ${OLSEN}/src TOPDIR=`pwd`/build install
+build/etc/zoneinfo/UTC: ${OLSON}/src/africa build
+	${MAKE} -C ${OLSON}/src TOPDIR=`pwd`/build install
 
 test: test_tzinfo test_docs test_zdump
 
