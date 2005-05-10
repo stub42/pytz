@@ -1,5 +1,5 @@
 '''
-$Id: test_tzinfo.py,v 1.2 2003/05/19 04:32:26 zenzen Exp $
+$Id: test_tzinfo.py,v 1.3 2003/06/29 09:22:01 zenzen Exp $
 '''
 import sys
 import re
@@ -7,8 +7,10 @@ import unittest
 import pickle
 import popen2
 import os.path
+import tzinfo
 from tzinfo import TZInfo
-from datetime import datetime,timedelta,tzinfo
+import datetime
+#from datetime import datetime,timedelta,tzinfo
 from time import strptime 
 import reference
 
@@ -18,16 +20,16 @@ class UTCTestCase(unittest.TestCase):
     def test_TZInfoUTC(self):
         # Test UTC as defined by TZInfo
         UTC = TZInfo('UTC')
-        now = datetime.now(tz=UTC)
-        self.failUnless(now.utcoffset() == timedelta(0))
-        self.failUnless(now.dst() == timedelta(0))
+        now = datetime.datetime.now(tz=UTC)
+        self.failUnless(now.utcoffset() == datetime.timedelta(0))
+        self.failUnless(now.dst() == datetime.timedelta(0))
         self.failUnless(now.timetuple() == now.utctimetuple())
 
     def test_simpleUTC(self):
         # Test our test suite UTC class that other tests use
-        now = datetime.now(tz=utc_tzinfo)
-        self.failUnless(now.utcoffset() == timedelta(0))
-        self.failUnless(now.dst() == timedelta(0))
+        now = datetime.datetime.now(tz=utc_tzinfo)
+        self.failUnless(now.utcoffset() == datetime.timedelta(0))
+        self.failUnless(now.dst() == datetime.timedelta(0))
         self.failUnless(now.timetuple() == now.utctimetuple())
 
 
@@ -35,17 +37,17 @@ class USEasternDSTStartTestCase(unittest.TestCase):
     tzinfo = TZInfo('US/Eastern')
 
     # 24 hours before DST kicks in
-    dayBefore = datetime(2002, 4, 6, 7, 0, 0, tzinfo=utc_tzinfo)
+    dayBefore = datetime.datetime(2002, 4, 6, 7, 0, 0, tzinfo=utc_tzinfo)
 
     # before transition
     before_tzname = 'EST'
-    before_utcoffset = timedelta(hours = -5)
-    before_dst = timedelta(hours = 0)
+    before_utcoffset = datetime.timedelta(hours = -5)
+    before_dst = datetime.timedelta(hours = 0)
 
     # after transition
     after_tzname = 'EDT'
-    after_utcoffset = timedelta(hours = -4)
-    after_dst = timedelta(hours = 1)
+    after_utcoffset = datetime.timedelta(hours = -4)
+    after_dst = datetime.timedelta(hours = 1)
 
     def _test_tzname(self,utc_dt,tzname):
         dt = utc_dt.astimezone(self.tzinfo)
@@ -81,32 +83,32 @@ class USEasternDSTStartTestCase(unittest.TestCase):
         self._test_dst(self.dayBefore, self.before_dst)
 
     def test_instantAfter_tzname(self):
-        self._test_tzname(self.dayBefore + timedelta(days=1), self.after_tzname)
+        self._test_tzname(self.dayBefore + datetime.timedelta(days=1), self.after_tzname)
 
     def test_instantAfter_utcoffset(self):
         self._test_utcoffset(
-            self.dayBefore + timedelta(days=1), self.after_utcoffset
+            self.dayBefore + datetime.timedelta(days=1), self.after_utcoffset
             )
 
     def test_instantAfter_dst(self):
-        self._test_dst(self.dayBefore + timedelta(days=1), self.after_dst)
+        self._test_dst(self.dayBefore + datetime.timedelta(days=1), self.after_dst)
 
     def test_dayAfter_tzname(self):
-        self._test_tzname(self.dayBefore + timedelta(days=2), self.after_tzname)
+        self._test_tzname(self.dayBefore + datetime.timedelta(days=2), self.after_tzname)
 
     def test_dayAfter_utcoffset(self):
         self._test_utcoffset(
-            self.dayBefore + timedelta(days=2), self.after_utcoffset
+            self.dayBefore + datetime.timedelta(days=2), self.after_utcoffset
             )
 
     def test_dayAfter_dst(self):
-        self._test_dst(self.dayBefore + timedelta(days=2), self.after_dst)
+        self._test_dst(self.dayBefore + datetime.timedelta(days=2), self.after_dst)
 
     def test_leadup(self):
         # Test every second for 15 minutes before
         for i in xrange(0,15*60):
-            delta = timedelta(hours=23,minutes=45) + timedelta(seconds=i)
-            assert delta < timedelta(hours=24)
+            delta = datetime.timedelta(hours=23,minutes=45) + datetime.timedelta(seconds=i)
+            assert delta < datetime.timedelta(hours=24)
             self._test_tzname(self.dayBefore + delta, self.before_tzname)
             self._test_utcoffset(self.dayBefore + delta, self.before_utcoffset)
             self._test_dst(self.dayBefore + delta, self.before_dst)
@@ -114,7 +116,7 @@ class USEasternDSTStartTestCase(unittest.TestCase):
     def test_followthrough(self):
         # Test every second for 15 minutes after
         for i in xrange(1,15*60):
-            delta = timedelta(hours=24) + timedelta(seconds=i)
+            delta = datetime.timedelta(hours=24) + datetime.timedelta(seconds=i)
             self._test_tzname(self.dayBefore + delta, self.after_tzname)
             self._test_utcoffset(self.dayBefore + delta, self.after_utcoffset)
             self._test_dst(self.dayBefore + delta, self.after_dst)
@@ -122,28 +124,18 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
 class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
     tzinfo = TZInfo('US/Eastern')
-    dayBefore = datetime(2002, 10, 26, 6, 0, 0, tzinfo=utc_tzinfo)
+    dayBefore = datetime.datetime(2002, 10, 26, 6, 0, 0, tzinfo=utc_tzinfo)
     before_tzname = 'EDT'
-    before_utcoffset = timedelta(hours = -4)
-    before_dst = timedelta(hours = 1)
+    before_utcoffset = datetime.timedelta(hours = -4)
+    before_dst = datetime.timedelta(hours = 1)
     after_tzname = 'EST'
-    after_utcoffset = timedelta(hours = -5)
-    after_dst = timedelta(hours = 0)
+    after_utcoffset = datetime.timedelta(hours = -5)
+    after_dst = datetime.timedelta(hours = 0)
 
 transitions_cache = {}
 
 class ZDumpTransitionTimesTestCase(unittest.TestCase):
     zdump = os.path.join('elsie.nci.nih.gov','build','etc','zdump')
-    #zoneinfo = os.path.join('elsie.nci.nih.gov','build','etc','zoneinfo')
-
-    def allzones(self):
-        ''' Return all available tzfile(5) files in the zoneinfo database '''
-        zones = []
-        for dirpath, dirnames, filenames in os.walk(self.zoneinfo):
-            zones.extend([os.path.join(dirpath,f) for f in filenames])
-        stripnum = len(os.path.commonprefix(zones))
-        zones = [z[stripnum:] for z in zones]
-        return zones
 
     def transitions(self,zone):
         try:
@@ -175,13 +167,15 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
     def _test_matchzdump(self,zone):
         for tz,utc_t,loc_t,tzname,is_dst in self.transitions(zone):
             args = list(utc_t[:6]) + [0,utc_tzinfo]
-            utc = datetime(*args)
+            utc = datetime.datetime(*args)
             loc = utc.astimezone(tz)
 
-            wanted = datetime(*(loc_t[:6] + (0,tz)))
+            # Convert loc to naieve time
+            nloc = loc.replace(tzinfo=None)
+            nwanted = datetime.datetime(*loc_t[:6])
 
-            self.failUnlessEqual(wanted,loc,
-                'Got %s from %s. Wanted %s' % (loc,utc,wanted)
+            self.failUnlessEqual(is_dst,loc.dst() != datetime.timedelta(0),
+                'Incorrect is_dst for %s. Wanted %s' % (loc,is_dst)
                 )
 
             self.failUnlessEqual(tzname,loc.tzname(),
@@ -189,16 +183,17 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
                     utc,tzname,loc.tzname()
                     )
                 )
-            self.failUnlessEqual(is_dst,loc.dst() != timedelta(0),
-                'Incorrect is_dst. Wanted %s (is_dst=%s). Got %s (dst=%s)' % (
-                    wanted,is_dst,loc,loc.dst())
+
+            self.failUnlessEqual(nwanted,nloc,
+                'Got %s from %s. Wanted %s' % (loc,utc,nwanted)
                 )
+
 
     def test_EasternReference(self):
         for tz,utc_t,loc_t,tzname,is_dst in self.transitions('US/Eastern'):
             if utc_t[0] not in range(2000,2004):
                 continue
-            dt = datetime(*(utc_t[:6]))
+            dt = datetime.datetime(*(utc_t[:6]))
             dt = dt.replace(tzinfo=utc_tzinfo)
 
             as_ref = dt.astimezone(reference.Eastern)
@@ -228,9 +223,8 @@ class ZDumpTransitionTimesTestCase(unittest.TestCase):
 
 def fillZDumpTest(cls):
     ''' Add tests to ZDump '''
-    zoneinfo = os.path.join('elsie.nci.nih.gov','build','etc','zoneinfo')
     zones = []
-    for dirpath, dirnames, filenames in os.walk(zoneinfo):
+    for dirpath, dirnames, filenames in os.walk(tzinfo.zoneinfo):
         zones.extend([os.path.join(dirpath,f) for f in filenames])
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]

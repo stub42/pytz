@@ -4,12 +4,23 @@ from pprint import pprint
 from bisect import bisect_right
 
 import os.path
-tzbase = os.path.join('elsie.nci.nih.gov','build','etc','zoneinfo')
+zoneinfo = os.path.join(
+    os.path.dirname(__file__),'elsie.nci.nih.gov','build','etc','zoneinfo'
+    )
+
+def allzones(self):
+    ''' Return all available tzfile(5) files in the zoneinfo database '''
+    zones = []
+    for dirpath, dirnames, filenames in os.walk(zoneinfo):
+        zones.extend([os.path.join(dirpath,f) for f in filenames])
+    stripnum = len(os.path.commonprefix(zones))
+    zones = [z[stripnum:] for z in zones]
+    return zones
 
 _notime = timedelta(0)
 
 def TZInfo(zone='UTC'):
-    filename = os.path.join(tzbase,zone)
+    filename = os.path.join(zoneinfo,zone)
     tzfile = TZFile(filename)
     if len(tzfile.transitions) == 0:
         ttinfo = tzfile.ttinfo[0]
