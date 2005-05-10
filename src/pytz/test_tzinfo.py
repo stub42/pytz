@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.8 2004/07/25 01:34:20 zenzen Exp $
+$Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.8 2004/07/25 01:34:20 zenzen Exp $'
-__version__ = '$Revision: 1.8 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $'
+__version__ = '$Revision: 1.9 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -19,7 +19,7 @@ fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 NOTIME = timedelta(0)
 
 UTC = pytz.timezone('UTC')
-REF_UTC = reference.utc
+REF_UTC = reference.UTC
 
 class BasicTest(unittest.TestCase):
     def testUTC(self):

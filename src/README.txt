@@ -2,7 +2,7 @@ pytz - World Timezone Definitions for Python
 ============================================
 
 :Author: Stuart Bishop <stuart@stuartbishop.net>
-:Version: $Revision: 1.10 $
+:Version: $Revision: 1.11 $
 
 Introduction
 ~~~~~~~~~~~~
@@ -13,7 +13,7 @@ or higher. It also solves the issue of ambiguous times at the end
 of daylight savings, which you can read more about in the Python
 Library Reference (datetime.tzinfo).
 
-546 of the Olsen timezones are supported [*]_.
+Amost all (over 540) of the Olsen timezones are supported [*]_.
 
 Note that if you perform date arithmetic on local times that cross
 DST boundaries, the results may be in an incorrect timezone (ie.
@@ -124,6 +124,31 @@ Central European time. So at the stroke of midnight on August 4th 1915
 the clocks were wound back 24 minutes creating a ambiguous time period
 that cannot be specified without referring to the timezone abbreviation
 or the actual UTC offset.
+
+The 'Standard' Python way of handling all thee ambiguities is not to,
+such as demonstrated in this example using the US/Eastern timezone
+definition from the Python documentation:
+
+>>> from pytz.reference import Eastern
+>>> dt = datetime(2002, 10, 27, 0, 30, tzinfo=Eastern)
+>>> str(dt)
+'2002-10-27 00:30:00-04:00'
+>>> str(dt + timedelta(hours=1))
+'2002-10-27 01:30:00-05:00'
+>>> str(dt + timedelta(hours=2))
+'2002-10-27 02:30:00-05:00'
+>>> str(dt + timedelta(hours=3))
+'2002-10-27 03:30:00-05:00'
+
+Notice the first two results? At first glance you might think they are
+correct, but taking the UTC offset into account you find that they are
+actually two hours appart instead of the 1 hour we asked for.
+
+>>> from pytz.reference import UTC
+>>> str(dt.astimezone(UTC))
+'2002-10-27 04:30:00+00:00'
+>>> str((dt + timedelta(hours=1)).astimezone(UTC))
+'2002-10-27 06:30:00+00:00'
 
 
 What is UTC
