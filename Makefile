@@ -45,7 +45,8 @@ sdist: build/dist build/dist/test_zdump.py.bz2
 	${PYTHON} setup.py sdist --force-manifest --formats=bztar,gztar,zip
 
 build/dist/test_zdump.py.bz2: build/dist
-	cd build/dist && bzip2 -c9 < test_zdump.py > test_zdump.py.bz2
+	mkdir -p build/dist/dist
+	cd build/dist && bzip2 -c9 < test_zdump.py > dist/test_zdump.py.bz2
 
 README.html: src/README.txt build/dist
 	rst2html.py --embed-stylesheet --stylesheet-path=${STYLESHEET} \
