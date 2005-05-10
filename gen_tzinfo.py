@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: gen_tzinfo.py,v 1.7 2004/06/02 19:39:53 zenzen Exp $
+$Id: gen_tzinfo.py,v 1.8 2004/06/02 23:08:53 zenzen Exp $
 '''
 import sys, os, os.path, shutil
 
@@ -124,24 +124,6 @@ class DstGen(Gen):
     def __init__(self, zone, transitions):
         self.zone = zone
 
-        # if first transition is in dst, add an extra one before it that
-        # isn't
-        if transitions[0][2]:
-            for nondst in transitions:
-                if not nondst[2]:
-                    break
-            delta = nondst[1]
-            dst = nondst[2]
-            tzname = nondst[3]
-            if delta > timedelta(0):
-                transitions.insert(
-                        0, (datetime.min, delta, dst, tzname)
-                        )
-            else:
-                transitions.insert(
-                        0, (datetime.min - delta, delta, dst, tzname)
-                        )
-
         utc_transition_times = []
         transition_times = []
         transition_info = []
@@ -150,13 +132,6 @@ class DstGen(Gen):
 
             utc_tt = transitions[i][0]
             utc_transition_times.append(utc_tt)
-
-            try:
-                tt = transitions[i][0] + transitions[i-1][1] # Local, naive time
-            except IndexError:
-                tt = transitions[i][0] + transitions[i+1][1] # Local, naive time
-            except OverflowError:
-                tt = datetime.min
 
             inf = transitions[i][1:]
 
@@ -171,13 +146,6 @@ class DstGen(Gen):
                 dst = dst.seconds
             tzname = inf[2]
 
-            if not dst and transitions[i-1][2]:
-                # we are comming out of DST, so we need to adjust the
-                # transition time, which is local
-                prev_dst = transitions[i-1][1] - inf[0]
-                tt = tt - prev_dst
-            transition_times.append(tt)
-
             # datetime library precision for offsets is 1 minute
             utcoffset = int((utcoffset + 30) / 60) * 60
             dst = int((dst + 30) / 60) * 60
@@ -188,21 +156,8 @@ class DstGen(Gen):
         attributes.append('')
 
         attributes.append('    _utc_transition_times = [')
-        for i in range(0, len(transition_times)):
+        for i in range(0, len(utc_transition_times)):
             tt = utc_transition_times[i]
-            delta, dst, tzname = transition_info[i]
-            comment = ' # %6d %5d %s' % transition_info[i]
-            attributes.append(
-                '        datetime(%4d, %2d, %2d, %2d, %2d),%s' % (
-                    tt.year, tt.month, tt.day, tt.hour, tt.minute, comment
-                    )
-                )
-        attributes.append('        ]')
-        attributes.append('')
-
-        attributes.append('    _transition_times = [')
-        for i in range(0, len(transition_times)):
-            tt = transition_times[i]
             delta, dst, tzname = transition_info[i]
             comment = ' # %6d %5d %s' % transition_info[i]
             attributes.append(

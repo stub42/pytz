@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 '''
-$Id: tzfile.py,v 1.6 2004/05/31 00:27:39 zenzen Exp $
+$Id: tzfile.py,v 1.7 2004/06/02 23:08:53 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzfile.py,v 1.6 2004/05/31 00:27:39 zenzen Exp $'
-__version__ = '$Revision: 1.6 $'[11:-2]
+__rcs_id__  = '$Id: tzfile.py,v 1.7 2004/06/02 23:08:53 zenzen Exp $'
+__version__ = '$Revision: 1.7 $'[11:-2]
 
 from struct import unpack,calcsize
 from cStringIO import StringIO
@@ -71,12 +71,21 @@ class TZFile:
                 for utcoffset,is_dst,tzname_index in ttinfo
             ]
 
+        assert len(lindexes) == len(transitions)
         self.transitions = [ (
             datetime.utcfromtimestamp(transitions[i]), # UTC time of transition
             ttinfo[lindexes[i]][0], # utc offset
             ttinfo[lindexes[i]][1], # is DST
             ttinfo[lindexes[i]][2], # timezone abbreviation
-            ) for i in xrange(0,len(transitions)) ]
+            ) for i in range(0,len(transitions)) ]
+
+        # Early dates use the first standard time ttinfo
+        i = 0
+        while ttinfo[i][1]:
+            i += 1
+        self.transitions.insert(
+                0, (datetime.min, ttinfo[i][0], ttinfo[i][1], ttinfo[i][2])
+                )
 
         self.ttinfo = ttinfo
 
