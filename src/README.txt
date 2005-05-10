@@ -31,6 +31,7 @@ modifying the Python datetime implementation. However, these tzinfo
 classes provide a normalize() method which allows you to correct these
 values.
 
+
 Installation
 ------------
 
@@ -39,11 +40,6 @@ package, run the following command as an administrative user::
 
     python setup.py install
 
-License
--------
-
-BSD style license. I'm more than happy to relicense this code for 
-inclusion in other open source projects.
 
 Example & Usage
 ---------------
@@ -64,12 +60,30 @@ Example & Usage
     >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:10:00 EST (-0500)'
 
+
+License
+-------
+
+BSD style license. I'm happy to relicense this code if necessary 
+for inclusion in other open source projects.
+
+
+Latest Versions
+---------------
+
+This module will be updated after releases of the Olsen timezone database.
+The latest version can be downloaded from sourceforge_.
+
+.. _sourceforge: http://sourceforge.net/projects/pytz/
+
+
 Further Reading
 ---------------
 
 More info than you want to know about timezones::
 
     http://www.twinsun.com/tz/tz-link.htm
+
 
 Contact
 -------
