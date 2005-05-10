@@ -1,6 +1,6 @@
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)date.c	7.40";
+static char	elsieid[] = "@(#)date.c	7.41";
 /*
 ** Modified from the UCB version with the SCCS ID appearing below.
 */
@@ -664,7 +664,8 @@ const time_t			t;
 	cp = value;
 	switch (dotp - cp) {
 		default:
-			wildinput(_("time"), value, _("main part is wrong length"));
+			wildinput(_("time"), value,
+				_("main part is wrong length"));
 		case 12:
 			if (!dousg) {
 				cent = ATOI2(cp);

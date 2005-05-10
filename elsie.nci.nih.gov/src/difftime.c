@@ -5,7 +5,7 @@
 
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)difftime.c	7.17";
+static char	elsieid[] = "@(#)difftime.c	7.18";
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
@@ -57,7 +57,7 @@ const time_t	time0;
 	/*
 	** Stay calm...decent optimizers will eliminate the complexity below.
 	*/
-	if (time1 >= 0 /* && time0 < 0 */) 
+	if (time1 >= 0 /* && time0 < 0 */)
 		return (unsigned long) time1 +
 			(unsigned long) (-(time0 + 1)) + 1;
 	return -(double) ((unsigned long) time0 +

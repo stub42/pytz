@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# @(#)workman.sh	1.7
+# @(#)workman.sh	1.8
 
 # Tell groff not to emit SGR escape sequences (ANSI color escapes).
 GROFF_NO_SGR=1
@@ -26,4 +26,4 @@ echo ".am TH
 		print "$_\n";
 		$didprint = 1;
 	}
-' 
+'

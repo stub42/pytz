@@ -1,4 +1,4 @@
-static char	elsieid[] = "@(#)zdump.c	7.59";
+static char	elsieid[] = "@(#)zdump.c	7.63";
 
 /*
 ** This code has been made independent of the rest of the time
@@ -149,10 +149,46 @@ static char *	abbr P((struct tm * tmp));
 static long	delta P((struct tm * newp, struct tm * oldp));
 static void	dumptime P((const struct tm * tmp));
 static time_t	hunt P((char * name, time_t lot, time_t	hit));
-static void	setabsolutes();
+static void	setabsolutes P((void));
 static void	show P((char * zone, time_t t, int v));
 static const char *	tformat P((void));
 static time_t	yeartot P((long y));
+
+#ifndef TYPECHECK
+#define my_localtime	localtime
+#else /* !defined TYPECHECK */
+static struct tm *
+my_localtime(tp)
+time_t *	tp;
+{
+	register struct tm *	tmp;
+
+	tmp = localtime(tp);
+	if (tp != NULL && tmp != NULL) {
+		struct tm	tm;
+		register time_t	t;
+
+		tm = *tmp;
+		t = mktime(&tm);
+		if (t - *tp >= 1 || *tp - t >= 1) {
+			(void) fflush(stdout);
+			(void) fprintf(stderr, "\n%s: ", progname);
+			(void) fprintf(stderr, tformat(), *tp);
+			(void) fprintf(stderr, " ->");
+			(void) fprintf(stderr, " sec %d", tmp->tm_sec);
+			(void) fprintf(stderr, " min %d", tmp->tm_min);
+			(void) fprintf(stderr, " hour %d", tmp->tm_hour);
+			(void) fprintf(stderr, " mday %d", tmp->tm_mday);
+			(void) fprintf(stderr, " mon %d", tmp->tm_mon);
+			(void) fprintf(stderr, " year %d", tmp->tm_year);
+			(void) fprintf(stderr, " -> ");
+			(void) fprintf(stderr, tformat(), t);
+			(void) fprintf(stderr, "\n");
+		}
+	}
+	return tmp;
+}
+#endif /* !defined TYPECHECK */
 
 int
 main(argc, argv)
@@ -179,7 +215,7 @@ char *	argv[];
 	INITIALIZE(cutlotime);
 	INITIALIZE(cuthitime);
 #if HAVE_GETTEXT
-	(void) setlocale(LC_MESSAGES, "");
+	(void) setlocale(LC_ALL, "");
 #ifdef TZ_DOMAINDIR
 	(void) bindtextdomain(TZ_DOMAIN, TZ_DOMAINDIR);
 #endif /* defined TEXTDOMAINDIR */
@@ -208,12 +244,12 @@ _("%s: usage is %s [ --version ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"),
 		if (cutarg != NULL) {
 			long	lo;
 			long	hi;
-			char	c;
+			char	dummy;
 
-			if (sscanf(cutarg, "%ld%c", &hi, &c) == 1) {
+			if (sscanf(cutarg, "%ld%c", &hi, &dummy) == 1) {
 				cuthiyear = hi;
 			} else if (sscanf(cutarg, "%ld,%ld%c",
-				&lo, &hi, &c) == 2) {
+				&lo, &hi, &dummy) == 2) {
 					cutloyear = lo;
 					cuthiyear = hi;
 			} else {
@@ -266,7 +302,7 @@ _("%s: usage is %s [ --version ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"),
 		show(argv[i], t, TRUE);
 		if (t < cutlotime)
 			t = cutlotime;
-		tmp = localtime(&t);
+		tmp = my_localtime(&t);
 		if (tmp != NULL) {
 			tm = *tmp;
 			(void) strncpy(buf, abbr(&tm), (sizeof buf) - 1);
@@ -282,7 +318,7 @@ _("%s: usage is %s [ --version ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"),
 			newtmp = localtime(&newt);
 			if (newtmp != NULL)
 				newtm = *newtmp;
-			if ((tmp == NULL || newtmp == NULL) ?  (tmp != newtmp) :
+			if ((tmp == NULL || newtmp == NULL) ? (tmp != newtmp) :
 				(delta(&newtm, &tm) != (newt - t) ||
 				newtm.tm_isdst != tm.tm_isdst ||
 				strcmp(abbr(&newtm), buf) != 0)) {
@@ -399,7 +435,7 @@ time_t	hit;
 	register struct tm *	tmp;
 	char			loab[MAX_STRING_LENGTH];
 
-	lotmp = localtime(&lot);
+	lotmp = my_localtime(&lot);
 	if (lotmp != NULL) {
 		lotm = *lotmp;
 		(void) strncpy(loab, abbr(&lotm), (sizeof loab) - 1);
@@ -414,7 +450,7 @@ time_t	hit;
 			++t;
 		else if (t >= hit)
 			--t;
-		tmp = localtime(&t);
+		tmp = my_localtime(&t);
 		if (tmp != NULL)
 			tm = *tmp;
 		if ((lotmp == NULL || tmp == NULL) ? (lotmp == tmp) :
@@ -477,7 +513,7 @@ int	v;
 		}
 		(void) printf(" = ");
 	}
-	tmp = localtime(&t);
+	tmp = my_localtime(&t);
 	dumptime(tmp);
 	if (tmp != NULL) {
 		if (*abbr(tmp) != '\0')

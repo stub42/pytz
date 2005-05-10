@@ -11,7 +11,7 @@
 
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)asctime.c	7.30";
+static char	elsieid[] = "@(#)asctime.c	7.31";
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
@@ -98,7 +98,7 @@ char *				buf;
 	/*
 	** We avoid using snprintf since it's not available on all systems.
 	*/
-	(void) sprintf(result, 
+	(void) sprintf(result,
 		((strlen(year) <= 4) ? ASCTIME_FMT : ASCTIME_FMT_B),
 		wn, mn,
 		timeptr->tm_mday, timeptr->tm_hour,

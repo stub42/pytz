@@ -1,4 +1,4 @@
-# @(#)Makefile	7.102
+# @(#)Makefile	7.107
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -383,22 +383,26 @@ names:
 		@echo $(ENCHILADA)
 
 # The zics below ensure that each data file can stand on its own.
+# We also do an all-files run to catch links to links.
 
-public:		$(ENCHILADA) zic
+public:		$(ENCHILADA)
+		make maintainer-clean
+		make "CFLAGS=$(GCC_DEBUG_FLAGS)"
 		-mkdir /tmp/,tzpublic
 		-for i in $(TDATA) ; do zic -v -d /tmp/,tzpublic $$i 2>&1 | grep -v "starting year" ; done
 		for i in $(TDATA) ; do zic -d /tmp/,tzpublic $$i || exit; done
+		zic -v -d /tmp/,tzpublic $(TDATA) || exit
 		rm -f -r /tmp/,tzpublic
 		for i in *.[1-8] ; do sh workman.sh $$i > $$i.txt || exit; done
 		$(AWK) -f checktab.awk $(PRIMARY_YDATA)
 		tar cf - $(DOCS) $(SOURCES) $(MISC) *.[1-8].txt | gzip -9 > tzcode.tar.gz
 		tar cf - $(DATA) | gzip -9 > tzdata.tar.gz
 
-typecheck:	
+typecheck:
 		make clean
-		for i in "long long" double unsigned; \
+		for i in "long long" unsigned double; \
 		do \
-			make CFLAGS="-D_TIME_T \"-Dtime_t=$$i\"" ; \
+			make CFLAGS="-DTYPECHECK -D_TIME_T \"-Dtime_t=$$i\"" ; \
 			./zdump -v US/Eastern ; \
 			make clean ; \
 		done
