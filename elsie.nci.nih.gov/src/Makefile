@@ -1,4 +1,4 @@
-# @(#)Makefile	7.83
+# @(#)Makefile	7.92
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -35,7 +35,6 @@ POSIXRULES=	America/New_York
 # Everything gets put in subdirectories of. . .
 
 TOPDIR=		/usr/local
-TOPDIR=        `pwd`/../build
 
 # "Compiled" time zone information is placed in the "TZDIR" directory
 # (and subdirectories).
@@ -268,8 +267,8 @@ TABDATA=	iso3166.tab zone.tab
 DATA=		$(YDATA) $(NDATA) $(SDATA) $(TABDATA) leapseconds yearistype.sh
 WEB_PAGES=	tz-art.htm tz-link.htm
 MISC=		usno1988 usno1989 usno1989a usno1995 usno1997 usno1998 \
-			$(WEB_PAGES) checktab.awk
-ENCHILADA=	$(DOCS) $(SOURCES) $(DATA) $(MISC)
+			itca.jpg $(WEB_PAGES) checktab.awk
+ENCHILADA=	$(DOCS) $(SOURCES) $(DATA) $(MISC) workman.sh
 
 # And for the benefit of csh users on systems that assume the user
 # shell should be used to handle commands in Makefiles. . .
@@ -374,8 +373,12 @@ check_web:	$(WEB_PAGES)
 		$(VALIDATE_ENV) $(VALIDATE) $(VALIDATE_FLAGS) $(WEB_PAGES)
 
 clean:
-		rm -f core *.o *.out tzselect zdump zic yearistype date \
-			,* *.tar.gz
+		rm -f core *.o *.out tzselect zdump zic yearistype date
+
+maintainer-clean: clean
+		@echo 'This command is intended for maintainers to use; it'
+		@echo 'deletes files that may need special tools to rebuild.'
+		rm -f *.[1-8].txt tzcode.tar.gz tzdata.tar.gz
 
 names:
 		@echo $(ENCHILADA)
@@ -384,10 +387,12 @@ names:
 
 public:		$(ENCHILADA) zic
 		-mkdir /tmp/,tzpublic
-		for i in $(TDATA) ; do zic -d /tmp/,tzpublic $$i ; done
+		-for i in $(TDATA) ; do zic -v -d /tmp/,tzpublic $$i 2>&1 | grep -v "starting year" ; done
+		for i in $(TDATA) ; do zic -d /tmp/,tzpublic $$i || exit; done
 		rm -f -r /tmp/,tzpublic
+		for i in *.[1-8] ; do sh workman.sh $$i > $$i.txt || exit; done
 		$(AWK) -f checktab.awk $(PRIMARY_YDATA)
-		tar cf - $(DOCS) $(SOURCES) $(MISC) | gzip -9 > tzcode.tar.gz
+		tar cf - $(DOCS) $(SOURCES) $(MISC) *.[1-8].txt | gzip -9 > tzcode.tar.gz
 		tar cf - $(DATA) | gzip -9 > tzdata.tar.gz
 
 zonenames:	$(TDATA)
