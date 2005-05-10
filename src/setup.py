@@ -1,5 +1,5 @@
 '''
-$Id: setup.py,v 1.5 2004/07/25 01:34:20 zenzen Exp $
+$Id: setup.py,v 1.6 2005/01/07 04:17:53 zenzen Exp $
 Distribution setup script
 '''
 
@@ -48,7 +48,7 @@ setup (
     classifiers = [
         'Development Status :: 6 - Mature',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
