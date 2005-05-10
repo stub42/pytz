@@ -6,7 +6,7 @@ PYTHON=python2.3
 OLSEN=./elsie.nci.nih.gov
 TESTARGS=-v
 TARGET=
-#TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
+TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia
 #Mideast/Riyadh87
 
 build/dist: build/etc/zoneinfo/UTC gen_tzinfo.py
@@ -19,7 +19,7 @@ clean:
 build/etc/zoneinfo/UTC: ${OLSEN}/src/africa build
 	${MAKE} -C ${OLSEN}/src TOPDIR=`pwd`/build install
 
-test: test_tzinfo test_zdump
+test: test_tzinfo test_zdump test_pytz
 
 .mk_test: build/dist gen_tests.py
 	${PYTHON} gen_tests.py ${TARGET} && touch .mk_test
@@ -29,6 +29,9 @@ test_tzinfo: .mk_test
 
 test_zdump: .mk_test
 	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
+
+test_pytz: .mk_test
+	cd build/dist/pytz && ${PYTHON} __init__.py ${TESTARGS}
 
 build:
 	mkdir build

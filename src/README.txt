@@ -11,13 +11,14 @@ Library Reference (datetime.tzinfo). The only remaining inaccuracy
 is that datetime.strftime only reports the UTC offset to the nearest
 minute (This is probably a feature - you have to draw a line somewhere).
 
-536 of the 539 Olsen timezones are supported. The missing 3 are for
-Riyadh Solar Time in 1987, 1988 and 1989, and I see no point
-reimplementing the algorithms to support this failed timezone attempt
-now only of historical sigificance. (The intention was to set sunset
-to 0:00 local time, which in the best case caused the DST offset
-to change daily and worst case caused the DST offset to change each
-instant depending on how you interpreted the ruling)
+536 of the Olsen timezones are supported. The missing few are for
+Riyadh Solar Time in 1987, 1988 and 1989. As Saudi Arabia gave up
+trying to cope with their timezone definition, I see no reason
+to complicate my code further to cope with them. (I understand
+the intention was to set sunset to 0:00 local time, the start of the
+Islamic day. In the best case caused the DST offset to change daily 
+and worst case caused the DST offset to change each instant depending 
+on how you interpreted the ruling.)
 
 Installation
 ------------
@@ -42,11 +43,13 @@ Example & Usage
     >>> eastern = timezone('US/Eastern')
     >>> utc_dt = datetime(2002, 10, 27, 6, 0, 0, tzinfo=utc)
     >>> loc_dt = utc_dt.astimezone(eastern)
-    >>> str(loc_dt - timedelta(minutes=10))
-
-    >>> str(loc_dt)
-
-    >>> str(loc_dt + timedelta(minutes=10))
+    >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
+    >>> loc_dt.strftime(fmt)
+    '2002-10-27 01:00:00 EST (-0500)'
+    >>> (loc_dt - timedelta(minutes=10)).strftime(fmt)
+    '2002-10-27 01:50:00 EDT (-0400)'
+    >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
+    '2002-10-27 01:10:00 EST (-0500)'
 
 Further Reading
 ---------------

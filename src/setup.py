@@ -1,11 +1,11 @@
 '''
-$Id: setup.py,v 1.2 2004/06/05 11:34:44 zenzen Exp $
+$Id: setup.py,v 1.3 2004/06/05 12:57:22 zenzen Exp $
 Distribution setup script
 '''
 
 from distutils.core import setup
 
-import pytz
+import pytz, sys, os, os.path
 
 me = 'Stuart Bishop'
 memail = 'stuart@stuartbishop.net'
@@ -26,10 +26,14 @@ will be regenerated and rereleased soon after updated editions of the
 Olsen database are made available.
 '''
 
+packages = ['pytz']
+for dirpath, dirname, filenames in os.walk(os.path.join('pytz','zoneinfo')):
+    packages.append('.'.join(dirpath.split(os.sep)))
+
 setup (
     name = 'pytz',
     version = pytz.OLSEN_VERSION,
-    description = 'World modern and historical timezone definitions',
+    description = 'World timezone definitions, modern and historical',
     long_description = ldesc,
     author = me,
     author_email = memail,
@@ -37,8 +41,8 @@ setup (
     maintainer_email = memail,
     url = 'http://pytz.sourceforge.net',
     license = open('LICENSE.txt','r').read(),
-    keywords = ['timezone','tzinfo', 'datetime'],
-    packages = ["pytz", "pytz.zoneinfo"],
+    keywords = ['timezone','tzinfo', 'datetime', 'olsen', 'time'],
+    packages = packages,
     #download_url='',
     platforms=['Independant'],
     classifiers = [

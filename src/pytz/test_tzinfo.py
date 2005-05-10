@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
-$Id: test_tzinfo.py,v 1.2 2004/06/05 11:34:44 zenzen Exp $
+$Id: test_tzinfo.py,v 1.3 2004/06/05 12:57:22 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.2 2004/06/05 11:34:44 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
+__rcs_id__  = '$Id: test_tzinfo.py,v 1.3 2004/06/05 12:57:22 zenzen Exp $'
+__version__ = '$Revision: 1.3 $'[11:-2]
 
 import sys, os
 sys.path.insert(0, os.pardir)
@@ -91,11 +91,22 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
     def _test_arithmetic(self, utc_dt):
         for days in range(-720, 720, 20):
+            delta = timedelta(days=days)
+
+            # Make sure we can get back where we started
             dt = utc_dt.astimezone(self.tzinfo)
-            dt2 = dt + timedelta(days=days)
-            dt2 = dt2 - timedelta(days=days)
+            dt2 = dt + delta
+            dt2 = dt2 - delta
             self.failUnlessEqual(dt, dt2)
-            self.failUnlessEqual(str(dt), str(dt2))
+
+            # Make sure arithmetic crossing DST boundaries ends
+            # up in the correct timezone
+            fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
+            self.failUnlessEqual(
+                    (dt + delta).strftime(fmt),
+                    (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
+                    )
+
 
     def _test_roundtrip(self, utc_dt):
         self.failUnlessEqual(

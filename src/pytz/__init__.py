@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-$Id: __init__.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $
+$Id: __init__.py,v 1.2 2004/06/05 12:57:22 zenzen Exp $
 
 datetime.tzinfo timezone definitions generated from the
 Olson timezone database:
@@ -11,8 +11,8 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-__rcs_id__  = '$Id: __init__.py,v 1.1 2004/06/05 09:53:55 zenzen Exp $'
-__version__ = '$Revision: 1.1 $'[11:-2]
+__rcs_id__  = '$Id: __init__.py,v 1.2 2004/06/05 12:57:22 zenzen Exp $'
+__version__ = '$Revision: 1.2 $'[11:-2]
 
 # The Olsen database has historically been updated about 4 times a year
 OLSEN_VERSION = '2004a'
@@ -22,7 +22,21 @@ __all__ = ['timezone', 'all_timezones', 'common_timezones']
 import sys
 
 def timezone(zone):
-    ''' Return a datetime.tzinfo implementation for the given timezone '''
+    ''' Return a datetime.tzinfo implementation for the given timezone 
+    
+    >>> from datetime import datetime, timedelta
+    >>> utc = timezone('UTC')
+    >>> eastern = timezone('US/Eastern')
+    >>> utc_dt = datetime(2002, 10, 27, 6, 0, 0, tzinfo=utc)
+    >>> loc_dt = utc_dt.astimezone(eastern)
+    >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
+    >>> loc_dt.strftime(fmt)
+    '2002-10-27 01:00:00 EST (-0500)'
+    >>> (loc_dt - timedelta(minutes=10)).strftime(fmt)
+    '2002-10-27 01:50:00 EDT (-0400)'
+    >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
+    '2002-10-27 01:10:00 EST (-0500)'
+    '''
     zone = _munge_zone(zone)
     zone_bits = ['zoneinfo'] + zone.split('/')
 
@@ -46,4 +60,12 @@ def _munge_zone(zone):
     '''
     return zone.replace('+', '_plus_').replace('-', '_minus_')
 
+def _test():
+    import doctest, os, sys
+    sys.path.insert(0, os.pardir)
+    import pytz
+    return doctest.testmod(pytz)
+
+if __name__ == '__main__':
+    _test()
 
