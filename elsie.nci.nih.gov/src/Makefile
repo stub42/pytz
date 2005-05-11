@@ -1,4 +1,4 @@
-# @(#)Makefile	7.107
+# @(#)Makefile	7.108
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -403,7 +403,7 @@ typecheck:
 		for i in "long long" unsigned double; \
 		do \
 			make CFLAGS="-DTYPECHECK -D_TIME_T \"-Dtime_t=$$i\"" ; \
-			./zdump -v US/Eastern ; \
+			./zdump -v Europe/Rome ; \
 			make clean ; \
 		done
 
