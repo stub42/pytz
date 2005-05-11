@@ -2,7 +2,6 @@ pytz - World Timezone Definitions for Python
 ============================================
 
 :Author: Stuart Bishop <stuart@stuartbishop.net>
-:Version: $Revision: 1.13 $
 
 Introduction
 ~~~~~~~~~~~~
@@ -165,9 +164,13 @@ computers that move roam through multiple timezones.
 License
 ~~~~~~~
 
-MIT license. I'm happy to relicense this code if necessary 
-for inclusion in other open source projects.
+MIT license.
 
+This code is also available as part of Zope 3 under the Zope Public
+License,  Version 2.1 (ZPL).
+
+I'm happy to relicense this code if necessary for inclusion in other
+open source projects.
 
 Latest Versions
 ~~~~~~~~~~~~~~~
