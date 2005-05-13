@@ -78,6 +78,15 @@ def dupe_src(destdir):
 
 def gen_tzinfo(destdir, zone):
     ''' Create a .py file for the given timezone '''
+
+    # UTC migrated to pytz/__init__.py for minimum sized pickles 
+    if zone == 'UTC':
+        outf = open(os.path.join(destdir, 'UTC.py'), 'w')
+        print >> outf, "'''tzinfo timezone information for UTC.'''"
+        print >> outf, "from pytz import UTC"
+        outf.close()
+        return
+
     filename = os.path.join(zoneinfo, zone)
     tzfile = TZFile(filename)
     zone = pytz._munge_zone(zone)
