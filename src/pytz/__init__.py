@@ -52,6 +52,22 @@ class UTC(datetime.tzinfo):
     def __reduce__(self):
         return _UTC, ()
 
+    def localize(self, dt, is_dst=False):
+        '''Convert naive time to local time'''
+        if dt.tzinfo is not None:
+            raise ValueError, 'Not naive datetime (tzinfo is already set)'
+        return dt.replace(tzinfo=self)
+
+    def normalize(self, dt, is_dst=False):
+        '''Correct the timezone information on the given datetime'''
+        if dt.tzinfo is None:
+            raise ValueError, 'Naive time - no tzinfo set'
+        return dt.replace(tzinfo=self)
+
+    def __repr__(self):
+        return '<UTC>'
+
+
 UTC = utc = UTC()
 
 def _UTC():

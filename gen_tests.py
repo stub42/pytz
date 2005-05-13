@@ -33,7 +33,8 @@ Daylight savings time transition tests generated from the Olson
 timezone database using the reference zdump implementation.
 '''
     
-import unittest
+import unittest, os, os.path,sys
+sys.path.insert(0, os.curdir)
 from time import strptime
 from pytz import timezone
 

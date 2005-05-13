@@ -25,7 +25,10 @@ test: test_tzinfo test_docs test_zdump
 
 clean:
 	rm -f .stamp-*
-	rm -rf build/{etc,lib,man,tarballs}; make -C ${OLSON}/src clean
+	rm -rf build/{etc,lib,man,tarballs}
+	find build/dist -name \*.py | xargs -r rm
+	rm -f build/dist/*.txt build/dist/MANIFEST*
+	make -C ${OLSON}/src clean
 	find . -name \*.pyc | xargs rm -f
 
 test_tzinfo: .stamp-tzinfo
