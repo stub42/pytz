@@ -27,10 +27,11 @@ test_docs: tzinfo
 	cd build/dist && ${PYTHON} test_docs.py ${TESTARGS}
 
 test_zdump: build_test_zdump
-	${PYTHON} -c 'import compileall;compileall.compile_dir("build/dist")'
+	${PYTHON} -c \
+	    'import compileall;compileall.compile_dir("build/dist/zoneinfo")'
 	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
 
-build_test_zdump:
+build_test_zdump: tzinfo
 	${PYTHON} gen_tests.py ${TARGET}
 	
 README.html: test_docs
