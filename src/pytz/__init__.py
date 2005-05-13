@@ -11,9 +11,6 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-__rcs_id__  = '$Id: __init__.py,v 1.12 2005/02/15 20:21:41 zenzen Exp $'
-__version__ = '$Revision: 1.12 $'[11:-2]
-
 # The Olson database has historically been updated about 4 times a year
 OLSON_VERSION = '2005i'
 VERSION = OLSON_VERSION

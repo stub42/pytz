@@ -6,9 +6,6 @@ Reference tzinfo implementations from the Python docs.
 Used for testing against.
 '''
 
-__rcs_id__  = '$Id: reference.py,v 1.2 2004/10/25 04:14:00 zenzen Exp $'
-__version__ = '$Revision: 1.2 $'[11:-2]
-
 from datetime import tzinfo, timedelta, datetime
 from pytz import utc, UTC, HOUR, ZERO
 

@@ -4,9 +4,6 @@
 $Id: gen_tests.py,v 1.15 2005/01/07 04:51:30 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: gen_tests.py,v 1.15 2005/01/07 04:51:30 zenzen Exp $'
-__version__ = '$Revision: 1.15 $'[11:-2]
-
 import os, os.path, popen2, re, sys
 from gen_tzinfo import allzones
 import gen_tzinfo

@@ -3,9 +3,6 @@
 $Id: tzfile.py,v 1.8 2004/06/03 00:15:24 zenzen Exp $
 '''
 
-__rcs_id__  = '$Id: tzfile.py,v 1.8 2004/06/03 00:15:24 zenzen Exp $'
-__version__ = '$Revision: 1.8 $'[11:-2]
-
 from struct import unpack,calcsize
 from cStringIO import StringIO
 from time import gmtime,asctime

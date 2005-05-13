@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 '''$Id: tzinfo.py,v 1.7 2005/02/15 20:21:52 zenzen Exp $'''
 
-__rcs_id__  = '$Id: tzinfo.py,v 1.7 2005/02/15 20:21:52 zenzen Exp $'
-__version__ = '$Revision: 1.7 $'[11:-2]
-
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
 from sets import Set
