@@ -18,14 +18,14 @@ dist: .stamp-dist
 .stamp-dist: .stamp-tzinfo
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
-	    --force-manifest --formats=bztar,gztar,zip
+	    --force-manifest --formats=bztar,gztar,zip --no-defaults
 	touch $@
 
 test: test_tzinfo test_docs test_zdump
 
 clean:
 	rm -f .stamp-*
-	rm -rf build; make -C ${OLSON}/src clean
+	rm -rf build/{etc,lib,man,tarballs}; make -C ${OLSON}/src clean
 	find . -name \*.pyc | xargs rm -f
 
 test_tzinfo: .stamp-tzinfo
