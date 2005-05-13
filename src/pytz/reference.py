@@ -10,25 +10,7 @@ __rcs_id__  = '$Id: reference.py,v 1.2 2004/10/25 04:14:00 zenzen Exp $'
 __version__ = '$Revision: 1.2 $'[11:-2]
 
 from datetime import tzinfo, timedelta, datetime
-
-ZERO = timedelta(0)
-HOUR = timedelta(hours=1)
-
-# A UTC class.
-
-class UTC(tzinfo):
-    """UTC"""
-
-    def utcoffset(self, dt):
-        return ZERO
-
-    def tzname(self, dt):
-        return "UTC"
-
-    def dst(self, dt):
-        return ZERO
-
-UTC = utc = UTC()
+from pytz import utc, UTC, HOUR, ZERO
 
 # A class building tzinfo objects for fixed-offset time zones.
 # Note that FixedOffset(0, "UTC") is a different way to build a

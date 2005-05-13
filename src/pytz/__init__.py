@@ -21,11 +21,70 @@ VERSION = OLSON_VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
-__all__ = ['timezone', 'all_timezones', 'common_timezones']
+__all__ = ['timezone', 'all_timezones', 'common_timezones', 'utc']
 
-import sys
+import sys, datetime
 
 from tzinfo import AmbiguousTimeError
+
+ZERO = datetime.timedelta(0)
+HOUR = datetime.timedelta(hours=1)
+
+# A UTC class.
+
+class UTC(datetime.tzinfo):
+    """UTC
+    
+    Identical to the reference UTC implementation given in Python docs except
+    that it unpickles using the single module global instance defined beneath
+    this class declaration.
+    """
+
+    def utcoffset(self, dt):
+        return ZERO
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return ZERO
+    
+    def __reduce__(self):
+        return _UTC, ()
+
+UTC = utc = UTC()
+
+def _UTC():
+    """Factory function for utc unpickling.
+    
+    Makes sure that unpickling a utc instance always returns the same 
+    module global.
+    
+    These examples belong in the UTC class above, but it is obscured; or in
+    the README.txt, but we are not depending on Python 2.4 so integrating
+    the README.txt examples with the unit tests is not trivial.
+    
+    >>> import datetime, pickle
+    >>> dt = datetime.datetime(2005, 3, 1, 14, 13, 21, tzinfo=utc)
+    >>> naive = dt.replace(tzinfo=None)
+    >>> p = pickle.dumps(dt, 1)
+    >>> naive_p = pickle.dumps(naive, 1)
+    >>> len(p), len(naive_p), len(p) - len(naive_p)
+    (60, 43, 17)
+    >>> new = pickle.loads(p)
+    >>> new == dt
+    True
+    >>> new is dt
+    False
+    >>> new.tzinfo is dt.tzinfo
+    True
+    >>> utc is UTC is timezone('UTC')
+    True
+    >>> utc is timezone('GMT')
+    False
+    """
+    return utc
+_UTC.__safe_for_unpickling__ = True
 
 def timezone(zone):
     ''' Return a datetime.tzinfo implementation for the given timezone 
@@ -48,6 +107,8 @@ def timezone(zone):
     '2002-10-27 01:10:00 EST (-0500)'
     '''
     zone = _munge_zone(zone)
+    if zone.upper() == 'UTC':
+        return utc
     zone_bits = ['zoneinfo'] + zone.split('/')
 
     # Load zone's module

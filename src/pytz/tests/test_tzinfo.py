@@ -7,29 +7,34 @@ $Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $
 __rcs_id__  = '$Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $'
 __version__ = '$Revision: 1.9 $'[11:-2]
 
-import sys, os
-sys.path.insert(0, os.pardir)
+import sys, os, os.path
+sys.path.insert(0, os.path.join(os.pardir, os.pardir))
 
 import unittest, doctest
 from datetime import datetime, tzinfo, timedelta
-import pytz, reference
+import pytz
+from pytz import reference
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
 NOTIME = timedelta(0)
 
+# GMT is a tzinfo.StaticTzInfo--the class we primarily want to test--while
+# UTC is reference implementation.  They both have the same timezone meaning.
 UTC = pytz.timezone('UTC')
-REF_UTC = reference.UTC
+GMT = pytz.timezone('GMT')
 
 class BasicTest(unittest.TestCase):
-    def testUTC(self):
-        now = datetime.now(tz=UTC)
+
+    def testGMT(self):
+        now = datetime.now(tz=GMT)
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
         self.failUnless(now.timetuple() == now.utctimetuple())
+        self.failUnless(now==now.replace(tzinfo=UTC))
 
     def testReferenceUTC(self):
-        now = datetime.now(tz=REF_UTC)
+        now = datetime.now(tz=UTC)
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
         self.failUnless(now.timetuple() == now.utctimetuple())

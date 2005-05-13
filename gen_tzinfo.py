@@ -69,6 +69,13 @@ def dupe_src(destdir):
         if not os.path.isdir(f):
             shutil.copy(f, destdir)
 
+    destdir = os.path.join(destdir, 'tests')
+    if not os.path.isdir(destdir):
+        os.makedirs(destdir)
+    for f in glob(os.path.join('src', 'pytz', 'tests', '*')):
+        if not os.path.isdir(f):
+            shutil.copy(f, destdir)
+
 def gen_tzinfo(destdir, zone):
     ''' Create a .py file for the given timezone '''
     filename = os.path.join(zoneinfo, zone)

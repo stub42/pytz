@@ -29,10 +29,10 @@ clean:
 	find . -name \*.pyc | xargs rm -f
 
 test_tzinfo: .stamp-tzinfo
-	cd build/dist/pytz && ${PYTHON} test_tzinfo.py ${TESTARGS}
+	cd build/dist/pytz/tests && ${PYTHON} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
-	cd build/dist && ${PYTHON} test_docs.py ${TESTARGS}
+	cd build/dist/pytz/tests && ${PYTHON} test_docs.py ${TESTARGS}
 
 test_zdump: build/dist/test_zdump.py
 	${PYTHON} -c \

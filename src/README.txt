@@ -104,10 +104,39 @@ before of after the end-of-daylight-savings-time transition.
 As you can see, the system has chosen one for you and there is a 50%
 chance of it being out by one hour. For some applications, this does
 not matter. However, if you are trying to schedule meetings with people
-in different timezones or analyze log files it is not acceptable. The
-best and simplest solution is to stick with using UTC. If you insist
-on working with local times, this library provides a facility for
-constructing them almost unambiguously
+in different timezones or analyze log files it is not acceptable. 
+
+The best and simplest solution is to stick with using UTC.  The pytz package
+encourages using UTC for internal timezone representation by including a
+special UTC implementation based on the standard Python reference 
+implementation in the Python documentation.  This timezone unpickles to be
+the same instance, and pickles to a relatively small size.  The UTC 
+implementation can be obtained as pytz.utc, pytz.UTC, or 
+pytz.timezone('UTC').  Note that this instance is not the same 
+instance (or implementation) as other timezones with the same meaning 
+(GMT, Greenwich, Universal, etc.).
+
+>>> import pickle, pytz
+>>> dt = datetime(2005, 3, 1, 14, 13, 21, tzinfo=utc)
+>>> naive = dt.replace(tzinfo=None)
+>>> p = pickle.dumps(dt, 1)
+>>> naive_p = pickle.dumps(naive, 1)
+>>> len(p), len(naive_p), len(p) - len(naive_p)
+(60, 43, 17)
+>>> new = pickle.loads(p)
+>>> new == dt
+True
+>>> new is dt
+False
+>>> new.tzinfo is dt.tzinfo
+True
+>>> pytz.utc is pytz.UTC is pytz.timezone('UTC')
+True
+>>> utc is pytz.timezone('GMT')
+False
+
+If you insist on working with local times, this library provides a
+facility for constructing them almost unambiguously.
 
 >>> loc_dt = datetime(2002, 10, 27, 1, 30, 00)
 >>> est_dt = eastern.localize(loc_dt, is_dst=True)
@@ -124,7 +153,7 @@ the clocks were wound back 24 minutes creating a ambiguous time period
 that cannot be specified without referring to the timezone abbreviation
 or the actual UTC offset.
 
-The 'Standard' Python way of handling all thee ambiguities is not to,
+The 'Standard' Python way of handling all these ambiguities is not to,
 such as demonstrated in this example using the US/Eastern timezone
 definition from the Python documentation:
 
