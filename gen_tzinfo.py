@@ -103,6 +103,12 @@ def gen_tzinfo(destdir, zone):
 def gen_inits(destdir):
     ''' Create required __init__.py's '''
     for dirpath, dirnames, filenames in os.walk(destdir):
+        if dirpath == destdir:
+            continue
+        if '.arch-ids' in dirpath:
+            continue
+        if '{arch}' in dirpath:
+            continue
         if '__init__.py' not in filenames:
             f = os.path.join(dirpath, '__init__.py')
             open(f, 'w').close()

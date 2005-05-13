@@ -47,7 +47,7 @@ build/dist/test_zdump.py: .stamp-zoneinfo
 
 README.html: test_docs
 	rst2html --embed-stylesheet --stylesheet-path=${STYLESHEET} \
-	    src/README.txt > build/dist/README.html
+	    src/README.txt > README.html
 
 .stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
 	${PYTHON} gen_tzinfo.py ${TARGET}
