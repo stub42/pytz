@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''
 $Id: reference.py,v 1.2 2004/10/25 04:14:00 zenzen Exp $
 

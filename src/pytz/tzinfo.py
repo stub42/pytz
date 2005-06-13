@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''$Id: tzinfo.py,v 1.7 2005/02/15 20:21:52 zenzen Exp $'''
 
 from datetime import datetime, timedelta, tzinfo

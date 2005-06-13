@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: ascii -*-
 
 import unittest, os, os.path, sys

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: ascii -*-
 '''
 $Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $
