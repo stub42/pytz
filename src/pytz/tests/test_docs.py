@@ -18,6 +18,9 @@ for loc in locs:
 if README is None:
     raise RuntimeError("Can't locate README.txt")
 
+def test_suite():
+    return README
+
 if __name__ == '__main__':
     unittest.main(defaultTest='README')
 
