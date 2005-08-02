@@ -11,7 +11,7 @@ on how to use these modules.
 '''
 
 # The Olson database has historically been updated about 4 times a year
-OLSON_VERSION = '2005i'
+OLSON_VERSION = '2005k'
 VERSION = OLSON_VERSION
 #VERSION = OLSON_VERSION + '.2'
 
