@@ -1,6 +1,4 @@
 '''
-$Id: __init__.py,v 1.12 2005/02/15 20:21:41 zenzen Exp $
-
 datetime.tzinfo timezone definitions generated from the
 Olson timezone database:
 
