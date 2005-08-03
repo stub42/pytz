@@ -12,6 +12,7 @@ on how to use these modules.
 OLSON_VERSION = '2005k'
 VERSION = OLSON_VERSION
 #VERSION = OLSON_VERSION + '.2'
+__version__ = OLSON_VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
