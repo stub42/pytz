@@ -48,7 +48,10 @@ class BaseTzInfo(tzinfo):
 
     def __str__(self):
         return self.zone
-    
+
+    def __reduce__(self):
+        return self.__class__.__name__
+
 
 class StaticTzInfo(BaseTzInfo):
     '''A timezone that has a constant offset from UTC
@@ -107,18 +110,14 @@ class DstTzInfo(BaseTzInfo):
     _tzinfos = None
     _dst = None # DST offset
 
-    def __init__(self, _inf=None, _tzinfos=None):
-        if _inf:
-            self._tzinfos = _tzinfos
-            self._utcoffset, self._dst, self._tzname = _inf
-        else:
-            _tzinfos = {}
-            self._tzinfos = _tzinfos
-            self._utcoffset, self._dst, self._tzname = self._transition_info[0]
-            _tzinfos[self._transition_info[0]] = self
-            for inf in self._transition_info[1:]:
-                if not _tzinfos.has_key(inf):
-                    _tzinfos[inf] = self.__class__(inf, _tzinfos)
+    def __init__(self):
+        _tzinfos = {}
+        self._tzinfos = _tzinfos
+        self._utcoffset, self._dst, self._tzname = self._transition_info[0]
+        _tzinfos[self._transition_info[0]] = self
+        for inf in self._transition_info[1:]:
+            if not _tzinfos.has_key(inf):
+                _tzinfos[inf] = self.__class__(inf, _tzinfos)
 
     def fromutc(self, dt):
         '''See datetime.tzinfo.fromutc'''
