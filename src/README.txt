@@ -38,7 +38,7 @@ Example & Usage
 >>> from datetime import datetime, timedelta
 >>> from pytz import timezone
 >>> utc = timezone('UTC')
->>> utz.zone
+>>> utc.zone
 'UTC'
 >>> eastern = timezone('US/Eastern')
 >>> eastern.zone
