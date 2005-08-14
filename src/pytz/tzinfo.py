@@ -99,7 +99,7 @@ class StaticTzInfo(BaseTzInfo):
     def __reduce__(self):
         # Special pickle to zone remains a singleton and to cope with
         # database changes. 
-        return _p, (self.zone,)
+        return pytz._p, (self.zone,)
 
 
 class DstTzInfo(BaseTzInfo):
@@ -308,7 +308,7 @@ class DstTzInfo(BaseTzInfo):
     def __reduce__(self):
         # Special pickle to zone remains a singleton and to cope with
         # database changes.
-        return _p, (
+        return pytz._p, (
                 self.zone,
                 _to_seconds(self._utcoffset),
                 _to_seconds(self._dst),
@@ -327,7 +327,7 @@ class AmbiguousTimeError(Exception):
     '''
        
 
-def _p(zone, utcoffset=None, dstoffset=None, tzname=None):
+def unpickler(zone, utcoffset=None, dstoffset=None, tzname=None):
     """Factory function for unpickling pytz tzinfo instances.
     
     This is shared for both StaticTzInfo and DstTzInfo instances, because
@@ -376,6 +376,4 @@ def _p(zone, utcoffset=None, dstoffset=None, tzname=None):
     inf = (utcoffset, dstoffset, tzname)
     tz._tzinfos[inf] = tz.__class__(inf, tz._tzinfos)
     return tz._tzinfos[inf]
-_p.__safe_for_unpickling__ = True
-
 
