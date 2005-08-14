@@ -1,16 +1,15 @@
 # -*- coding: ascii -*-
-'''
-$Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $
-'''
-
-__rcs_id__  = '$Id: test_tzinfo.py,v 1.9 2004/10/25 04:14:00 zenzen Exp $'
-__version__ = '$Revision: 1.9 $'[11:-2]
 
 import sys, os, os.path
-sys.path.insert(0, os.path.join(os.pardir, os.pardir))
-
-import unittest, doctest, pickle
+import unittest, doctest
+import cPickle as pickle
 from datetime import datetime, tzinfo, timedelta
+
+if __name__ == '__main__':
+    # Only munge path if invoked as a script. Testrunners should have setup
+    # the paths already
+    sys.path.insert(0, os.path.join(os.pardir, os.pardir))
+
 import pytz
 from pytz import reference
 
@@ -24,6 +23,12 @@ UTC = pytz.timezone('UTC')
 GMT = pytz.timezone('GMT')
 
 class BasicTest(unittest.TestCase):
+
+    def testVersion(self):
+        # Ensuring the correct version of pytz has been loaded
+        self.failUnlessEqual('2005k', pytz.__version__,
+                'Incorrect pytz version loaded. Import path is stuffed.'
+                )
 
     def testGMT(self):
         now = datetime.now(tz=GMT)
@@ -437,18 +442,12 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite('pytz'))
     suite.addTest(doctest.DocTestSuite('pytz.tzinfo'))
-    suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(
-        __import__('__main__')
-        ))
+    import test_tzinfo
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(test_tzinfo))
     return suite
 
-if __name__ == '__main__':
-    suite = test_suite()
-    if '-v' in sys.argv:
-        runner = unittest.TextTestRunner(verbosity=2)
-    else:
-        runner = unittest.TextTestRunner()
-    runner.run(suite)
+DEFAULT = test_suite()
 
-# vim: set filetype=python ts=4 sw=4 et
+if __name__ == '__main__':
+    unittest.main(defaultTest='DEFAULT')
 
