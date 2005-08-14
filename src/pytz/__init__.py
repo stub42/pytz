@@ -16,7 +16,10 @@ __version__ = OLSON_VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
-__all__ = ['timezone', 'all_timezones', 'common_timezones', 'utc']
+__all__ = [
+    'timezone', 'all_timezones', 'common_timezones', 'utc',
+    'AmbiguousTimeError',
+    ]
 
 import sys, datetime
 
@@ -33,7 +36,11 @@ class UTC(datetime.tzinfo):
     Identical to the reference UTC implementation given in Python docs except
     that it unpickles using the single module global instance defined beneath
     this class declaration.
+
+    Also contains extra attributes and methods to match other pytz tzinfo
+    instances.
     """
+    zone = "UTC"
 
     def utcoffset(self, dt):
         return ZERO
@@ -60,7 +67,10 @@ class UTC(datetime.tzinfo):
         return dt.replace(tzinfo=self)
 
     def __repr__(self):
-        return '<UTC>'
+        return "<UTC>"
+
+    def __str__(self):
+        return "UTC"
 
 
 UTC = utc = UTC()

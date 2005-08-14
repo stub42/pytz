@@ -38,7 +38,11 @@ Example & Usage
 >>> from datetime import datetime, timedelta
 >>> from pytz import timezone
 >>> utc = timezone('UTC')
+>>> utz.zone
+'UTC'
 >>> eastern = timezone('US/Eastern')
+>>> eastern.zone
+'US/Eastern'
 >>> fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
 The preferred way of dealing with times is to always work in UTC,
