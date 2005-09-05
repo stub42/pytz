@@ -194,6 +194,39 @@ savings time transitions, your country changing its timezone, or mobile
 computers that move roam through multiple timezones.
 
 
+Helpers
+~~~~~~~
+
+There are two lists of timezones provided.
+
+`all_timezones` is the exhaustive list of the timezone names that can be used.
+
+>>> from pytz import all_timezones
+>>> len(all_timezones) >= 548
+True
+>>> 'Etc/Greenwich' in all_timezones
+True
+
+`common_timezones` is a list of useful, current timezones. It doesn't
+contain deprecated zones or historical zones. It is also a sequence of
+strings.
+
+>>> from pytz import common_timezones
+>>> len(common_timezones) < len(all_timezones)
+True
+>>> 'Etc/Greenwich' in common_timezones
+False
+
+You can also retrieve lists of timezones used by particular countries
+using the `country_timezones()` method. It requires an ISO-3166 two letter
+country code.
+
+>>> from pytz import country_timezones
+>>> country_timezones('ch')
+['Europe/Zurich']
+>>> country_timezones('CH')
+['Europe/Zurich']
+
 License
 ~~~~~~~
 

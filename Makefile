@@ -11,6 +11,7 @@ TARGET=
 STYLESHEET=/usr/share/python-docutils/stylesheets/default.css
 
 all: dist
+
 # skip test_zdump, since it fails on AMD64, and takes a long time on i386
 check: test_tzinfo test_docs
 
@@ -27,7 +28,7 @@ clean:
 	rm -f .stamp-*
 	rm -rf build/{etc,lib,man,tarballs}
 	find build/dist -name \*.py | xargs -r rm
-	rm -f build/dist/*.txt build/dist/MANIFEST*
+	rm -f build/dist/*.txt build/dist/MANIFEST* build/dist/zone.tab
 	make -C ${OLSON}/src clean
 	find . -name \*.pyc | xargs rm -f
 
@@ -51,6 +52,8 @@ README.html: test_docs
 
 .stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
 	${PYTHON} gen_tzinfo.py ${TARGET}
+	cp ${OLSON}/src/zone.tab build/dist/pytz/
+	chmod u+w build/dist/pytz/zone.tab
 	touch $@
 
 .stamp-zoneinfo:

@@ -26,8 +26,9 @@ class BasicTest(unittest.TestCase):
 
     def testVersion(self):
         # Ensuring the correct version of pytz has been loaded
-        self.failUnlessEqual('2005k', pytz.__version__,
-                'Incorrect pytz version loaded. Import path is stuffed.'
+        self.failUnlessEqual('2005m', pytz.__version__,
+                'Incorrect pytz version loaded. Import path is stuffed '
+                'or this test needs updating.'
                 )
 
     def testGMT(self):
