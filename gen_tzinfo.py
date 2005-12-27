@@ -259,7 +259,9 @@ def main(destdir):
     gen_inits(_destdir)
     add_allzones(os.path.join(_destdir, 'pytz', '__init__.py'))
 
+target = None
 if __name__ == '__main__':
+    
     try:
         target = sys.argv[1:]
     except IndexError:

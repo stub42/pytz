@@ -15,7 +15,7 @@ all: dist
 # skip test_zdump, since it fails on AMD64, and takes a long time on i386
 check: test_tzinfo test_docs
 
-dist: .stamp-dist
+dist: build/dist/locales/pytz.pot .stamp-dist
 .stamp-dist: .stamp-tzinfo
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
@@ -59,5 +59,14 @@ README.html: test_docs
 .stamp-zoneinfo:
 	${MAKE} -C ${OLSON}/src TOPDIR=`pwd`/build install
 	touch $@
+
+build/dist/locales/pytz.pot:
+	${PYTHON} gen_pot.py build/dist/locales/pytz.pot
+
+#	cd build/dist; mkdir locales; \
+#	pygettext --extract-all --no-location \
+#	    --default-domain=pytz --output-dir=locales
+
+
 
 .PHONY: all check dist test test_tzinfo test_docs test_zdump
