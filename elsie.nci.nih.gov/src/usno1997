@@ -1,4 +1,4 @@
-# @(#)usno1997	7.6
+# @(#)usno1997	7.7
 #
 # From Arthur David Olson (1997-03-07):
 #
@@ -324,5 +324,4 @@ Zaire Kivu: +2 hours
 Zaire Shaba: +2 hours
 Zambia: +2 hours
 Zimbabwe: +2 hours
-All timezone information is non-authoritative.
-Send corrections to: res@tuttle.usno.navy.mil
+All timezone information is non-authoritative...
