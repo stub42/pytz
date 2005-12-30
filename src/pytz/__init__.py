@@ -24,7 +24,12 @@ __all__ = [
 import sys, datetime, os.path, gettext
 from tzinfo import AmbiguousTimeError, unpickler
 
-# Enable this when we get some translations
+# Enable this when we get some translations?
+# We want an i18n API that is useful to programs using Python's gettext
+# module, as well as the Zope3 i18n package. Perhaps we should just provide
+# the POT file and translations, and leave it up to callers to make use
+# of them.
+# 
 # t = gettext.translation(
 #         'pytz', os.path.join(os.path.dirname(__file__), 'locales'),
 #         fallback=True
