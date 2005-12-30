@@ -202,7 +202,7 @@ There are two lists of timezones provided.
 `all_timezones` is the exhaustive list of the timezone names that can be used.
 
 >>> from pytz import all_timezones
->>> len(all_timezones) >= 548
+>>> len(all_timezones) >= 500
 True
 >>> 'Etc/Greenwich' in all_timezones
 True

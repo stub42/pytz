@@ -61,7 +61,7 @@ README.html: test_docs
 	touch $@
 
 build/dist/locales/pytz.pot:
-	${PYTHON} gen_pot.py build/dist/locales/pytz.pot
+	${PYTHON} gen_pot.py build/dist/pytz/locales/pytz.pot
 
 #	cd build/dist; mkdir locales; \
 #	pygettext --extract-all --no-location \

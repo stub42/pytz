@@ -18,11 +18,20 @@ OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
 __all__ = [
     'timezone', 'all_timezones', 'common_timezones', 'utc',
-    'AmbiguousTimeError', 'country_timezones',
+    'AmbiguousTimeError', 'country_timezones', '_',
     ]
 
-import sys, datetime, os.path
+import sys, datetime, os.path, gettext
 from tzinfo import AmbiguousTimeError, unpickler
+
+# Enable this when we get some translations
+# t = gettext.translation(
+#         'pytz', os.path.join(os.path.dirname(__file__), 'locales'),
+#         fallback=True
+#         )
+# def _(timezone_name):
+#     """Translate a timezone name using the current locale, returning Unicode"""
+#     return t.ugettext(timezone_name)
 
 def timezone(zone):
     ''' Return a datetime.tzinfo implementation for the given timezone 

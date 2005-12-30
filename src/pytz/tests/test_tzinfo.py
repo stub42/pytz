@@ -13,6 +13,8 @@ if __name__ == '__main__':
 import pytz
 from pytz import reference
 
+EXPECTED_VERSION='2005r'
+
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
 NOTIME = timedelta(0)
@@ -26,9 +28,10 @@ class BasicTest(unittest.TestCase):
 
     def testVersion(self):
         # Ensuring the correct version of pytz has been loaded
-        self.failUnlessEqual('2005m', pytz.__version__,
+        self.failUnlessEqual(EXPECTED_VERSION, pytz.__version__,
                 'Incorrect pytz version loaded. Import path is stuffed '
-                'or this test needs updating.'
+                'or this test needs updating. (Wanted %s, got %s)'
+                % (EXPECTED_VERSION, pytz.__version__)
                 )
 
     def testGMT(self):

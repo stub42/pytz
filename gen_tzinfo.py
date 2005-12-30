@@ -109,6 +109,8 @@ def gen_inits(destdir):
             continue
         if '{arch}' in dirpath:
             continue
+        if 'locales' in dirpath:
+            continue
         if '__init__.py' not in filenames:
             f = os.path.join(dirpath, '__init__.py')
             open(f, 'w').close()
