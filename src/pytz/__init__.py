@@ -206,6 +206,111 @@ def country_timezones(iso3166_code):
                 _country_timezones_cache[code] = [zone]
     return _country_timezones_cache[iso3166_code]
 
+# Time-zone info based solely on fixed offsets
+
+class _FixedOffset(datetime.tzinfo):
+
+    zone = None # to match the standard pytz API
+
+    def __init__(self, minutes):
+        if abs(minutes) >= 1440:
+            raise ValueError("absolute offset is too large", minutes)
+        self._minutes = minutes
+        self._offset = datetime.timedelta(minutes=minutes)
+
+    def utcoffset(self, dt):
+        return self._offset
+
+    def __reduce__(self):
+        return FixedOffset, (self._minutes, )
+
+    def dst(self, dt):
+        return None
+    
+    def tzname(self, dt):
+        return None
+
+    def __repr__(self):
+        return 'pytz.FixedOffset(%d)' % self._minutes
+
+    def localize(self, dt, is_dst=False):
+        '''Convert naive time to local time'''
+        if dt.tzinfo is not None:
+            raise ValueError, 'Not naive datetime (tzinfo is already set)'
+        return dt.replace(tzinfo=self)
+
+    def normalize(self, dt, is_dst=False):
+        '''Correct the timezone information on the given datetime'''
+        if dt.tzinfo is None:
+            raise ValueError, 'Naive time - no tzinfo set'
+        return dt.replace(tzinfo=self)
+
+def FixedOffset(offset, _tzinfos = {}):
+    """return a fixed-offset timezone based off a number of minutes.
+    
+        >>> one = FixedOffset(-330)
+        >>> one
+        pytz.FixedOffset(-330)
+        >>> one.utcoffset(datetime.datetime.now())
+        datetime.timedelta(-1, 66600)
+
+        >>> two = FixedOffset(1380)
+        >>> two
+        pytz.FixedOffset(1380)
+        >>> two.utcoffset(datetime.datetime.now())
+        datetime.timedelta(0, 82800)
+    
+    The datetime.timedelta must be between the range of -1 and 1 day,
+    non-inclusive.
+
+        >>> FixedOffset(1440)
+        Traceback (most recent call last):
+        ...
+        ValueError: ('absolute offset is too large', 1440)
+
+        >>> FixedOffset(-1440)
+        Traceback (most recent call last):
+        ...
+        ValueError: ('absolute offset is too large', -1440)
+
+    An offset of 0 is special-cased to return UTC.
+
+        >>> FixedOffset(0) is UTC
+        True
+
+    There should always be only one instance of a FixedOffset per timedelta.
+    This should be true for multiple creation calls.
+    
+        >>> FixedOffset(-330) is one
+        True
+        >>> FixedOffset(1380) is two
+        True
+
+    It should also be true for pickling.
+
+        >>> import pickle
+        >>> pickle.loads(pickle.dumps(one)) is one
+        True
+        >>> pickle.loads(pickle.dumps(two)) is two
+        True
+
+    """
+
+    if offset == 0:
+        return UTC
+
+    info = _tzinfos.get(offset)
+    if info is None:
+        # We haven't seen this one before. we need to save it.
+
+        # Use setdefault to avoid a race condition and make sure we have
+        # only one
+        info = _tzinfos.setdefault(offset, _FixedOffset(offset))
+
+    return info
+
+FixedOffset.__safe_for_unpickling__ = True
+
 def _test():
     import doctest, os, sys
     sys.path.insert(0, os.pardir)
