@@ -60,7 +60,7 @@ README.html: test_docs
 	${MAKE} -C ${OLSON}/src TOPDIR=`pwd`/build install
 	touch $@
 
-build/dist/locales/pytz.pot:
+build/dist/locales/pytz.pot: .stamp-tzinfo
 	${PYTHON} gen_pot.py build/dist/pytz/locales/pytz.pot
 
 #	cd build/dist; mkdir locales; \

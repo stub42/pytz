@@ -18,3 +18,9 @@
 
     - Ensure all tzinfo instances are efficiently picklable.
 
+2005-12-31
+
+    - Add fixed offset timezone classes required by Zope 3
+    - Generate and distribute a PO template file listing all timezone
+      names. Translations are not yet available.
+

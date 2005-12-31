@@ -43,7 +43,7 @@ setup (
     license=open('LICENSE.txt','r').read(),
     keywords=['timezone','tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,
-    package_data={'pytz': ['zone.tab']},
+    package_data={'pytz': ['zone.tab', 'locales/pytz.pot']},
     download_url='http://sourceforge.net/project/showfiles.php?group_id=79122',
     platforms=['Independant'],
     classifiers = [

@@ -1,5 +1,6 @@
 include *.txt setup.py
 recursive-include pytz *.py
+recursive-include pytz *.pot
 recursive-include pytz zone.tab
 recursive-exclude pytz .arch-ids
 exclude test_zdump.py
