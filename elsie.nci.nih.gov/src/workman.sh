@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# @(#)workman.sh	1.8
+# @(#)workman.sh	8.1
 
 # Tell groff not to emit SGR escape sequences (ANSI color escapes).
 GROFF_NO_SGR=1

@@ -9,7 +9,7 @@
 <meta http-equiv="Content-type" content='text/html; charset="US-ASCII"' />
 <meta name="DC.Creator" content="Eggert, Paul" />
 <meta name="DC.Contributor" content="Olson, Arthur David" />
-<meta name="DC.Date" content="2005-11-17" />
+<meta name="DC.Date" content="2006-03-31" />
 <meta name="DC.Description"
  content="Sources of information about time zones and daylight saving time" />
 <meta name="DC.Identifier" content="http://www.twinsun.com/tz/tz-link.htm" />
@@ -19,7 +19,7 @@
 <body>
 <h1>Sources for Time Zone and Daylight Saving Time Data</h1>
 <address>
-@(#)tz-link.htm	7.53
+@(#)tz-link.htm	8.3
 </address>
 <p>
 Please send corrections to this web page to the
@@ -31,7 +31,8 @@ that represent the history of local time
 for many representative locations around the globe.
 It is updated periodically to reflect changes made by political bodies
 to <a href="http://en.wikipedia.org/wiki/Time_zone">time zone</a>
-boundaries, <a href="http://en.wikipedia.org/wiki/UTC"><abbr
+boundaries, <a
+href="http://en.wikipedia.org/wiki/Coordinated_Universal_Time"><abbr
 title="Coordinated Universal Time">UTC</abbr></a> offsets, and
 <a href="http://en.wikipedia.org/wiki/Daylight_saving">daylight-saving</a>
 rules.
@@ -68,7 +69,8 @@ title="daylight saving time">DST</abbr>);
 <code>America/Detroit</code> represents most of Michigan, which uses
 eastern time but with different <abbr>DST</abbr> rules in 1975;
 and other entries represent smaller regions like Starke County,
-Indiana, which switched from central to eastern time in 1991.
+Indiana, which switched from central to eastern time in 1991
+and switched back in 2006.
 To use the database on an extended <a
 href="http://en.wikipedia.org/wiki/POSIX"><abbr
 title="Portable Operating System Interface">POSIX</abbr></a>
@@ -141,7 +143,22 @@ title="Calendaring and Scheduling Working Group">calsch</abbr>)</a>
 covers time zone
 data; see its VTIMEZONE calendar component.
 The <a href="http://www.calconnect.org/">Calendaring and Scheduling
-Consortium</a> is promoting further work in this area.</li>
+Consortium</a> is promoting further work in this area. <a
+href="ftp://ftp.rfc-editor.org/internet-drafts/draft-royer-ical-basic-04.txt">iCalendar
+Basic</a> is a draft simplified definition that omits VTIMEZONE due to
+its complexity, but this removal is expected to appear as an
+independent specification later. <a
+href="http://www.calconnect.org/publications/icalendartimezoneproblemsandrecommendationsv1.0.pdf">iCalendar
+TIMEZONE Problems and Recommendations</a> offers guidelines and
+recommendations for the use of VTIMEZONE and <code>tz</code>.</li>
+<li><a
+href="http://ietfreport.isoc.org/idref/draft-royer-timezone-registry/">Time
+Zone Registry</a> proposes an <a href="http://www.iana.org/"><abbr
+title="Internet Assigned Numbers Authority">IANA</abbr></a> time zone
+registration process that would establish unique names for each
+version of each <code>tz</code> zone, along with a polygonal
+representation of the geographical area corresponding to the
+zone. (This draft has expired, though.)</li>
 <li>The <a
 href="http://lists.w3.org/Archives/Public/www-rdf-calendar/">www-rdf-calendar</a>
 list discusses <a
@@ -196,6 +213,16 @@ is freely available under a <abbr>BSD</abbr>-style license.</li>
 Zone Library</a> compiles <code>tz</code> source into
 <a href="http://www.python.org/">Python</a>.
 It is freely available under a <abbr>BSD</abbr>-style license.</li>
+<li><a href="http://tzinfo.rubyforge.org/">TZInfo - Ruby Timezone Library</a>
+compiles <code>tz</code> source into
+<a href="http://www.ruby-lang.org/">Ruby</a>.
+It is freely available under the <abbr
+title="Massachusetts Institute of Technology">MIT</abbr> license.</li>
+<li>Starting with version 8.5, <a href="http://www.tcl.tk/">Tcl</a>
+contains a developer-oriented parser that compiles <samp>tz</samp>
+source into text files, along with a runtime that can read those
+files. Tcl is freely available under a <abbr>BSD</abbr>-style
+license.</li>
 </ul>
 <h2>Other <code>tz</code> binary file readers</h2>
 <ul>
@@ -215,6 +242,8 @@ It is freely available under the <abbr>LGPL</abbr>.</li>
 <li><a href="http://s.keim.free.fr/tz/doc.html">Python time zones</a>
 is a <code>tz</code> binary file reader written in Python.
 It is freely available under a <abbr>BSD</abbr>-style license.</li>
+<li>Tcl, mentioned above, also contains a
+<code>tz</code> binary file reader.</li>
 </ul>
 <h2>Other <code>tz</code>-based time zone software</h2>
 <ul>
@@ -235,7 +264,7 @@ a Mac OS X program. Its developers
 <a href="http://www.veladg.com/tzoffer.html">offer free
 licenses</a> to <code>tz</code> contributors.</li>
 <li><a
-href="http://www.cimmyt.org/timezone/">World Time Explorer</a> is a
+href="http://www.worldtimeexplorer.com/index.html">World Time Explorer</a> is a
 Microsoft Windows program.</li>
 </ul>
 <h2>Other time zone databases</h2>
@@ -243,8 +272,12 @@ Microsoft Windows program.</li>
 <li><a href="http://www.astro.com/cgi/aq.cgi?lang=e">Atlas Query</a>
 is Astrodienst's Web version of Shanks's
 excellent time zone history atlases published in both <a
-href="http://astrocom.com/products/software.php?software_id=ibmwboth">computer
-and book form</a> by <a
+href="http://astrocom.com/products/software.php?software_id=ibmwboth">computer</a>
+and book form (<a
+href="http://astrocom.com/products/book.php?book_id=b110x">one volume
+for the USA</a>, and <a
+href="http://astrocom.com/products/book.php?book_id=b112x">one for
+other locations</a>) by <a
 href="http://astrocom.com/">Astro Communications Services</a>.</li>
 <li><a href="http://worldtime.com/">WORLDTIME: interactive atlas,
 time info, public holidays</a>
@@ -413,6 +446,12 @@ title="Network Time Protocol">NTP</abbr>: The Network
 Time Protocol</a>
 discusses how to synchronize clocks of
 Internet hosts.</li>
+<li><a
+href="ftp://ftp.rfc-editor.org/internet-drafts/draft-lear-dhc-timezone-option-02.txt">A
+Timezone Option for <abbr title="Dynamic Host Configuration
+Protocol">DHCP</abbr></a> proposes a <a
+href="http://www.dhcp.org/">DHCP</a> option for a server to configure
+a client's time zone and daylight saving settings automatically.</li>
 <li><a href="http://gauss.gge.unb.ca/GMT.UT.and.the.RGO.html">A Few
 Facts Concerning <abbr title="Greenwich Mean Time">GMT</abbr>, <abbr
 title="Universal Time">UT</abbr>, and
@@ -424,7 +463,9 @@ href="http://www.cv.nrao.edu/~rfisher/Ephemerides/times.html">Astronomical
 Times</a> explains more abstruse astronomical time scales like
 <abbr title="Terrestrial Dynamic Time">TDT</abbr>,
 <abbr title="Geocentric Coordinate Time">TCG</abbr>, and
-<abbr title="Barycentric Dynamic Time">TDB</abbr>.</li>
+<abbr title="Barycentric Dynamic Time">TDB</abbr>.
+<a href="http://www.ucolick.org/~sla/leapsecs/timescales.html">Time
+Scales</a> goes into more detail, particularly for historical variants.</li>
 <li>The <a href="http://www.iau.org/"><abbr
 title="International Astronomical Union">IAU</abbr></a>'s <a
 href="http://www.iau-sofa.rl.ac.uk/"><abbr
@@ -444,6 +485,10 @@ describes Mars Coordinated Time (<abbr
 title="Mars Coordinated Time">MTC</abbr>) and the
 diverse local time
 scales used by each landed mission on Mars.</li>
+<li><a href="http://www.leapsecond.com/">LeapSecond.com</a> is
+dedicated not only to leap seconds but to precise time and frequency
+in general. It covers the state of the art in amateur timekeeping, and
+how the art has progressed over the past few decades.</li>
 <li><a
 href="http://hpiers.obspm.fr/eop-pc/products/bulletins/bulletins.html">Bulletins
 maintained by the
@@ -467,8 +512,8 @@ title="Global Positioning System">GPS</abbr> World</a>
 leap second: its history and possible future</a>,
 <a href="http://www.bipm.fr/metrologia/index.html">Metrologia</a>
 <strong>38</strong> (2001), 509&ndash;529.
-<a href="http://www.ucolick.org/~sla/leapsecs/onlinebib.html">The
-Future of Leap Seconds</a> catalogs information about this
+<a href="http://www.ucolick.org/~sla/leapsecs/">The
+Future of Leap Seconds</a> covers this
 contentious issue.</li>
 </ul>
 <h2>Time notation</h2>
@@ -483,6 +528,10 @@ title="International Organization for Standardization">ISO</abbr>
 8601:2004 -- Data elements and interchange formats -- Information
 interchange -- Representation of dates and times</a>.</li>
 <li>
+<a href="http://www.w3.org/TR/xmlschema-2/#dateTime"><abbr>XML</abbr>
+Schema: Datatypes - dateTime</a> specifies a format inspired by
+<abbr>ISO</abbr> 8601 that is in common use in <abbr>XML</abbr> data.</li>
+<li>
 Section 3.3 of <a
 href="ftp://ftp.rfc-editor.org/in-notes/rfc2822.txt">Internet
 <abbr title="Request For Comments">RFC</abbr> 2822</a>
@@ -494,6 +543,10 @@ headers.</li>
 <abbr>RFC</abbr> 3339</a> specifies an <abbr>ISO</abbr> 8601
 profile for use in new Internet
 protocols.</li>
+<li>
+<a href="http://www.hackcraft.net/web/datetime/">Date &amp; Time
+Formats on the Web</a> surveys web- and Internet-oriented date and time
+formats.</li>
 <li>
 <a href="http://www.exit109.com/~ghealton/y2k/yrexamples.html">The
 Best of Dates, the Worst of Dates</a> covers many problems encountered
