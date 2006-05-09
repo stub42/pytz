@@ -3,7 +3,10 @@ $Id: setup.py,v 1.7 2005/01/07 04:51:33 zenzen Exp $
 Distribution setup script
 '''
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 import pytz, sys, os, os.path
 
