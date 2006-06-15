@@ -159,9 +159,10 @@ or the actual UTC offset.
 
 The 'Standard' Python way of handling all these ambiguities is not to,
 such as demonstrated in this example using the US/Eastern timezone
-definition from the Python documentation:
+definition from the Python documentation (Note that this implementation
+only works for dates between 1987 and 2006 - it is included for tests only!):
 
->>> from pytz.reference import Eastern
+>>> from pytz.reference import Eastern # pytz.reference only for tests
 >>> dt = datetime(2002, 10, 27, 0, 30, tzinfo=Eastern)
 >>> str(dt)
 '2002-10-27 00:30:00-04:00'
@@ -176,7 +177,7 @@ Notice the first two results? At first glance you might think they are
 correct, but taking the UTC offset into account you find that they are
 actually two hours appart instead of the 1 hour we asked for.
 
->>> from pytz.reference import UTC
+>>> from pytz.reference import UTC # pytz.reference only for tests
 >>> str(dt.astimezone(UTC))
 '2002-10-27 04:30:00+00:00'
 >>> str((dt + timedelta(hours=1)).astimezone(UTC))

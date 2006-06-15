@@ -1,8 +1,7 @@
 '''
-$Id: reference.py,v 1.2 2004/10/25 04:14:00 zenzen Exp $
-
 Reference tzinfo implementations from the Python docs.
-Used for testing against.
+Used for testing against as they are only correct for the years
+1987 to 2006. Do not use these for real code.
 '''
 
 from datetime import tzinfo, timedelta, datetime
@@ -124,5 +123,5 @@ class USTimeZone(tzinfo):
 Eastern  = USTimeZone(-5, "Eastern",  "EST", "EDT")
 Central  = USTimeZone(-6, "Central",  "CST", "CDT")
 Mountain = USTimeZone(-7, "Mountain", "MST", "MDT")
-Pacific  = USTimeZone(-8, "Pacific",  "PST", "PDT") 
+Pacific  = USTimeZone(-8, "Pacific",  "PST", "PDT")
 
