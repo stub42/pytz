@@ -19,7 +19,16 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 .stamp-dist: .stamp-tzinfo
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
-	    --force-manifest --formats=bztar,gztar,zip --no-defaults
+	    --formats=bztar,gztar,zip
+	${PYTHON} setup.py bdist_egg 
+	touch $@
+
+upload: build/dist/locales/pytz.pot .stamp-upload
+.stamp-upload: .stamp-tzinfo
+	cd build/dist && \
+	${PYTHON} setup.py sdist \
+	    --formats=bztar,gztar,zip upload --sign && \
+	${PYTHON} setup.py bdist_egg upload --sign && \
 	touch $@
 
 test: test_tzinfo test_docs test_zdump
