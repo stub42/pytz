@@ -1,4 +1,4 @@
-# @(#)Makefile	8.1
+# @(#)Makefile	8.3
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -223,16 +223,16 @@ ZIC=		$(zic) $(ZFLAGS)
 AWK=		nawk
 
 # The path where SGML DTDs are kept.
-SGML_SEARCH_PATH= $(TOPDIR)/share/doc/sgml-lib/REC-xhtml1-20000126/
+SGML_SEARCH_PATH= $(TOPDIR)/share/doc/sgml-lib/REC-html401-19991224/
 
 # The catalog file(s) to use when validating XHTML.
-SGML_CATALOG_FILES= xhtml.soc
+SGML_CATALOG_FILES= HTML4.cat
 
 # The name, arguments and environment of a program to validate your web pages.
 # See <http://www.jclark.com/sp/> for a validator, and
 # <http://validator.w3.org/source/> for a validation library.
 VALIDATE = nsgmls
-VALIDATE_FLAGS = -s -B -wall -wno-unused-param -wxml
+VALIDATE_FLAGS = -s -B -wall -wno-unused-param
 VALIDATE_ENV = \
   SGML_CATALOG_FILES=$(SGML_CATALOG_FILES) \
   SGML_SEARCH_PATH=$(SGML_SEARCH_PATH) \
@@ -269,7 +269,8 @@ TABDATA=	iso3166.tab zone.tab
 DATA=		$(YDATA) $(NDATA) $(SDATA) $(TABDATA) leapseconds yearistype.sh
 WEB_PAGES=	tz-art.htm tz-link.htm
 MISC=		usno1988 usno1989 usno1989a usno1995 usno1997 usno1998 \
-			itca.jpg $(WEB_PAGES) checktab.awk workman.sh
+			itca.jpg $(WEB_PAGES) checktab.awk workman.sh \
+			zoneinfo2tdf.pl
 ENCHILADA=	$(DOCS) $(SOURCES) $(DATA) $(MISC)
 
 # And for the benefit of csh users on systems that assume the user

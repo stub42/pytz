@@ -1,4 +1,9 @@
-static char	elsieid[] = "@(#)zic.c	8.5";
+/*
+** This file is in the public domain, so clarified as of
+** 2006-07-17 by Arthur David Olson.
+*/
+
+static char	elsieid[] = "@(#)zic.c	8.7";
 
 #include "private.h"
 #include "locale.h"
@@ -1532,7 +1537,7 @@ const char * const	string;
 	for (i = 0; i < timecnt; ++i) {
 		j = leapcnt;
 		while (--j >= 0)
-			if (ats[i] >= trans[j]) {
+			if (ats[i] > trans[j] - corr[j]) {
 				ats[i] = tadd(ats[i], corr[j]);
 				break;
 			}
