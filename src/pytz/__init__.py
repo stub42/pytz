@@ -195,8 +195,12 @@ def country_timezones(iso3166_code):
     """
     iso3166_code = iso3166_code.upper()
     if not _country_timezones_cache:
-        zone_tab_name = os.path.join(os.path.dirname(__file__), 'zone.tab')
-        for line in open(zone_tab_name):
+        try:
+            from pkg_resources import resource_stream
+            zone_tab = resource_stream(__name__, 'zone.tab')
+        except ImportError:
+            zone_tab = open(os.path.join(os.path.dirname(__file__), 'zone.tab'))
+        for line in zone_tab:
             if line.startswith('#'):
                 continue
             code, coordinates, zone = line.split(None, 4)[:3]

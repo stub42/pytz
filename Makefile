@@ -19,8 +19,8 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 .stamp-dist: .stamp-tzinfo
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
-	    --formats=bztar,gztar,zip
-	${PYTHON} setup.py bdist_egg 
+	    --formats=bztar,gztar,zip && \
+	${PYTHON} setup.py bdist_egg
 	touch $@
 
 upload: build/dist/locales/pytz.pot .stamp-upload
@@ -28,14 +28,14 @@ upload: build/dist/locales/pytz.pot .stamp-upload
 	cd build/dist && \
 	${PYTHON} setup.py sdist \
 	    --formats=bztar,gztar,zip upload --sign && \
-	${PYTHON} setup.py bdist_egg upload --sign && \
+	${PYTHON} setup.py bdist_egg upload --sign
 	touch $@
 
 test: test_tzinfo test_docs test_zdump
 
 clean:
 	rm -f .stamp-*
-	rm -rf build/{etc,lib,man,tarballs}
+	rm -rf build/{etc,lib,man,tarballs,dist}
 	find build/dist -name \*.py | xargs -r rm
 	rm -f build/dist/*.txt build/dist/MANIFEST* build/dist/zone.tab
 	make -C ${OLSON}/src clean
@@ -59,7 +59,7 @@ README.html: test_docs
 	rst2html --embed-stylesheet --stylesheet-path=${STYLESHEET} \
 	    src/README.txt > README.html
 
-.stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
+.stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py
 	${PYTHON} gen_tzinfo.py ${TARGET}
 	cp ${OLSON}/src/zone.tab build/dist/pytz/
 	chmod u+w build/dist/pytz/zone.tab

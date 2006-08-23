@@ -36,6 +36,7 @@ for dirpath, dirname, filenames in os.walk(os.path.join('pytz','zoneinfo')):
 setup (
     name='pytz',
     version=pytz.VERSION,
+    zip_safe=True,
     description='World timezone definitions, modern and historical',
     long_description=ldesc,
     author=me,

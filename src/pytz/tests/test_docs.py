@@ -27,7 +27,7 @@ def test_suite():
     return README
 
 if __name__ == '__main__':
-    sys.path.insert(0, os.path.normpath(os.path.join(
+    sys.path.insert(0, os.path.abspath(os.path.join(
         this_dir, os.pardir, os.pardir
         )))
     unittest.main(defaultTest='README')

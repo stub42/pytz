@@ -8,7 +8,7 @@ from datetime import datetime, tzinfo, timedelta
 if __name__ == '__main__':
     # Only munge path if invoked as a script. Testrunners should have setup
     # the paths already
-    sys.path.insert(0, os.path.join(os.pardir, os.pardir))
+    sys.path.insert(0, os.path.abspath(os.path.join(os.pardir, os.pardir)))
 
 import pytz
 from pytz import reference
