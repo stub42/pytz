@@ -37,7 +37,8 @@ Example & Usage
 
 >>> from datetime import datetime, timedelta
 >>> from pytz import timezone
->>> utc = timezone('UTC')
+>>> import pytz
+>>> utc = pytz.utc
 >>> utc.zone
 'UTC'
 >>> eastern = timezone('US/Eastern')
@@ -82,6 +83,35 @@ for more details)
 >>> dt2 = eastern.localize(dt, is_dst=False)
 >>> dt2.strftime(fmt)
 '2002-10-27 01:30:00 EST-0500'
+
+Converting between timezones also needs special attention. This also needs
+to use the normalize method to ensure the conversion is correct.
+
+>>> utc_dt = utc.localize(datetime.utcfromtimestamp(1143408899))
+>>> utc_dt.strftime(fmt)
+'2006-03-26 21:34:59 UTC+0000'
+>>> au_tz = timezone('Australia/Sydney')
+>>> au_dt = au_tz.normalize(utc_dt.astimezone(au_tz))
+>>> au_dt.strftime(fmt)
+'2006-03-27 08:34:59 EST+1100'
+>>> utc_dt2 = utc.normalize(au_dt.astimezone(utc))
+>>> utc_dt2.strftime(fmt)
+'2006-03-26 21:34:59 UTC+0000'
+
+You can also take shortcuts when dealing with the UTC side of timezone
+conversions. Normalize and localize are not really necessary because there
+are no daylight savings time transitions to deal with.
+
+>>> utc_dt = datetime.utcfromtimestamp(1143408899).replace(tzinfo=utc)
+>>> utc_dt.strftime(fmt)
+'2006-03-26 21:34:59 UTC+0000'
+>>> au_tz = timezone('Australia/Sydney')
+>>> au_dt = au_tz.normalize(utc_dt.astimezone(au_tz))
+>>> au_dt.strftime(fmt)
+'2006-03-27 08:34:59 EST+1100'
+>>> utc_dt2 = au_dt.astimezone(utc)
+>>> utc_dt2.strftime(fmt)
+'2006-03-26 21:34:59 UTC+0000'
 
 
 Problems with Localtime
