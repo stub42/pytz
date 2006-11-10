@@ -12,7 +12,7 @@ import pytz, sys, os, os.path
 
 me = 'Stuart Bishop'
 memail = 'stuart@stuartbishop.net'
-ldesc = '''\
+ldesc = """\
 World modern and historical timezone definitions, implemented as
 Python tzinfo subclasses suitable for use my Python's datetime module. 
 Timezone information was provided by the Olson Timezone database.
@@ -27,11 +27,16 @@ The Olson Timezone database is updated roughly four times per year,
 usually with obscure and generally unnoticable changes. These files
 will be regenerated and rereleased soon after updated editions of the
 Olson database are made available.
-'''
+"""
 
 packages = ['pytz']
-for dirpath, dirname, filenames in os.walk(os.path.join('pytz','zoneinfo')):
-    packages.append('.'.join(dirpath.split(os.sep)))
+zoneinfo = []
+package_data = {'pytz': zoneinfo}
+for dirpath, dirnames, filenames in os.walk(os.path.join('pytz', 'zoneinfo')):
+    # remove the 'pytz' part of the path
+    basepath = dirpath.split(os.path.sep, 1)[1]
+    zoneinfo.extend([os.path.join(basepath, filename)
+                     for filename in filenames])
 
 setup (
     name='pytz',
@@ -47,7 +52,7 @@ setup (
     license=open('LICENSE.txt','r').read(),
     keywords=['timezone','tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,
-    package_data={'pytz': ['zone.tab', 'locales/pytz.pot']},
+    package_data=package_data,
     download_url='http://sourceforge.net/project/showfiles.php?group_id=79122',
     platforms=['Independant'],
     classifiers = [
