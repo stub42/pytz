@@ -19,13 +19,13 @@ def memorized_timedelta(seconds):
         return delta
 
 _datetime_cache = {}
-def memorized_datetime(*args):
+def memorized_datetime(seconds):
     '''Create only one instance of each distinct datetime'''
     try:
-        return _datetime_cache[args]
+        return _datetime_cache[seconds]
     except KeyError:
-        dt = datetime(*args)
-        _datetime_cache[args] = dt
+        dt = datetime.utcfromtimestamp(seconds)
+        _datetime_cache[seconds] = dt
         return dt
 
 _ttinfo_cache = {}

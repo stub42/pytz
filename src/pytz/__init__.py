@@ -22,7 +22,32 @@ __all__ = [
     ]
 
 import sys, datetime, os.path, gettext
+
+try:
+    from pkg_resources import resource_stream
+except ImportError:
+    resource_stream = None
+
 from tzinfo import AmbiguousTimeError, unpickler
+from tzfile import build_tzinfo
+
+
+def open_resource(name):
+    """Open a resource from the zoneinfo subdir for reading.
+
+    Uses the pkg_resources module if available.
+    """
+    if resource_stream is not None:
+        return resource_stream(__name__, 'zoneinfo/' + name)
+    else:
+        name_parts = name.lstrip('/').split('/')
+        for part in name_parts:
+            if part == os.path.pardir or os.path.sep in part:
+                raise ValueError('Bad path segment: %r' % part)
+        filename = os.path.join(os.path.dirname(__file__),
+                                'zoneinfo', *name_parts)
+        return open(filename, 'rb')
+        
 
 # Enable this when we get some translations?
 # We want an i18n API that is useful to programs using Python's gettext
@@ -37,6 +62,10 @@ from tzinfo import AmbiguousTimeError, unpickler
 # def _(timezone_name):
 #     """Translate a timezone name using the current locale, returning Unicode"""
 #     return t.ugettext(timezone_name)
+
+zoneinfo = os.path.join(os.path.dirname(__file__), 'zoneinfo')
+
+_tzinfo_cache = {}
 
 def timezone(zone):
     ''' Return a datetime.tzinfo implementation for the given timezone 
@@ -58,25 +87,13 @@ def timezone(zone):
     >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:10:00 EST (-0500)'
     '''
-    zone = _munge_zone(zone)
     if zone.upper() == 'UTC':
         return utc
-    zone_bits = ['zoneinfo'] + zone.split('/')
 
-    # Load zone's module
-    module_name = '.'.join(zone_bits)
-    try:
-        module = __import__(module_name, globals(), locals())
-    except ImportError:
-        raise KeyError, zone
-    rv = module
-    for bit in zone_bits[1:]:
-        rv = getattr(rv, bit)
-
-    # Return instance from that module
-    rv = getattr(rv, zone_bits[-1])
-    assert type(rv) != type(sys)
-    return rv
+    if zone not in _tzinfo_cache:
+        _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
+    
+    return _tzinfo_cache[zone]
 
 
 def _munge_zone(zone):
@@ -195,6 +212,7 @@ def country_timezones(iso3166_code):
     """
     iso3166_code = iso3166_code.upper()
     if not _country_timezones_cache:
+        zone_tab = open_resource('zone.tab')
         try:
             from pkg_resources import resource_stream
             zone_tab = resource_stream(__name__, 'zone.tab')
