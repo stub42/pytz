@@ -59,9 +59,8 @@ README.html: test_docs
 	rst2html --embed-stylesheet --stylesheet-path=${STYLESHEET} \
 	    src/README.txt > README.html
 
-.stamp-tzinfo: .stamp-zoneinfo
-	rm -rf build/dist/*
-	cp -a src/* build/dist/
+.stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
+	${PYTHON} gen_tzinfo.py ${TARGET}
 	rm -rf build/dist/pytz/zoneinfo
 	cp -a build/etc/zoneinfo build/dist/pytz/zoneinfo
 	touch $@
