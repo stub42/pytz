@@ -13,7 +13,7 @@ if __name__ == '__main__':
 import pytz
 from pytz import reference
 
-EXPECTED_VERSION='2006j'
+EXPECTED_VERSION='2006p'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
