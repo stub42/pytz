@@ -1,4 +1,4 @@
-# @(#)Makefile	8.3
+# @(#)Makefile	8.4
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -225,7 +225,7 @@ AWK=		nawk
 # The path where SGML DTDs are kept.
 SGML_SEARCH_PATH= $(TOPDIR)/share/doc/sgml-lib/REC-html401-19991224/
 
-# The catalog file(s) to use when validating XHTML.
+# The catalog file(s) to use when validating.
 SGML_CATALOG_FILES= HTML4.cat
 
 # The name, arguments and environment of a program to validate your web pages.

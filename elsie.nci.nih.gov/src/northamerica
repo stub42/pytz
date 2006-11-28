@@ -1,4 +1,4 @@
-# @(#)northamerica	8.7
+# @(#)northamerica	8.10
 # <pre>
 
 # also includes Central America and the Caribbean
@@ -2096,6 +2096,14 @@ Zone America/Costa_Rica	-5:36:20 -	LMT	1890		# San Jose
 # adjustment in Cuba.  We will stay in daylight saving time:
 # http://www.granma.cu/espanol/2005/noviembre/mier9/horario.html
 
+# From Jesper Norgaard Welen (2006-10-21):
+# An article in GRANMA INTERNACIONAL claims that Cuba will end
+# the 3 years of permanent DST next weekend, see
+# http://www.granma.cu/ingles/2006/octubre/lun16/43horario.html
+# "On Saturday night, October 28 going into Sunday, October 29, at 01:00,
+# watches should be set back one hour -- going back to 00:00 hours -- returning
+# to the normal schedule....
+
 # Rule	NAME	FROM	TO	TYPE	IN	ON	AT	SAVE	LETTER/S
 Rule	Cuba	1928	only	-	Jun	10	0:00	1:00	D
 Rule	Cuba	1928	only	-	Oct	10	0:00	0	S
@@ -2289,11 +2297,16 @@ Zone America/Port-au-Prince -4:49:20 -	LMT	1890
 # <http://www.elheraldo.hn/nota.php?nid=54941&sec=12>.
 # It mentions executive decree 18-2006.
 
+# From Steffen Thorsen (2006-08-17):
+# Honduras will observe DST from 2007 to 2009, exact dates are not
+# published, I have located this authoritative source:
+# http://www.presidencia.gob.hn/noticia.aspx?nId=47
+
 # Rule	NAME	FROM	TO	TYPE	IN	ON	AT	SAVE	LETTER/S
 Rule	Hond	1987	1988	-	May	Sun>=1	0:00	1:00	D
 Rule	Hond	1987	1988	-	Sep	lastSun	0:00	0	S
-Rule	Hond	2006	only	-	May	Sun>=1	0:00	1:00	D
-Rule	Hond	2006	only	-	Aug	Mon>=1	0:00	0	S
+Rule	Hond	2006	2009	-	May	Sun>=1	0:00	1:00	D
+Rule	Hond	2006	2009	-	Aug	Mon>=1	0:00	0	S
 # Zone	NAME		GMTOFF	RULES	FORMAT	[UNTIL]
 Zone America/Tegucigalpa -5:48:52 -	LMT	1921 Apr
 			-6:00	Hond	C%sT
@@ -2373,12 +2386,19 @@ Zone America/Montserrat	-4:08:52 -	LMT	1911 Jul 1 0:01   # Cork Hill
 # advanced by sixty minutes their official time, yesterday at 2 in the
 # morning, and will stay that way until 30.th. of september.
 #
+# From Jesper Norgaard Welen (2006-09-30):
+# http://www.presidencia.gob.ni/buscador_gaceta/BD/DECRETOS/2006/D-063-2006P-PRN-Cambio-Hora.pdf
+# My informal translation runs:
+# The natural sun time is restored in all the national territory, in that the
+# time is returned one hour at 01:00 am of October 1 of 2006.
+#
 # Rule	NAME	FROM	TO	TYPE	IN	ON	AT	SAVE	LETTER/S
 Rule	Nic	1979	1980	-	Mar	Sun>=16	0:00	1:00	D
 Rule	Nic	1979	1980	-	Jun	Mon>=23	0:00	0	S
 Rule	Nic	2005	only	-	Apr	10	0:00	1:00	D
-Rule	Nic	2005	2006	-	Oct	Sun>=1	0:00	0	S
+Rule	Nic	2005	only	-	Oct	Sun>=1	0:00	0	S
 Rule	Nic	2006	only	-	Apr	30	2:00	1:00	D
+Rule	Nic	2006	only	-	Oct	Sun>=1	1:00	0	S
 # Zone	NAME		GMTOFF	RULES	FORMAT	[UNTIL]
 Zone	America/Managua	-5:45:08 -	LMT	1890
 			-5:45:12 -	MMT	1934 Jun 23 # Managua Mean Time?
