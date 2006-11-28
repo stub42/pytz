@@ -90,16 +90,16 @@ def timezone(zone):
     if zone.upper() == 'UTC':
         return utc
 
+    zone = _unmunge_zone(zone)
     if zone not in _tzinfo_cache:
         _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
     
     return _tzinfo_cache[zone]
 
 
-def _munge_zone(zone):
-    ''' Convert a zone into a string suitable for use as a Python identifier 
-    '''
-    return zone.replace('+', '_plus_').replace('-', '_minus_')
+def _unmunge_zone(zone):
+    """Undo the time zone name munging done by older versions of pytz."""
+    return zone.replace('_plus_', '+').replace('_minus_', '-')
 
 
 ZERO = datetime.timedelta(0)
