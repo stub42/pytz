@@ -63,8 +63,6 @@ def open_resource(name):
 #     """Translate a timezone name using the current locale, returning Unicode"""
 #     return t.ugettext(timezone_name)
 
-zoneinfo = os.path.join(os.path.dirname(__file__), 'zoneinfo')
-
 _tzinfo_cache = {}
 
 def timezone(zone):
