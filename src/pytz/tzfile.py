@@ -3,12 +3,9 @@
 $Id: tzfile.py,v 1.8 2004/06/03 00:15:24 zenzen Exp $
 '''
 
-from struct import unpack,calcsize
 from cStringIO import StringIO
-from time import gmtime, asctime
-from pprint import pprint
-
 from datetime import datetime, timedelta
+from struct import unpack, calcsize
 
 from pytz.tzinfo import (
     StaticTzInfo, DstTzInfo, memorized_datetime, memorized_timedelta,
@@ -106,9 +103,12 @@ def build_tzinfo(zone, fp):
 
 if __name__ == '__main__':
     import os.path
-    base = os.path.join('elsie.nci.nih.gov','build','etc','zoneinfo')
-    tz = TZFile(os.path.join(base,'Australia','Melbourne'))
-    tz = TZFile(os.path.join(base,'US','Eastern'))
-    pprint(tz.transitions)
+    from pprint import pprint
+    base = os.path.join(os.path.dirname(__file__), 'zoneinfo')
+    tz = build_tzinfo('Australia/Melbourne',
+                      open(os.path.join(base,'Australia','Melbourne'), 'rb'))
+    tz = build_tzinfo('US/Eastern',
+                      open(os.path.join(base,'US','Eastern'), 'rb'))
+    pprint(tz._utc_transition_times)
     #print tz.asPython(4)
     #print tz.transitions_mapping
