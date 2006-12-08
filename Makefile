@@ -2,7 +2,9 @@
 #
 
 MAKE=make
-PYTHON=python2.4
+PYTHON24=python2.4
+PYTHON25=python2.5
+PYTHON=${PYTHON24}
 OLSON=./elsie.nci.nih.gov
 TESTARGS=-vv
 TARGET=
@@ -20,24 +22,27 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip && \
-	${PYTHON} setup.py bdist_egg
+	${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
 
 upload: build/dist/locales/pytz.pot .stamp-upload
 .stamp-upload: .stamp-tzinfo
 	cd build/dist && \
-	${PYTHON} setup.py sdist \
-	    --formats=bztar,gztar,zip upload --sign && \
-	${PYTHON} setup.py bdist_egg upload --sign
+	${PYTHON} setup.py register sdist \
+	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON24} setup.py register bdist_egg --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON25} setup.py register bdist_egg --dist-dir=../tarballs \
+	    upload --sign
 	touch $@
 
 test: test_tzinfo test_docs test_zdump
 
 clean:
 	rm -f .stamp-*
-	rm -rf build/{etc,lib,man,tarballs,dist}
-	find build/dist -name \*.py | xargs -r rm
-	rm -f build/dist/*.txt build/dist/MANIFEST* build/dist/zone.tab
+	rm -rf build/*/*
 	make -C ${OLSON}/src clean
 	find . -name \*.pyc | xargs rm -f
 
@@ -56,8 +61,8 @@ build/dist/test_zdump.py: .stamp-zoneinfo
 	${PYTHON} gen_tests.py ${TARGET}
 
 README.html: test_docs
-	rst2html --embed-stylesheet --stylesheet-path=${STYLESHEET} \
-	    src/README.txt > README.html
+	rst2html --embed-stylesheet \
+	    --traceback src/README.txt > README.html
 
 .stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py
 	${PYTHON} gen_tzinfo.py ${TARGET}

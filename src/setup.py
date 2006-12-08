@@ -1,6 +1,5 @@
 '''
-$Id: setup.py,v 1.7 2005/01/07 04:51:33 zenzen Exp $
-Distribution setup script
+pytz setup script
 '''
 
 try:
@@ -48,7 +47,7 @@ setup (
     keywords=['timezone','tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,
     package_data={'pytz': ['zone.tab', 'locales/pytz.pot']},
-    download_url='http://sourceforge.net/project/showfiles.php?group_id=79122',
+    download_url='http://cheeseshop.python.org/pypi/pytz',
     platforms=['Independant'],
     classifiers = [
         'Development Status :: 6 - Mature',
