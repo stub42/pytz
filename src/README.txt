@@ -273,14 +273,15 @@ Latest Versions
 ~~~~~~~~~~~~~~~
 
 This package will be updated after releases of the Olson timezone database.
-The latest version can be downloaded from Sourceforge_. The code that
-is used to generate this distribution is available using the Bazaar_
-revision control system in at:
+The latest version can be downloaded from the Python Cheeseshop_ or
+Sourceforge_. The code that is used to generate this distribution is
+available using the Bazaar_ revision control system in at:
 
-http://mirrors.sourcecontrol.net/stuart@stuartbishop.net--public/pytz--devel--0
+http://bazaar.launchpad.net/~stub/pytz/devel
 
+.. _Cheeseshop: http://cheeseshop.python.org/pypi/pytz/
 .. _Sourceforge: http://sourceforge.net/projects/pytz/
-.. _Bazaar: http://bazaar.canonical.com/
+.. _Bazaar: http://bazaar-vcs.org/
 
 
 Issues & Limitations
