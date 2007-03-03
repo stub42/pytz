@@ -64,10 +64,10 @@ README.html: test_docs
 	rst2html --embed-stylesheet \
 	    --traceback src/README.txt > README.html
 
-.stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py
+.stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
 	${PYTHON} gen_tzinfo.py ${TARGET}
-	cp ${OLSON}/src/zone.tab build/dist/pytz/
-	chmod u+w build/dist/pytz/zone.tab
+	rm -rf build/dist/pytz/zoneinfo
+	cp -a build/etc/zoneinfo build/dist/pytz/zoneinfo
 	touch $@
 
 .stamp-zoneinfo:
@@ -75,7 +75,7 @@ README.html: test_docs
 	touch $@
 
 build/dist/locales/pytz.pot: .stamp-tzinfo
-	${PYTHON} gen_pot.py build/dist/pytz/locales/pytz.pot
+	@: #${PYTHON} gen_pot.py build/dist/pytz/locales/pytz.pot
 
 #	cd build/dist; mkdir locales; \
 #	pygettext --extract-all --no-location \
