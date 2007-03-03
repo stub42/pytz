@@ -6,7 +6,7 @@
 2005-02-16
 
     - Made available under the Zope Public Licence 2.1 (ZPL) and checked
-      into the Zope3 project. pytz may not be used and redistributed
+      into the Zope3 project. pytz may now be used and redistributed
       under either the original MIT license or the ZPL 2.1.
 
 2005-05-13
