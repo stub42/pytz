@@ -22,20 +22,22 @@ the obscure historical cases work. This test suite is available seperatly
 as it is rather large (75558 comparisisons), as is the program used
 to generate this package.
 
-The Olson Timezone database is updated roughly four times per year,
+The Olson Timezone database is updated several times per year,
 usually with obscure and generally unnoticable changes. These files
 will be regenerated and rereleased soon after updated editions of the
 Olson database are made available.
 """
 
 packages = ['pytz']
-zoneinfo = []
-package_data = {'pytz': zoneinfo}
+resources = ['zone.tab', 'locales/pytz.pot']
 for dirpath, dirnames, filenames in os.walk(os.path.join('pytz', 'zoneinfo')):
     # remove the 'pytz' part of the path
     basepath = dirpath.split(os.path.sep, 1)[1]
-    zoneinfo.extend([os.path.join(basepath, filename)
+    resources.extend([os.path.join(basepath, filename)
                      for filename in filenames])
+package_data = {'pytz': resources}
+
+assert len(resources) > 10, 'zoneinfo files not found!'
 
 setup (
     name='pytz',
@@ -51,7 +53,7 @@ setup (
     license=open('LICENSE.txt','r').read(),
     keywords=['timezone','tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,
-    package_data={'pytz': ['zone.tab', 'locales/pytz.pot']},
+    package_data=package_data,
     download_url='http://cheeseshop.python.org/pypi/pytz',
     platforms=['Independant'],
     classifiers = [
