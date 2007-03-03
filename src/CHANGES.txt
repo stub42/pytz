@@ -24,3 +24,9 @@
     - Generate and distribute a PO template file listing all timezone
       names. Translations are not yet available.
 
+2007-03-03
+
+    - Import work by James Henstridge, making pytz load timezone
+      information from zic compiled binaries at runtime rather than
+      processing them into Python classes.
+
