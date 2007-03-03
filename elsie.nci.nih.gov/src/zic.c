@@ -3,7 +3,7 @@
 ** 2006-07-17 by Arthur David Olson.
 */
 
-static char	elsieid[] = "@(#)zic.c	8.7";
+static char	elsieid[] = "@(#)zic.c	8.10";
 
 #include "private.h"
 #include "locale.h"
@@ -675,7 +675,7 @@ const char * const	tofile;
 						"../");
 				symlinkcontents =
 					ecatalloc(symlinkcontents,
-					fromfile);
+					fromname);
 				result = symlink(symlinkcontents,
 					toname);
 				if (result == 0)
@@ -2451,9 +2451,12 @@ register char *	cp;
 			else while ((*dp = *cp++) != '"')
 				if (*dp != '\0')
 					++dp;
-				else	error(_(
+				else {
+					error(_(
 						"Odd number of quotation marks"
 						));
+					exit(1);
+				}
 		} while (*cp != '\0' && *cp != '#' &&
 			(!isascii(*cp) || !isspace((unsigned char) *cp)));
 		if (isascii(*cp) && isspace((unsigned char) *cp))
@@ -2641,7 +2644,7 @@ wp = _("time zone abbreviation differs from POSIX standard");
 
 static int
 mkdirs(argname)
-char * const	argname;
+char *		argname;
 {
 	register char *	name;
 	register char *	cp;

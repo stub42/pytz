@@ -1,4 +1,4 @@
-static char	elsieid[] = "@(#)zdump.c	8.2";
+static char	elsieid[] = "@(#)zdump.c	8.3";
 
 /*
 ** This code has been made independent of the rest of the time
@@ -385,7 +385,7 @@ _("%s: usage is %s [ --version ] [ -v ] [ -c [loyear,]hiyear ] zonename ...\n"),
 	}
 	if (fflush(stdout) || ferror(stdout)) {
 		(void) fprintf(stderr, "%s: ", progname);
-		(void) perror(_("Error writing standard output"));
+		(void) perror(_("Error writing to standard output"));
 		exit(EXIT_FAILURE);
 	}
 	exit(EXIT_SUCCESS);
