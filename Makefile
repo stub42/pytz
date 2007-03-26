@@ -54,7 +54,7 @@ test_docs: .stamp-tzinfo
 
 test_zdump: build/dist/test_zdump.py
 	${PYTHON} -c \
-	    'import compileall;compileall.compile_dir("build/dist/zoneinfo")'
+	    'import compileall;compileall.compile_dir("build/dist")'
 	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
