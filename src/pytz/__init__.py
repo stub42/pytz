@@ -17,8 +17,10 @@ __version__ = OLSON_VERSION
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
 __all__ = [
-    'timezone', 'all_timezones', 'common_timezones', 'utc',
-    'AmbiguousTimeError', 'country_timezones', '_',
+    'timezone', 'utc', 'country_timezones',
+    'AmbiguousTimeError', 'UnknownTimezoneError',
+    'all_timezones', 'all_timezones_set',
+    'common_timezones', 'common_timezones_set',
     ]
 
 import sys, datetime, os.path, gettext
@@ -30,6 +32,12 @@ except ImportError:
 
 from tzinfo import AmbiguousTimeError, unpickler
 from tzfile import build_tzinfo
+
+# Use 2.3 sets module implementation if set builtin is not available
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 
 def open_resource(name):
@@ -63,6 +71,23 @@ def open_resource(name):
 #     """Translate a timezone name using the current locale, returning Unicode"""
 #     return t.ugettext(timezone_name)
 
+
+class UnknownTimezoneError(KeyError):
+    '''Exception raised when pytz is passed an unknown timezone.
+
+    >>> isinstance(UnknownTimezoneError(), LookupError)
+    True
+
+    This class is actually a subclass of KeyError to provide backwards
+    compatibility with code relying on the undocumented behavior of earlier
+    pytz releases.
+
+    >>> isinstance(UnknownTimezoneError(), KeyError)
+    True
+    '''
+    pass
+
+
 _tzinfo_cache = {}
 
 def timezone(zone):
@@ -84,13 +109,23 @@ def timezone(zone):
     '2002-10-27 01:50:00 EDT (-0400)'
     >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:10:00 EST (-0500)'
+
+    Raises UnknownTimezoneError if passed an unknown zone.
+
+    >>> timezone('Asia/Shangri-La')
+    Traceback (most recent call last):
+    ...
+    UnknownTimezoneError: 'Asia/Shangri-La'
     '''
     if zone.upper() == 'UTC':
         return utc
 
     zone = _unmunge_zone(zone)
     if zone not in _tzinfo_cache:
-        _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
+        if zone in all_timezones_set:
+            _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
+        else:
+            raise UnknownTimezoneError(zone)
     
     return _tzinfo_cache[zone]
 
@@ -221,6 +256,7 @@ def country_timezones(iso3166_code):
                 _country_timezones_cache[code] = [zone]
     return _country_timezones_cache[iso3166_code]
 
+
 # Time-zone info based solely on fixed offsets
 
 class _FixedOffset(datetime.tzinfo):
@@ -259,6 +295,7 @@ class _FixedOffset(datetime.tzinfo):
         if dt.tzinfo is None:
             raise ValueError, 'Naive time - no tzinfo set'
         return dt.replace(tzinfo=self)
+
 
 def FixedOffset(offset, _tzinfos = {}):
     """return a fixed-offset timezone based off a number of minutes.
@@ -308,9 +345,7 @@ def FixedOffset(offset, _tzinfos = {}):
         True
         >>> pickle.loads(pickle.dumps(two)) is two
         True
-
     """
-
     if offset == 0:
         return UTC
 
@@ -325,6 +360,7 @@ def FixedOffset(offset, _tzinfos = {}):
     return info
 
 FixedOffset.__safe_for_unpickling__ = True
+
 
 def _test():
     import doctest, os, sys

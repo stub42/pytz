@@ -90,10 +90,12 @@ def add_allzones(filename):
 
     print >> outf, 'common_timezones = \\'
     pprint(cz, outf)
+    print >> outf, 'common_timezones_set = set(common_timezones)'
     print >> outf
 
     print >> outf, 'all_timezones = \\'
     pprint(allzones(), outf)
+    print >> outf, 'all_timezones_set = set(all_timezones)'
     outf.close()
 
 
