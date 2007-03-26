@@ -13,7 +13,9 @@ if __name__ == '__main__':
 import pytz
 from pytz import reference
 
-EXPECTED_VERSION='2007c'
+# I test for expected version to ensure the correct version of pytz is
+# actually being installed.
+EXPECTED_VERSION='2007d'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 

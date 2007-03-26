@@ -3,7 +3,7 @@
 ** 2006-07-17 by Arthur David Olson.
 */
 
-static char	elsieid[] = "@(#)zic.c	8.10";
+static char	elsieid[] = "@(#)zic.c	8.11";
 
 #include "private.h"
 #include "locale.h"
@@ -2024,7 +2024,7 @@ const int			zonecount;
 
 wp = ecpyalloc(_("no POSIX environment variable for zone"));
 		wp = ecatalloc(wp, " ");
-		wp = ecatalloc(wp, zpfirst->z_name); 
+		wp = ecatalloc(wp, zpfirst->z_name);
 		warning(wp);
 		ifree(wp);
 	}
