@@ -18,7 +18,7 @@ OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
 __all__ = [
     'timezone', 'utc', 'country_timezones',
-    'AmbiguousTimeError', 'UnknownTimezoneError',
+    'AmbiguousTimeError', 'UnknownTimeZoneError',
     'all_timezones', 'all_timezones_set',
     'common_timezones', 'common_timezones_set',
     ]
@@ -72,17 +72,17 @@ def open_resource(name):
 #     return t.ugettext(timezone_name)
 
 
-class UnknownTimezoneError(KeyError):
+class UnknownTimeZoneError(KeyError):
     '''Exception raised when pytz is passed an unknown timezone.
 
-    >>> isinstance(UnknownTimezoneError(), LookupError)
+    >>> isinstance(UnknownTimeZoneError(), LookupError)
     True
 
     This class is actually a subclass of KeyError to provide backwards
     compatibility with code relying on the undocumented behavior of earlier
     pytz releases.
 
-    >>> isinstance(UnknownTimezoneError(), KeyError)
+    >>> isinstance(UnknownTimeZoneError(), KeyError)
     True
     '''
     pass
@@ -110,12 +110,12 @@ def timezone(zone):
     >>> (loc_dt + timedelta(minutes=10)).strftime(fmt)
     '2002-10-27 01:10:00 EST (-0500)'
 
-    Raises UnknownTimezoneError if passed an unknown zone.
+    Raises UnknownTimeZoneError if passed an unknown zone.
 
     >>> timezone('Asia/Shangri-La')
     Traceback (most recent call last):
     ...
-    UnknownTimezoneError: 'Asia/Shangri-La'
+    UnknownTimeZoneError: 'Asia/Shangri-La'
     '''
     if zone.upper() == 'UTC':
         return utc
@@ -125,7 +125,7 @@ def timezone(zone):
         if zone in all_timezones_set:
             _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
         else:
-            raise UnknownTimezoneError(zone)
+            raise UnknownTimeZoneError(zone)
     
     return _tzinfo_cache[zone]
 
