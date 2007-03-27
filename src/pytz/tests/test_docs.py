@@ -20,16 +20,16 @@ for loc in locs:
 if test_README.__doc__ is None:
     raise RuntimeError('README.txt not found')
 
-README = DocTestSuite()
 
 def test_suite():
     "For the Z3 test runner"
-    return README
+    return DocTestSuite()
+
 
 if __name__ == '__main__':
     sys.path.insert(0, os.path.abspath(os.path.join(
         this_dir, os.pardir, os.pardir
         )))
-    unittest.main(defaultTest='README')
+    unittest.main(defaultTest='test_suite')
 
 
