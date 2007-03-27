@@ -476,7 +476,7 @@ def test_suite():
     suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(test_tzinfo))
     return suite
 
-DEFAULT = test_suite()
+DEFAULT = test_suite
 
 if __name__ == '__main__':
     unittest.main(defaultTest='DEFAULT')

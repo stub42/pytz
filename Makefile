@@ -2,9 +2,10 @@
 #
 
 MAKE=make
+PYTHON23=python2.3
 PYTHON24=python2.4
 PYTHON25=python2.5
-PYTHON=${PYTHON24}
+PYTHON=${PYTHON25}
 OLSON=./elsie.nci.nih.gov
 TESTARGS=-vv
 TARGET=
@@ -22,6 +23,7 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip && \
+	${PYTHON23} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
@@ -31,6 +33,8 @@ upload: build/dist/locales/pytz.pot .stamp-upload
 	cd build/dist && \
 	${PYTHON} setup.py register sdist \
 	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON23} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON24} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
@@ -47,15 +51,21 @@ clean:
 	find . -name \*.pyc | xargs rm -f
 
 test_tzinfo: .stamp-tzinfo
-	cd build/dist/pytz/tests && ${PYTHON} test_tzinfo.py ${TESTARGS}
+	cd build/dist/pytz/tests \
+	    && ${PYTHON23} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON24} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON25} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
-	cd build/dist/pytz/tests && ${PYTHON} test_docs.py ${TESTARGS}
+	cd build/dist/pytz/tests \
+	    && ${PYTHON23} test_docs.py ${TESTARGS} \
+	    && ${PYTHON24} test_docs.py ${TESTARGS} \
+	    && ${PYTHON25} test_docs.py ${TESTARGS}
 
 test_zdump: build/dist/test_zdump.py
-	${PYTHON} -c \
-	    'import compileall;compileall.compile_dir("build/dist")'
-	cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
+	${PYTHON23} -c \
+	    'import compileall;compileall.compile_dir("build/dist")' \
+	    && cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 	${PYTHON} gen_tests.py ${TARGET}
