@@ -91,13 +91,15 @@ class UnknownTimeZoneError(KeyError):
 _tzinfo_cache = {}
 
 def timezone(zone):
-    ''' Return a datetime.tzinfo implementation for the given timezone 
+    r''' Return a datetime.tzinfo implementation for the given timezone 
     
     >>> from datetime import datetime, timedelta
     >>> utc = timezone('UTC')
     >>> eastern = timezone('US/Eastern')
     >>> eastern.zone
     'US/Eastern'
+    >>> timezone(u'US/Eastern') is eastern
+    True
     >>> utc_dt = datetime(2002, 10, 27, 6, 0, 0, tzinfo=utc)
     >>> loc_dt = utc_dt.astimezone(eastern)
     >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
@@ -116,9 +118,20 @@ def timezone(zone):
     Traceback (most recent call last):
     ...
     UnknownTimeZoneError: 'Asia/Shangri-La'
+
+    >>> timezone(u'\N{TRADE MARK SIGN}')
+    Traceback (most recent call last):
+    ...
+    UnknownTimeZoneError: u'\u2122'
     '''
     if zone.upper() == 'UTC':
         return utc
+
+    try:
+        zone = zone.encode('US-ASCII')
+    except UnicodeEncodeError:
+        # All valid timezones are ASCII
+        raise UnknownTimeZoneError(zone)
 
     zone = _unmunge_zone(zone)
     if zone not in _tzinfo_cache:
@@ -237,6 +250,8 @@ def country_timezones(iso3166_code):
     >>> country_timezones('ch')
     ['Europe/Zurich']
     >>> country_timezones('CH')
+    ['Europe/Zurich']
+    >>> country_timezones(u'ch')
     ['Europe/Zurich']
     >>> country_timezones('XXX')
     Traceback (most recent call last):

@@ -40,3 +40,7 @@
       UnknownTimezoneError, which is a KeyError subclass for backwards
       compatibility.
 
+2007-03-27
+
+    - Ensure API can accept Unicode strings (Bug #96957)
+
