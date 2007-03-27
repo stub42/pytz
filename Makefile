@@ -63,9 +63,9 @@ test_docs: .stamp-tzinfo
 	    && ${PYTHON25} test_docs.py ${TESTARGS}
 
 test_zdump: build/dist/test_zdump.py
-	${PYTHON23} -c \
+	${PYTHON24} -c \
 	    'import compileall;compileall.compile_dir("build/dist")' \
-	    && cd build/dist && ${PYTHON} test_zdump.py ${TESTARGS}
+	    && cd build/dist && ${PYTHON24} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 	${PYTHON} gen_tests.py ${TARGET}

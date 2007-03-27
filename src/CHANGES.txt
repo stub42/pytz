@@ -30,3 +30,13 @@
       information from zic compiled binaries at runtime rather than
       processing them into Python classes.
 
+2007-03-26
+
+    - Update database to version 2007d
+    - Fix windows incompatibilities, working around limitations on that
+      platform.
+    - Fix 2.3 incompatibilities. Installation now requires distutils.
+    - Passing an invalid timezone name to timezone() now raises an
+      UnknownTimezoneError, which is a KeyError subclass for backwards
+      compatibility.
+
