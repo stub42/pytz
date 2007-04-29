@@ -14,8 +14,8 @@ import pytz
 from pytz import reference
 
 # I test for expected version to ensure the correct version of pytz is
-# actually being installed.
-EXPECTED_VERSION='2007d'
+# actually being tested.
+EXPECTED_VERSION='2007e'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
