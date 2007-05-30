@@ -23,7 +23,7 @@ Timezone information was provided by the Olson Timezone database.
 Using these timezone definitions resolves all ambiguous daylight savings
 time transitions. All DST trantions have been tested against the reference
 implementation of zdump found in the Olson database to confirm even
-the obscure historical cases work. This test suite is available seperatly
+the obscure historical cases work. This test suite is available separatly
 as it is rather large (75558 comparisons), as is the program used
 to generate this package.
 
