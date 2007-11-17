@@ -1,0 +1,14 @@
+*~
+*.py[co]
+
+# Build-related files
+./.stamp-tzinfo
+./.stamp-zoneinfo
+./build/
+
+# tz compiled files
+./elsie.nci.nih.gov/src/pytz/*.o
+./elsie.nci.nih.gov/src/tzselect
+./elsie.nci.nih.gov/src/yearistype
+./elsie.nci.nih.gov/src/zdump
+./elsie.nci.nih.gov/src/zic
