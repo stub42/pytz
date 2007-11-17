@@ -4,7 +4,8 @@
 # Build-related files
 ./.stamp-tzinfo
 ./.stamp-zoneinfo
-./build/
+# For whatever reason, build/ is versioned, so the * is necessary.
+./build/*
 
 # tz compiled files
 ./elsie.nci.nih.gov/src/pytz/*.o
