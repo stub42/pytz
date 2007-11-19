@@ -8,7 +8,7 @@
 ./build/*
 
 # tz compiled files
-./elsie.nci.nih.gov/src/pytz/*.o
+./elsie.nci.nih.gov/src/*.o
 ./elsie.nci.nih.gov/src/tzselect
 ./elsie.nci.nih.gov/src/yearistype
 ./elsie.nci.nih.gov/src/zdump
