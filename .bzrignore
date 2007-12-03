@@ -1,0 +1,15 @@
+*~
+*.py[co]
+
+# Build-related files
+./.stamp-tzinfo
+./.stamp-zoneinfo
+# For whatever reason, build/ is versioned, so the * is necessary.
+./build/*
+
+# tz compiled files
+./elsie.nci.nih.gov/src/*.o
+./elsie.nci.nih.gov/src/tzselect
+./elsie.nci.nih.gov/src/yearistype
+./elsie.nci.nih.gov/src/zdump
+./elsie.nci.nih.gov/src/zic
