@@ -15,7 +15,7 @@ from pytz import reference
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
-EXPECTED_VERSION='2007i'
+EXPECTED_VERSION='2007j'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
