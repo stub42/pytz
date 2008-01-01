@@ -3,7 +3,7 @@
 ** 2006-07-17 by Arthur David Olson.
 */
 
-static char	elsieid[] = "@(#)zic.c	8.16";
+static char	elsieid[] = "@(#)zic.c	8.17";
 
 #include "private.h"
 #include "locale.h"
@@ -159,10 +159,6 @@ static zic_t	tadd(zic_t t1, long t2);
 static void	usage(void);
 static void	writezone(const char * name, const char * string);
 static int	yearistype(int year, const char * type);
-
-#if !HAVE_STRERROR
-static char *	strerror(int);
-#endif /* !HAVE_STRERROR */
 
 static int		charcnt;
 static int		errors;
@@ -404,19 +400,6 @@ char * const	ptr;
 /*
 ** Error handling.
 */
-
-#if !HAVE_STRERROR
-static char *
-strerror(errnum)
-int	errnum;
-{
-	extern char *	sys_errlist[];
-	extern int	sys_nerr;
-
-	return (errnum > 0 && errnum <= sys_nerr) ?
-		sys_errlist[errnum] : _("Unknown system error");
-}
-#endif /* !HAVE_STRERROR */
 
 static void
 eats(name, num, rname, rnum)
