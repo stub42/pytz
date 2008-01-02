@@ -2,6 +2,7 @@
 *.py[co]
 
 # Build-related files
+./.stamp-dist
 ./.stamp-tzinfo
 ./.stamp-zoneinfo
 # For whatever reason, build/ is versioned, so the * is necessary.
