@@ -48,8 +48,8 @@ DESCRIPTION
      of the different types of ``local time'' types described in
      the file is associated with the same-indexed transition
      time.  These values serve as indices into an array of ttinfo
-     structures that appears next in the file; these structures
-     are defined as follows:
+     structures (with tzh_typecnt entries) that appears next in
+     the file; these structures are defined as follows:
 
           struct ttinfo {
                long          tt_gmtoff;
@@ -96,7 +96,7 @@ DESCRIPTION
      data is followed by a second header and data, identical in
      format except that eight bytes are used for each transition
      time or leap second time.  After the second header and data
-     comes a newline-encloded, POSIX-TZ-environment-variable-
+     comes a newline-enclosed, POSIX-TZ-environment-variable-
      style string for use in handling instants after the last
      transition time stored in the file (with nothing between the
      newlines if there is no POSIX representation for such
