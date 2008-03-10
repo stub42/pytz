@@ -28,7 +28,7 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
 
-upload: build/dist/locales/pytz.pot .stamp-upload
+upload: dist build/dist/locales/pytz.pot .stamp-upload
 .stamp-upload: .stamp-tzinfo
 	cd build/dist && \
 	${PYTHON} setup.py register sdist \
