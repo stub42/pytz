@@ -2,7 +2,10 @@
 
 from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
-from sets import Set
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 import pytz
 
@@ -238,7 +241,7 @@ class DstTzInfo(BaseTzInfo):
         # but we might end up with two if we are in the end-of-DST
         # transition period. Or possibly more in some particularly confused
         # location...
-        possible_loc_dt = Set()
+        possible_loc_dt = set()
         for tzinfo in self._tzinfos.values():
             loc_dt = tzinfo.normalize(dt.replace(tzinfo=tzinfo))
             if loc_dt.replace(tzinfo=None) == dt:
