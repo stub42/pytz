@@ -19,7 +19,8 @@ OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
 __all__ = [
     'timezone', 'utc', 'country_timezones',
-    'AmbiguousTimeError', 'UnknownTimeZoneError',
+    'AmbiguousTimeError', 'InvalidTimeError',
+    'NonExistentTimeError', 'UnknownTimeZoneError',
     'all_timezones', 'all_timezones_set',
     'common_timezones', 'common_timezones_set',
     ]
@@ -31,7 +32,8 @@ try:
 except ImportError:
     resource_stream = None
 
-from tzinfo import AmbiguousTimeError, unpickler
+from tzinfo import AmbiguousTimeError, InvalidTimeError, NonExistentTimeError
+from tzinfo import unpickler
 from tzfile import build_tzinfo
 
 # Use 2.3 sets module implementation if set builtin is not available

@@ -14,22 +14,38 @@ Library Reference (datetime.tzinfo).
 
 Amost all (over 540) of the Olson timezones are supported [*]_.
 
-Note that if you perform date arithmetic on local times that cross
-DST boundaries, the results may be in an incorrect timezone (ie.
-subtract 1 minute from 2002-10-27 1:00 EST and you get 2002-10-27
-0:59 EST instead of the correct 2002-10-27 1:59 EDT). This cannot
-be resolved without modifying the Python datetime implementation.
-However, these tzinfo classes provide a normalize() method which
-allows you to correct these values.
+Note that this library differs from the documented Python API for
+tzinfo implementations; if you want to create local wallclock
+times you need to use the localize() method documented in this
+document. In addition, if you perform date arithmetic on local
+times that cross DST boundaries, the results may be in an incorrect
+timezone (ie. subtract 1 minute from 2002-10-27 1:00 EST and you get
+2002-10-27 0:59 EST instead of the correct 2002-10-27 1:59 EDT). A
+normalize() method is provided to correct this. Unfortunatly these
+issues cannot be resolved without modifying the Python datetime
+implementation.
 
 
 Installation
 ~~~~~~~~~~~~
 
-This is a standard Python distutils distribution. To install the
-package, run the following command as an administrative user::
+This package can either be installed from a .egg file using setuptools,
+or from the tarball using the standard Python distutils.
+
+If you are installing from a tarball, run the following command as an
+administrative user::
 
     python setup.py install
+
+If you are installing using setuptools, you don't even need to download
+anything as the latest version will be downloaded for you
+from the Python package index::
+
+    easy_install --upgrade pytz
+
+If you already have the .egg file, you can use that too::
+
+    easy_install pytz-2008g-py2.6.egg
 
 
 Example & Usage
@@ -44,7 +60,36 @@ Example & Usage
 >>> eastern = timezone('US/Eastern')
 >>> eastern.zone
 'US/Eastern'
+>>> amsterdam = timezone('Europe/Amsterdam')
 >>> fmt = '%Y-%m-%d %H:%M:%S %Z%z'
+
+This library only supports two ways of building a localized time. The
+first is to use the .localize() method provided by the pytz library.
+This is used to localize a naive datetime (datetime with no timezone
+information)::
+
+>>> loc_dt = eastern.localize(datetime(2002, 10, 27, 6, 0, 0))
+>>> loc_dt.strftime(fmt)
+'2002-10-27 06:00:00 EST-0500'
+
+The second way of building a localized time is by converting an existing
+localized time using the standard .astimezone() method::
+
+>>> ams_dt = loc_dt.astimezone(amsterdam)
+>>> ams_dt.strftime(fmt)
+'2002-10-27 12:00:00 CET+0100'
+
+Unfortunately using the tzinfo argument of the standard datetime
+constructors ''does not work'' with pytz for many timezones.
+
+>>> datetime(2002, 10, 27, 12, 0, 0, tzinfo=amsterdam).strftime(fmt)
+'2002-10-27 12:00:00 AMT+0020'
+
+It is safe for timezones without daylight savings trasitions though, such
+as UTC::
+
+>>> datetime(2002, 10, 27, 12, 0, 0, tzinfo=pytz.utc).strftime(fmt)
+'2002-10-27 12:00:00 UTC+0000'
 
 The preferred way of dealing with times is to always work in UTC,
 converting to localtime only when generating output to be read
@@ -98,8 +143,8 @@ to use the normalize method to ensure the conversion is correct.
 >>> utc_dt2.strftime(fmt)
 '2006-03-26 21:34:59 UTC+0000'
 
-You can also take shortcuts when dealing with the UTC side of timezone
-conversions. Normalize and localize are not really necessary because there
+You can take shortcuts when dealing with the UTC side of timezone
+conversions. Normalize and localize are not really necessary when there
 are no daylight savings time transitions to deal with.
 
 >>> utc_dt = datetime.utcfromtimestamp(1143408899).replace(tzinfo=utc)
@@ -140,15 +185,13 @@ chance of it being out by one hour. For some applications, this does
 not matter. However, if you are trying to schedule meetings with people
 in different timezones or analyze log files it is not acceptable. 
 
-The best and simplest solution is to stick with using UTC.  The pytz package
-encourages using UTC for internal timezone representation by including a
-special UTC implementation based on the standard Python reference 
-implementation in the Python documentation.  This timezone unpickles to be
-the same instance, and pickles to a relatively small size.  The UTC 
-implementation can be obtained as pytz.utc, pytz.UTC, or 
-pytz.timezone('UTC').  Note that this instance is not the same 
-instance (or implementation) as other timezones with the same meaning 
-(GMT, Greenwich, Universal, etc.).
+The best and simplest solution is to stick with using UTC.  The pytz
+package encourages using UTC for internal timezone representation by
+including a special UTC implementation based on the standard Python
+reference implementation in the Python documentation.  This timezone
+unpickles to be the same instance, and pickles to a relatively small
+size.  The UTC implementation can be obtained as pytz.utc, pytz.UTC,
+or pytz.timezone('UTC').
 
 >>> import pickle, pytz
 >>> dt = datetime(2005, 3, 1, 14, 13, 21, tzinfo=utc)
@@ -166,11 +209,15 @@ False
 True
 >>> pytz.utc is pytz.UTC is pytz.timezone('UTC')
 True
+
+Note that this instance is not the same instance (or implementation) as
+other timezones with the same meaning (GMT, Greenwich, Universal, etc.).
+
 >>> utc is pytz.timezone('GMT')
 False
 
 If you insist on working with local times, this library provides a
-facility for constructing them almost unambiguously.
+facility for constructing them unambiguously::
 
 >>> loc_dt = datetime(2002, 10, 27, 1, 30, 00)
 >>> est_dt = eastern.localize(loc_dt, is_dst=True)
@@ -178,14 +225,63 @@ facility for constructing them almost unambiguously.
 >>> print est_dt.strftime(fmt), '/', edt_dt.strftime(fmt)
 2002-10-27 01:30:00 EDT-0400 / 2002-10-27 01:30:00 EST-0500
 
-Note that although this handles many cases, it is still not possible
+If you pass None as the is_dst flag to localize(), pytz will refuse to
+guess and raise exceptions if you try to build ambiguous or non-existent
+times.
+
+For example, 1:30am on 27th Oct 2002 happened twice in the US/Eastern
+timezone when the clocks where put back at the end of Daylight Savings
+Time::
+
+>>> eastern.localize(datetime(2002, 10, 27, 1, 30, 00), is_dst=None)
+Traceback (most recent call last):
+...
+AmbiguousTimeError: 2002-10-27 01:30:00
+
+Similarly, 2:30am on 7th April 2002 never happened at all in the
+US/Eastern timezone, as the clock where put forward at 2:00am skipping
+the entire hour::
+
+>>> eastern.localize(datetime(2002, 4, 7, 2, 30, 00), is_dst=None)
+Traceback (most recent call last):
+...
+NonExistentTimeError: 2002-04-07 02:30:00
+
+Both of these exceptions share a common base class to make error handling
+easier::
+
+>>> isinstance(pytz.AmbiguousTimeError(), pytz.InvalidTimeError)
+True
+>>> isinstance(pytz.NonExistentTimeError(), pytz.InvalidTimeError)
+True
+
+Although localize() handles many cases, it is still not possible
 to handle all. In cases where countries change their timezone definitions,
 cases like the end-of-daylight-savings-time occur with no way of resolving
 the ambiguity. For example, in 1915 Warsaw switched from Warsaw time to
-Central European time. So at the stroke of midnight on August 4th 1915
-the clocks were wound back 24 minutes creating a ambiguous time period
+Central European time. So at the stroke of midnight on August 5th 1915
+the clocks were wound back 24 minutes creating an ambiguous time period
 that cannot be specified without referring to the timezone abbreviation
-or the actual UTC offset.
+or the actual UTC offset. In this case midnight happened twice, neither
+time during a daylight savings time period::
+
+>>> warsaw = pytz.timezone('Europe/Warsaw')
+>>> loc_dt1 = warsaw.localize(datetime(1915, 8, 4, 23, 59, 59), is_dst=False)
+>>> loc_dt1.strftime(fmt)
+'1915-08-04 23:59:59 WMT+0124'
+>>> loc_dt2 = warsaw.localize(datetime(1915, 8, 5, 00, 00, 00), is_dst=False)
+>>> loc_dt2.strftime(fmt)
+'1915-08-05 00:00:00 CET+0100'
+>>> str(loc_dt2 - loc_dt1)
+'0:24:01'
+
+The only way of creating a time during the missing 24 minutes is converting
+from another time - because neither of the timezones involved where in
+daylight savings mode the API simply provides no way to express it::
+
+>>> utc_dt = datetime(1915, 8, 4, 22, 36, tzinfo=pytz.utc)
+>>> utc_dt.astimezone(warsaw).strftime(fmt)
+'1915-08-04 23:36:00 CET+0100'
 
 The 'Standard' Python way of handling all these ambiguities is not to,
 such as demonstrated in this example using the US/Eastern timezone
@@ -217,12 +313,13 @@ actually two hours appart instead of the 1 hour we asked for.
 What is UTC
 ~~~~~~~~~~~
 
-`UTC` is Universal Time, formerly known as Greenwich Mean Time or GMT.
-All other timezones are given as offsets from UTC. No daylight savings
-time occurs in UTC, making it a useful timezone to perform date arithmetic
-without worrying about the confusion and ambiguities caused by daylight
-savings time transitions, your country changing its timezone, or mobile
-computers that move roam through multiple timezones.
+`UTC` is Universal Time, also known as Greenwich Mean Time or GMT
+in the United Kingdom. All other timezones are given as offsets from
+UTC. No daylight savings time occurs in UTC, making it a useful timezone
+to perform date arithmetic without worrying about the confusion and
+ambiguities caused by daylight savings time transitions, your country
+changing its timezone, or mobile computers that move roam through
+multiple timezones.
 
 
 Helpers
@@ -272,15 +369,15 @@ open source projects.
 Latest Versions
 ~~~~~~~~~~~~~~~
 
-This package will be updated after releases of the Olson timezone database.
-The latest version can be downloaded from the Python Cheeseshop_ or
-Sourceforge_. The code that is used to generate this distribution is
-available using the Bazaar_ revision control system using::
+This package will be updated after releases of the Olson timezone
+database.  The latest version can be downloaded from the Python Package
+Index (PyPI_).  The code that is used to generate this distribution is
+hosted on launchpad.net and available using the Bazaar_ revision control
+system using::
 
-    bzr branch http://bazaar.launchpad.net/~stub/pytz/devel
+    bzr branch lp:pytz
 
-.. _Cheeseshop: http://cheeseshop.python.org/pypi/pytz/
-.. _Sourceforge: http://sourceforge.net/projects/pytz/
+.. _PyPI: http://cheeseshop.python.org/pypi/pytz/
 .. _Bazaar: http://bazaar-vcs.org/
 
 Bugs, Feature Requests & Patches

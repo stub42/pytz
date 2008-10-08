@@ -217,12 +217,6 @@ class DstTzInfo(BaseTzInfo):
         Use is_dst=None to raise an AmbiguousTimeError for ambiguous
         times at the end of daylight savings
 
-        >>> try:
-        ...     loc_dt1 = amdam.localize(dt, is_dst=None)
-        ... except AmbiguousTimeError:
-        ...     print 'Oops'
-        Oops
-
         >>> loc_dt1 = amdam.localize(dt, is_dst=None)
         Traceback (most recent call last):
             [...]
@@ -233,6 +227,27 @@ class DstTzInfo(BaseTzInfo):
         >>> amdam.localize(dt) == amdam.localize(dt, False)
         True
 
+        is_dst is also used to determine the correct timezone in the
+        wallclock times jumped over at the start of daylight savings time.
+
+        >>> pacific = timezone('US/Pacific')
+        >>> dt = datetime(2008, 3, 9, 2, 0, 0)
+        >>> ploc_dt1 = pacific.localize(dt, is_dst=True)
+        >>> ploc_dt2 = pacific.localize(dt, is_dst=False)
+        >>> ploc_dt1.strftime(fmt)
+        '2008-03-09 02:00:00 PDT (-0700)'
+        >>> ploc_dt2.strftime(fmt)
+        '2008-03-09 02:00:00 PST (-0800)'
+        >>> str(ploc_dt2 - ploc_dt1)
+        '1:00:00'
+
+        Use is_dst=None to raise a NonExistentTimeError for these skipped
+        times.
+
+        >>> loc_dt1 = pacific.localize(dt, is_dst=None)
+        Traceback (most recent call last):
+            [...]
+        NonExistentTimeError: 2008-03-09 02:00:00
         '''
         if dt.tzinfo is not None:
             raise ValueError, 'Not naive datetime (tzinfo is already set)'
@@ -249,6 +264,31 @@ class DstTzInfo(BaseTzInfo):
 
         if len(possible_loc_dt) == 1:
             return possible_loc_dt.pop()
+
+        # If there are no possibly correct timezones, we are attempting
+        # to convert a time that never happened - the time period jumped
+        # during the start-of-DST transition period.
+        if len(possible_loc_dt) == 0:
+            # If we refuse to guess, raise an exception.
+            if is_dst is None:
+                raise NonExistentTimeError(dt)
+
+            # If we are forcing the pre-DST side of the DST transition, we
+            # obtain the correct timezone by winding the clock forward a few
+            # hours.
+            elif is_dst:
+                return self.localize(
+                    dt + timedelta(hours=6), is_dst=True) - timedelta(hours=6)
+
+            # If we are forcing the post-DST side of the DST transition, we
+            # obtain the correct timezone by winding the clock back.
+            else:
+                return self.localize(
+                    dt - timedelta(hours=6), is_dst=False) + timedelta(hours=6)
+
+
+        # If we get this far, we have multiple possible timezones - this
+        # is an ambiguous case occuring during the end-of-DST transition.
 
         # If told to be strict, raise an exception since we have an
         # ambiguous case
@@ -322,7 +362,11 @@ class DstTzInfo(BaseTzInfo):
                 )
 
 
-class AmbiguousTimeError(Exception):
+class InvalidTimeError(Exception):
+    '''Base class for invalid time exceptions.'''
+
+
+class AmbiguousTimeError(InvalidTimeError):
     '''Exception raised when attempting to create an ambiguous wallclock time.
 
     At the end of a DST transition period, a particular wallclock time will
@@ -331,7 +375,16 @@ class AmbiguousTimeError(Exception):
 
     See DstTzInfo.normalize() for more info
     '''
-       
+
+
+class NonExistentTimeError(InvalidTimeError):
+    '''Exception raised when attempting to create a wallclock time that
+    cannot exist.
+
+    At the start of a DST transition period, the wallclock time jumps forward.
+    The instants jumped over never occur.
+    '''
+
 
 def unpickler(zone, utcoffset=None, dstoffset=None, tzname=None):
     """Factory function for unpickling pytz tzinfo instances.

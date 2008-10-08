@@ -407,8 +407,19 @@ class LocalTestCase(unittest.TestCase):
         self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EST-0500')
 
         self.failUnlessRaises(pytz.AmbiguousTimeError,
-                loc_tz.localize, datetime(1918, 10, 27, 1, 59, 59), is_dst=None
-                )
+            loc_tz.localize, datetime(1918, 10, 27, 1, 59, 59), is_dst=None
+            )
+
+        # Start of DST non-existent times
+        loc_time = loc_tz.localize(datetime(1918, 3, 31, 2, 0, 0), is_dst=0)
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EST-0500')
+
+        loc_time = loc_tz.localize(datetime(1918, 3, 31, 2, 0, 0), is_dst=1)
+        self.failUnlessEqual(loc_time.strftime('%Z%z'), 'EDT-0400')
+
+        self.failUnlessRaises(pytz.NonExistentTimeError,
+            loc_tz.localize, datetime(1918, 3, 31, 2, 0, 0), is_dst=None
+            )
 
         # Weird changes - war time and peace time both is_dst==True
 
