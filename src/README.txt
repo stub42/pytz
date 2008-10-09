@@ -310,6 +310,24 @@ actually two hours appart instead of the 1 hour we asked for.
 '2002-10-27 06:30:00+00:00'
 
 
+Country Information
+~~~~~~~~~~~~~~~~~~~
+
+A mechanism is provided to access the timezones commonly in use
+for a particular country, looked up using the ISO 3166 country code.
+It returns a list of strings that can be used to retrieve the relevant
+tzinfo instance using `pytz.timezone()`::
+
+>>> pytz.country_timezones('nz')
+['Pacific/Auckland', 'Pacific/Chatham']
+
+The Olson database comes with a ISO 3166 country code to English country
+name mapping that pytz exposes as a dictionary::
+
+>>> pytz.country_names['nz']
+'New Zealand'
+
+
 What is UTC
 ~~~~~~~~~~~
 

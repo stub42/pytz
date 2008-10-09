@@ -18,7 +18,7 @@ __version__ = OLSON_VERSION
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
 __all__ = [
-    'timezone', 'utc', 'country_timezones',
+    'timezone', 'utc', 'country_timezones', 'country_names',
     'AmbiguousTimeError', 'InvalidTimeError',
     'NonExistentTimeError', 'UnknownTimeZoneError',
     'all_timezones', 'all_timezones_set',
@@ -26,6 +26,7 @@ __all__ = [
     ]
 
 import sys, datetime, os.path, gettext
+from UserDict import DictMixin
 
 try:
     from pkg_resources import resource_stream
@@ -282,6 +283,33 @@ def country_timezones(iso3166_code):
             except KeyError:
                 _country_timezones_cache[code] = [zone]
     return _country_timezones_cache[iso3166_code]
+
+
+class _CountryNameDict(DictMixin):
+    '''Dictionary proving ISO3166 code -> English name.'''
+    data = None
+
+    def __getitem__(self, key):
+        if self.data is None:
+            self._fill()
+        return self.data[key.upper()]
+
+    def keys(self):
+        if self.data is None:
+            self._fill()
+        return self.data.keys()
+
+    def _fill(self):
+        data = {}
+        zone_tab = open_resource('iso3166.tab')
+        for line in zone_tab.readlines():
+            if line.startswith('#'):
+                continue
+            code, name = line.split(None, 1)
+            data[code] = name.strip()
+        self.data = data
+
+country_names = _CountryNameDict()
 
 
 # Time-zone info based solely on fixed offsets
