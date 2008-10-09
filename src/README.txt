@@ -338,8 +338,8 @@ True
 `common_timezones` is a list of useful, current timezones. It doesn't
 contain deprecated zones or historical zones, except for a few I've
 deemed in common usage, such as US/Eastern (open a bug report if you
-think other timezones are deserving of being included here). It is also
-a alphabetically ordered sequence of strings.
+think other timezones are deserving of being included here).It is also
+a sequence of strings.
 
 >>> from pytz import common_timezones
 >>> len(common_timezones) < len(all_timezones)
@@ -354,6 +354,17 @@ True
 True
 >>> 'US/Pacific-New' in common_timezones
 False
+
+Both common_timezones and all_timezones are alphabetically sorted:
+
+>>> common_timezones_dupe = common_timezones[:]
+>>> common_timezones_dupe.sort()
+>>> common_timezones == common_timezones_dupe
+True
+>>> all_timezones_dupe = all_timezones[:]
+>>> all_timezones_dupe.sort()
+>>> all_timezones == all_timezones_dupe
+True
 
 `all_timezones` and `common_timezones` are also available as sets.
 

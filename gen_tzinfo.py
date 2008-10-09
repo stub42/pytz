@@ -116,7 +116,7 @@ def add_allzones(filename):
     print >> outf
 
     print >> outf, 'all_timezones = \\'
-    pprint(allzones(), outf)
+    pprint(sorted(allzones()), outf)
     print >> outf, 'all_timezones_set = set(all_timezones)'
     outf.close()
 
