@@ -314,7 +314,11 @@ country_timezones = _CountryTimezoneDict()
 
 
 class _CountryNameDict(_LazyDict):
-    '''Dictionary proving ISO3166 code -> English name.'''
+    '''Dictionary proving ISO3166 code -> English name.
+    
+    >>> country_names['au']
+    'Australia'
+    '''
     def _fill(self):
         data = {}
         zone_tab = open_resource('iso3166.tab')
