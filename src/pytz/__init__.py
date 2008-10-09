@@ -58,6 +58,15 @@ def open_resource(name):
         filename = os.path.join(os.path.dirname(__file__),
                                 'zoneinfo', *name_parts)
         return open(filename, 'rb')
+
+
+def resource_exists(name):
+    """Return true if the given resource exists"""
+    try:
+        open_resource(name)
+        return True
+    except IOError:
+        return False
         
 
 # Enable this when we get some translations?

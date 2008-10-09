@@ -110,14 +110,20 @@ def add_allzones(filename):
         'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska'])
     cz.sort()
 
-    print >> outf, 'common_timezones = \\'
-    pprint(cz, outf)
-    print >> outf, 'common_timezones_set = set(common_timezones)'
-    print >> outf
-
     print >> outf, 'all_timezones = \\'
     pprint(sorted(allzones()), outf)
+    print >> outf, '''all_timezones = [
+        tz for tz in all_timezones if resource_exists(tz)]
+        '''
     print >> outf, 'all_timezones_set = set(all_timezones)'
+
+    print >> outf, 'common_timezones = \\'
+    pprint(cz, outf)
+    print >> outf, '''common_timezones = [
+        tz for tz in common_timezones if tz in all_timezones]
+        '''
+    print >> outf, 'common_timezones_set = set(common_timezones)'
+
     outf.close()
 
 
