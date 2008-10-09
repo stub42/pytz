@@ -336,13 +336,33 @@ True
 True
 
 `common_timezones` is a list of useful, current timezones. It doesn't
-contain deprecated zones or historical zones. It is also a sequence of
-strings.
+contain deprecated zones or historical zones, except for a few I've
+deemed in common usage, such as US/Eastern (open a bug report if you
+think other timezones are deserving of being included here). It is also
+a alphabetically ordered sequence of strings.
 
 >>> from pytz import common_timezones
 >>> len(common_timezones) < len(all_timezones)
 True
 >>> 'Etc/Greenwich' in common_timezones
+False
+>>> 'US/Eastern' in common_timezones
+True
+>>> 'Australia/Melbourne' in common_timezones
+True
+>>> 'US/Pacific-New' in all_timezones
+True
+>>> 'US/Pacific-New' in common_timezones
+False
+
+`all_timezones` and `common_timezones` are also available as sets.
+
+>>> from pytz import all_timezones_set, common_timezones_set
+>>> 'US/Eastern' in all_timezones_set
+True
+>>> 'US/Eastern' in common_timezones_set
+True
+>>> 'Australia/Victoria' in common_timezones_set
 False
 
 You can also retrieve lists of timezones used by particular countries

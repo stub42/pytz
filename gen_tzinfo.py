@@ -8,6 +8,7 @@ from glob import glob
 from datetime import datetime,timedelta,tzinfo
 from pprint import pprint
 from bisect import bisect_right
+import re
 
 sys.path.insert(0, 'src')
 import pytz
@@ -44,13 +45,25 @@ def allzones():
     return zones
 
 def links():
-    inf_name = 'elsie.nci.nih.gov/src/backward'
+    '''Mapping of alias -> canonical name'''
     l = {}
-    for line in open(inf_name):
-        if line.strip().startswith('#') or not line.strip():
+    olson_src_files = glob('elsie.nci.nih.gov/src/*')
+    assert olson_src_files, 'No src files'
+    for filename in olson_src_files:
+        # Filenames containing a '.' are not data files.
+        if '.' in os.path.basename(filename):
             continue
-        link, new_name, old_name = line.split()
-        assert link == 'Link', 'Got %s' % repr(line)
+        for line in open(filename):
+            if line.strip().startswith('#') or not line.strip():
+                continue
+            match = re.search(r'^\s*Link\s+([\w/\-]+)\s+([\w/\-]+)', line)
+            if match is not None:
+                new_name = match.group(1)
+                old_name = match.group(2)
+                l[old_name] = new_name
+            else:
+                assert not line.startswith('Link'), line
+    assert 'US/Pacific-New' in l, 'US/Pacific-New should be in links()'
     return l
 
 def dupe_src(destdir):
@@ -81,12 +94,21 @@ def add_allzones(filename):
 
     obsolete_zones = links().keys()
 
-    cz = [z for z in allzones() if 
-        (len(z.split('/')) == 2 or z in ('UTC', 'GMT'))
-        and z not in obsolete_zones
-        and not z.startswith('SystemV/')
-        and not z.startswith('Etc/')
-        ]
+    # Calculate 'common' timezones as best we can. We start with all
+    # timezones, strip out the legacy noise, and any name linked to
+    # a more canonical name (eg. Asia/Singapore is preferred to just
+    # Singapore)
+    cz = [z for z in allzones()
+        if z not in obsolete_zones
+            and '/' in z
+            and not z.startswith('SystemV/')
+            and not z.startswith('Etc/')]
+    # And extend our list manually with stuff we think deserves to be
+    # labelled 'common'. 
+    cz.extend([
+        'UTC', 'GMT', 'US/Eastern', 'US/Pacific', 'US/Mountain',
+        'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska'])
+    cz.sort()
 
     print >> outf, 'common_timezones = \\'
     pprint(cz, outf)
