@@ -318,7 +318,7 @@ for a particular country, looked up using the ISO 3166 country code.
 It returns a list of strings that can be used to retrieve the relevant
 tzinfo instance using `pytz.timezone()`::
 
->>> pytz.country_timezones('nz')
+>>> pytz.country_timezones['nz']
 ['Pacific/Auckland', 'Pacific/Chatham']
 
 The Olson database comes with a ISO 3166 country code to English country

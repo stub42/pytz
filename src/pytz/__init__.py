@@ -253,42 +253,10 @@ def _p(*args):
     return unpickler(*args)
 _p.__safe_for_unpickling__ = True
 
-_country_timezones_cache = {}
 
-def country_timezones(iso3166_code):
-    """Return a list of timezones used in a particular country.
-
-    iso3166_code is the two letter code used to identify the country.
-
-    >>> country_timezones('ch')
-    ['Europe/Zurich']
-    >>> country_timezones('CH')
-    ['Europe/Zurich']
-    >>> country_timezones(u'ch')
-    ['Europe/Zurich']
-    >>> country_timezones('XXX')
-    Traceback (most recent call last):
-    ...
-    KeyError: 'XXX'
-    """
-    iso3166_code = iso3166_code.upper()
-    if not _country_timezones_cache:
-        zone_tab = open_resource('zone.tab')
-        for line in zone_tab:
-            if line.startswith('#'):
-                continue
-            code, coordinates, zone = line.split(None, 4)[:3]
-            try:
-                _country_timezones_cache[code].append(zone)
-            except KeyError:
-                _country_timezones_cache[code] = [zone]
-    return _country_timezones_cache[iso3166_code]
-
-
-class _CountryNameDict(DictMixin):
-    '''Dictionary proving ISO3166 code -> English name.'''
+class _LazyDict(DictMixin):
+    """Dictionary populated on first use."""
     data = None
-
     def __getitem__(self, key):
         if self.data is None:
             self._fill()
@@ -299,6 +267,52 @@ class _CountryNameDict(DictMixin):
             self._fill()
         return self.data.keys()
 
+
+class _CountryTimezoneDict(_LazyDict):
+    """Map ISO 3166 country code to a list of timezone names commonly used
+    in that country.
+
+    iso3166_code is the two letter code used to identify the country.
+
+    >>> country_timezones['ch']
+    ['Europe/Zurich']
+    >>> country_timezones['CH']
+    ['Europe/Zurich']
+    >>> country_timezones[u'ch']
+    ['Europe/Zurich']
+    >>> country_timezones['XXX']
+    Traceback (most recent call last):
+    ...
+    KeyError: 'XXX'
+
+    Previously, this information was exposed as a function rather than a
+    dictionary. This is still supported::
+
+    >>> country_timezones('nz')
+    ['Pacific/Auckland', 'Pacific/Chatham']
+    """
+    def __call__(self, iso3166_code):
+        """Backwards compatibility."""
+        return self[iso3166_code]
+
+    def _fill(self):
+        data = {}
+        zone_tab = open_resource('zone.tab')
+        for line in zone_tab:
+            if line.startswith('#'):
+                continue
+            code, coordinates, zone = line.split(None, 4)[:3]
+            try:
+                data[code].append(zone)
+            except KeyError:
+                data[code] = [zone]
+        self.data = data
+
+country_timezones = _CountryTimezoneDict()
+
+
+class _CountryNameDict(_LazyDict):
+    '''Dictionary proving ISO3166 code -> English name.'''
     def _fill(self):
         data = {}
         zone_tab = open_resource('iso3166.tab')
