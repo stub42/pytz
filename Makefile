@@ -68,13 +68,11 @@ test_docs: .stamp-tzinfo
 	    && ${PYTHON25} test_docs.py ${TESTARGS} \
 	    && ${PYTHON26} test_docs.py ${TESTARGS}
 
-test_zdump: build/dist/test_zdump.py
-	${PYTHON24} -c \
-	    'import compileall;compileall.compile_dir("build/dist")' \
-	    && cd build/dist && ${PYTHON24} test_zdump.py ${TESTARGS}
+test_zdump: dist
+	${PYTHON25} gen_tests.py ${TARGET} && \
+	    ${PYTHON25} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
-	${PYTHON} gen_tests.py ${TARGET}
 
 README.html: test_docs
 	rst2html --embed-stylesheet \

@@ -39,8 +39,7 @@ def allzones():
     # 'Factory' and 'localtime' appear to be Olson reference code specific
     # and are skipped
     zones = [z for z in zones if 'Riyadh8' not in z and z not in [
-        'Factory', 'localtime'
-        ]]
+        'Factory', 'localtime', 'posixrules']]
     zones.sort()
     return zones
 
