@@ -66,14 +66,14 @@ Example & Usage
 This library only supports two ways of building a localized time. The
 first is to use the .localize() method provided by the pytz library.
 This is used to localize a naive datetime (datetime with no timezone
-information)::
+information):
 
 >>> loc_dt = eastern.localize(datetime(2002, 10, 27, 6, 0, 0))
->>> loc_dt.strftime(fmt)
-'2002-10-27 06:00:00 EST-0500'
+>>> print loc_dt.strftime(fmt)
+2002-10-27 06:00:00 EST-0500
 
 The second way of building a localized time is by converting an existing
-localized time using the standard .astimezone() method::
+localized time using the standard .astimezone() method:
 
 >>> ams_dt = loc_dt.astimezone(amsterdam)
 >>> ams_dt.strftime(fmt)
@@ -86,7 +86,7 @@ constructors ''does not work'' with pytz for many timezones.
 '2002-10-27 12:00:00 AMT+0020'
 
 It is safe for timezones without daylight savings trasitions though, such
-as UTC::
+as UTC:
 
 >>> datetime(2002, 10, 27, 12, 0, 0, tzinfo=pytz.utc).strftime(fmt)
 '2002-10-27 12:00:00 UTC+0000'
@@ -217,7 +217,7 @@ other timezones with the same meaning (GMT, Greenwich, Universal, etc.).
 False
 
 If you insist on working with local times, this library provides a
-facility for constructing them unambiguously::
+facility for constructing them unambiguously:
 
 >>> loc_dt = datetime(2002, 10, 27, 1, 30, 00)
 >>> est_dt = eastern.localize(loc_dt, is_dst=True)
@@ -231,7 +231,7 @@ times.
 
 For example, 1:30am on 27th Oct 2002 happened twice in the US/Eastern
 timezone when the clocks where put back at the end of Daylight Savings
-Time::
+Time:
 
 >>> eastern.localize(datetime(2002, 10, 27, 1, 30, 00), is_dst=None)
 Traceback (most recent call last):
@@ -240,7 +240,7 @@ AmbiguousTimeError: 2002-10-27 01:30:00
 
 Similarly, 2:30am on 7th April 2002 never happened at all in the
 US/Eastern timezone, as the clock where put forward at 2:00am skipping
-the entire hour::
+the entire hour:
 
 >>> eastern.localize(datetime(2002, 4, 7, 2, 30, 00), is_dst=None)
 Traceback (most recent call last):
@@ -248,7 +248,7 @@ Traceback (most recent call last):
 NonExistentTimeError: 2002-04-07 02:30:00
 
 Both of these exceptions share a common base class to make error handling
-easier::
+easier:
 
 >>> isinstance(pytz.AmbiguousTimeError(), pytz.InvalidTimeError)
 True
@@ -263,7 +263,7 @@ Central European time. So at the stroke of midnight on August 5th 1915
 the clocks were wound back 24 minutes creating an ambiguous time period
 that cannot be specified without referring to the timezone abbreviation
 or the actual UTC offset. In this case midnight happened twice, neither
-time during a daylight savings time period::
+time during a daylight savings time period:
 
 >>> warsaw = pytz.timezone('Europe/Warsaw')
 >>> loc_dt1 = warsaw.localize(datetime(1915, 8, 4, 23, 59, 59), is_dst=False)
@@ -277,7 +277,7 @@ time during a daylight savings time period::
 
 The only way of creating a time during the missing 24 minutes is converting
 from another time - because neither of the timezones involved where in
-daylight savings mode the API simply provides no way to express it::
+daylight savings mode the API simply provides no way to express it:
 
 >>> utc_dt = datetime(1915, 8, 4, 22, 36, tzinfo=pytz.utc)
 >>> utc_dt.astimezone(warsaw).strftime(fmt)
@@ -316,13 +316,13 @@ Country Information
 A mechanism is provided to access the timezones commonly in use
 for a particular country, looked up using the ISO 3166 country code.
 It returns a list of strings that can be used to retrieve the relevant
-tzinfo instance using `pytz.timezone()`::
+tzinfo instance using `pytz.timezone()`:
 
 >>> pytz.country_timezones['nz']
 ['Pacific/Auckland', 'Pacific/Chatham']
 
 The Olson database comes with a ISO 3166 country code to English country
-name mapping that pytz exposes as a dictionary::
+name mapping that pytz exposes as a dictionary:
 
 >>> pytz.country_names['nz']
 'New Zealand'
