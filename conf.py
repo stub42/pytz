@@ -35,7 +35,7 @@ templates_path = ['.templates']
 source_suffix = '.txt'
 
 # The master toctree document.
-master_doc = 'README'
+master_doc = 'index'
 
 # General substitutions.
 project = u'pytz'
