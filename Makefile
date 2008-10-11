@@ -74,9 +74,14 @@ test_zdump: dist
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 
-README.html: test_docs
-	rst2html --embed-stylesheet \
-	    --traceback src/README.txt > README.html
+
+docs: dist
+	mkdir -p build/docs/source/.static
+	mkdir -p build/docs/built
+	cp src/README.txt build/docs/source/README.txt
+	cp conf.py build/docs/source/conf.py
+	sphinx-build build/docs/source build/docs/built
+
 
 .stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
 	${PYTHON} gen_tzinfo.py ${TARGET}
