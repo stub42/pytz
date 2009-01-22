@@ -302,7 +302,7 @@ class _CountryTimezoneDict(_LazyDict):
             if line.startswith('#'):
                 continue
             code, coordinates, zone = line.split(None, 4)[:3]
-            if zone not in all_timezones:
+            if zone not in all_timezones_set:
                 continue
             try:
                 data[code].append(zone)
