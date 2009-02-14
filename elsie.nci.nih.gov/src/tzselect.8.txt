@@ -15,11 +15,11 @@ DESCRIPTION
      standard error.
 
 ENVIRONMENT VARIABLES
-     AWK  Name of a Posix-compliant awk program (default:  awk).
+     AWK  Name of a Posix-compliant awk program (default: awk).
 
      TZDIR
           Name of the directory containing time zone data files
-          (default:  /usr/local/etc/zoneinfo).
+          (default: /usr/local/etc/zoneinfo).
 
 FILES
      TZDIR/iso3166.tab

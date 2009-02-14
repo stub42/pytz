@@ -64,7 +64,6 @@ DESCRIPTION
      is output.  All other characters in the format are copied
      unchanged to the output; a newline character is always added
      at the end of the output.
-
      In Sunday-based week numbering, the first Sunday of the year
      begins week 1; days preceding it are part of ``week 0.''  In
      Monday-based week numbering, the first Monday of the year
@@ -110,9 +109,9 @@ DESCRIPTION
           adjustment argument.  Either the seconds part or the
           fractions part of the argument (but not both) may be
           omitted.  On BSD-based systems, the adjustment is made
-          by changing the rate at which time advances; on
-          System-V-based systems, the adjustment is made by
-          changing the time.
+          by changing the rate at which time advances; on System-
+          V-based systems, the adjustment is made by changing the
+          time.
 
 FILES
      /usr/lib/locale/L/LC_TIME           description of time
