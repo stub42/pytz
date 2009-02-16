@@ -65,7 +65,7 @@ DESCRIPTION
      characters may be enclosed in double quotes (") if they're
      to be used as part of a field.  Any line that is blank
      (after comment stripping) is ignored.  Non-blank lines are
-     expected to be of one of three types:  rule lines, zone
+     expected to be of one of three types: rule lines, zone
      lines, and link lines.
 
      A rule line has the form
@@ -102,7 +102,7 @@ DESCRIPTION
              between FROM and TO inclusive.  If TYPE is something
              else, then zic executes the command
                   yearistype year type
-             to check the type of a year:  an exit status of zero
+             to check the type of a year: an exit status of zero
              is taken to mean that the year is of the given type;
              an exit status of one is taken to mean that the year
              is not of the given type.
@@ -122,7 +122,6 @@ DESCRIPTION
              Names of days of the week may be abbreviated or
              spelled out in full.  Note that there must be no
              spaces within the ON field.
-
      AT      Gives the time of day at which the rule takes
              effect.  Recognized forms include:
 
@@ -247,7 +246,7 @@ EXTENDED EXAMPLE
        Rule    Swiss 1940  only  -     Dec  31       0:00  0     -
        Rule    Swiss 1941  1942  -     May  Sun>=1   2:00  1:00  S
        Rule    Swiss 1941  1942  -     Oct  Sun>=1   0:00  0
-9       Rule    EU    1977  1980  -     Apr  Sun>=1   1:00u 1:00  S
+       Rule    EU    1977  1980  -     Apr  Sun>=1   1:00u 1:00  S
        Rule    EU    1977  only  -     Sep  lastSun  1:00u 0     -
        Rule    EU    1978  only  -     Oct   1       1:00u 0     -
        Rule    EU    1979  1995  -     Sep  lastSun  1:00u 0     -

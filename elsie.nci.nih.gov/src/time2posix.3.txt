@@ -29,7 +29,7 @@ DESCRIPTION
      of leap seconds inserted since the Epoch.
 
      Typically this is not a problem as the type time_t is
-     intended to be (mostly) opaque-time_t values should only be
+     intended to be (mostly) opaque--time_t values should only be
      obtained-from and passed-to functions such as time(2),
      localtime(3), mktime(3), and difftime(3).  However, POSIX
      gives an arithmetic expression for directly computing a
@@ -50,7 +50,7 @@ DESCRIPTION
 
      Time2posix is single-valued.  That is, every local time_t
      corresponds to a single POSIX time_t.  Posix2time is less
-     well-behaved:  for a positive leap second hit the result is
+     well-behaved: for a positive leap second hit the result is
      not unique, and for a negative leap second hit the
      corresponding POSIX time_t doesn't exist so an adjacent
      value is returned.  Both of these are good indicators of the
