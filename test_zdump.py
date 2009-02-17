@@ -83,7 +83,9 @@ def test_suite():
         test_name = 'test_utc_to_local_%04d_%02d_%02d_%02d_%02d_%02d' % (
             utc_dt.year, utc_dt.month, utc_dt.day,
             utc_dt.hour, utc_dt.minute, utc_dt.second)
-        def test_utc_to_local(self):
+        def test_utc_to_local(
+            self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt, tzname=tzname,
+            is_dst=is_dst):
             self.utc_to_local_check(zone, utc_dt, loc_dt, tzname, is_dst)
         test_utc_to_local.__name__ = test_name
         #test_utc_to_local.__doc__ = line
@@ -93,7 +95,9 @@ def test_suite():
             test_name = 'test_local_to_utc_%04d_%02d_%02d_%02d_%02d_%02d' % (
                 utc_dt.year, utc_dt.month, utc_dt.day,
                 utc_dt.hour, utc_dt.minute, utc_dt.second)
-            def test_local_to_utc(self):
+            def test_local_to_utc(
+                self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt, tzname=tzname,
+                is_dst=is_dst):
                 self.utc_to_local_check(zone, utc_dt, loc_dt, tzname, is_dst)
             test_local_to_utc.__name__ = test_name
             #test_local_to_utc.__doc__ = line
