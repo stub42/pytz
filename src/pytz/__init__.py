@@ -47,18 +47,21 @@ except NameError:
 def open_resource(name):
     """Open a resource from the zoneinfo subdir for reading.
 
-    Uses the pkg_resources module if available.
+    Uses the pkg_resources module if available and no standard file
+    found at the calculated location.
     """
-    if resource_stream is not None:
+    name_parts = name.lstrip('/').split('/')
+    for part in name_parts:
+        if part == os.path.pardir or os.path.sep in part:
+            raise ValueError('Bad path segment: %r' % part)
+    filename = os.path.join(os.path.dirname(__file__),
+                            'zoneinfo', *name_parts)
+    if not os.path.exists(filename) and resource_stream is not None:
+        # http://bugs.launchpad.net/bugs/383171 - we avoid using this
+        # unless absolutely necessary to help when a broken version of
+        # pkg_resources is installed.
         return resource_stream(__name__, 'zoneinfo/' + name)
-    else:
-        name_parts = name.lstrip('/').split('/')
-        for part in name_parts:
-            if part == os.path.pardir or os.path.sep in part:
-                raise ValueError('Bad path segment: %r' % part)
-        filename = os.path.join(os.path.dirname(__file__),
-                                'zoneinfo', *name_parts)
-        return open(filename, 'rb')
+    return open(filename, 'rb')
 
 
 def resource_exists(name):
@@ -68,7 +71,7 @@ def resource_exists(name):
         return True
     except IOError:
         return False
-        
+
 
 # Enable this when we get some translations?
 # We want an i18n API that is useful to programs using Python's gettext
@@ -105,7 +108,7 @@ _tzinfo_cache = {}
 
 def timezone(zone):
     r''' Return a datetime.tzinfo implementation for the given timezone 
-    
+
     >>> from datetime import datetime, timedelta
     >>> utc = timezone('UTC')
     >>> eastern = timezone('US/Eastern')
@@ -152,7 +155,7 @@ def timezone(zone):
             _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
         else:
             raise UnknownTimeZoneError(zone)
-    
+
     return _tzinfo_cache[zone]
 
 
@@ -167,7 +170,7 @@ HOUR = datetime.timedelta(hours=1)
 
 class UTC(datetime.tzinfo):
     """UTC
-    
+
     Identical to the reference UTC implementation given in Python docs except
     that it unpickles using the single module global instance defined beneath
     this class declaration.
@@ -185,7 +188,7 @@ class UTC(datetime.tzinfo):
 
     def dst(self, dt):
         return ZERO
-    
+
     def __reduce__(self):
         return _UTC, ()
 
@@ -213,14 +216,14 @@ UTC = utc = UTC() # UTC is a singleton
 
 def _UTC():
     """Factory function for utc unpickling.
-    
+
     Makes sure that unpickling a utc instance always returns the same 
     module global.
-    
+
     These examples belong in the UTC class above, but it is obscured; or in
     the README.txt, but we are not depending on Python 2.4 so integrating
     the README.txt examples with the unit tests is not trivial.
-    
+
     >>> import datetime, pickle
     >>> dt = datetime.datetime(2005, 3, 1, 14, 13, 21, tzinfo=utc)
     >>> naive = dt.replace(tzinfo=None)
@@ -315,7 +318,7 @@ country_timezones = _CountryTimezoneDict()
 
 class _CountryNameDict(_LazyDict):
     '''Dictionary proving ISO3166 code -> English name.
-    
+
     >>> country_names['au']
     'Australia'
     '''
@@ -352,7 +355,7 @@ class _FixedOffset(datetime.tzinfo):
 
     def dst(self, dt):
         return None
-    
+
     def tzname(self, dt):
         return None
 
@@ -374,7 +377,7 @@ class _FixedOffset(datetime.tzinfo):
 
 def FixedOffset(offset, _tzinfos = {}):
     """return a fixed-offset timezone based off a number of minutes.
-    
+
         >>> one = FixedOffset(-330)
         >>> one
         pytz.FixedOffset(-330)
@@ -386,7 +389,7 @@ def FixedOffset(offset, _tzinfos = {}):
         pytz.FixedOffset(1380)
         >>> two.utcoffset(datetime.datetime.now())
         datetime.timedelta(0, 82800)
-    
+
     The datetime.timedelta must be between the range of -1 and 1 day,
     non-inclusive.
 
@@ -407,7 +410,7 @@ def FixedOffset(offset, _tzinfos = {}):
 
     There should always be only one instance of a FixedOffset per timedelta.
     This should be true for multiple creation calls.
-    
+
         >>> FixedOffset(-330) is one
         True
         >>> FixedOffset(1380) is two
