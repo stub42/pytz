@@ -49,7 +49,7 @@ setup (
     version=pytz.VERSION,
     zip_safe=True,
     description='World timezone definitions, modern and historical',
-    long_description=ldesc,
+    long_description=open('README.txt','r').read(),
     author=me,
     author_email=memail,
     maintainer=me,
