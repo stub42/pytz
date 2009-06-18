@@ -55,7 +55,7 @@ setup (
     maintainer=me,
     maintainer_email=memail,
     url='http://pytz.sourceforge.net',
-    license=open('LICENSE.txt','r').read(),
+    license='MIT',
     keywords=['timezone','tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,
     package_data=package_data,
