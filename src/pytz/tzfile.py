@@ -12,12 +12,12 @@ from pytz.tzinfo import memorized_datetime, memorized_timedelta
 
 
 def build_tzinfo(zone, fp):
-    head_fmt = '>4s 16x 6l'
+    head_fmt = '>4s c 15x 6l'
     head_size = calcsize(head_fmt)
-    (magic,ttisgmtcnt,ttisstdcnt,leapcnt,
-     timecnt,typecnt,charcnt) =  unpack(head_fmt, fp.read(head_size))
+    (magic, format, ttisgmtcnt, ttisstdcnt,leapcnt, timecnt,
+        typecnt, charcnt) =  unpack(head_fmt, fp.read(head_size))
 
-    # Make sure it is a tzinfo(5) file
+    # Make sure it is a tzfile(5) file
     assert magic == 'TZif'
 
     # Read out the transition times, localtime indices and ttinfo structures.

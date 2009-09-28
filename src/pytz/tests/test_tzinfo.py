@@ -26,6 +26,22 @@ NOTIME = timedelta(0)
 UTC = pytz.timezone('UTC')
 GMT = pytz.timezone('GMT')
 
+
+def prettydt(dt):
+    """datetime as a string using a known format.
+
+    We don't use strftime as it doesn't handle years earlier than 1900
+    per http://bugs.python.org/issue1777412
+    """
+    if dt.utcoffset() >= timedelta(0):
+        offset = '+%s' % (dt.utcoffset(),)
+    else:
+        offset = '-%s' % (-1 * dt.utcoffset(),)
+    return '%04d-%02d-%02d %02d:%02d:%02d %s %s' % (
+        dt.year, dt.month, dt.day,
+        dt.hour, dt.minute, dt.second,
+        dt.tzname(), offset)
+
 class BasicTest(unittest.TestCase):
 
     def testVersion(self):
@@ -194,13 +210,15 @@ class USEasternDSTStartTestCase(unittest.TestCase):
 
             # Make sure arithmetic crossing DST boundaries ends
             # up in the correct timezone after normalization
+            utc_plus_delta = (utc_dt + delta).astimezone(self.tzinfo)
+            local_plus_delta = self.tzinfo.normalize(dt + delta)
             self.failUnlessEqual(
-                    (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
-                    self.tzinfo.normalize(dt + delta).strftime(fmt),
+                    prettydt(utc_plus_delta),
+                    prettydt(local_plus_delta),
                     'Incorrect result for delta==%d days.  Wanted %r. Got %r'%(
                         days,
-                        (utc_dt + delta).astimezone(self.tzinfo).strftime(fmt),
-                        self.tzinfo.normalize(dt + delta).strftime(fmt),
+                        prettydt(utc_plus_delta),
+                        prettydt(local_plus_delta),
                         )
                     )
 
@@ -340,7 +358,6 @@ class VilniusCESTStartTestCase(USEasternDSTStartTestCase):
     # causing the clocks to go backwards for this summer time
     # switchover.
     tzinfo = pytz.timezone('Europe/Vilnius')
-    instant = timedelta(seconds=31)
     transition_time = datetime(1941, 6, 23, 21, 00, 00, tzinfo=UTC)
     before = {
         'tzname': 'MSK',
@@ -351,6 +368,109 @@ class VilniusCESTStartTestCase(USEasternDSTStartTestCase):
         'tzname': 'CEST',
         'utcoffset': timedelta(hours=2),
         'dst': timedelta(hours=1),
+        }
+
+
+class LondonHistoryStartTestCase(USEasternDSTStartTestCase):
+    # The first known timezone transition in London was in 1847 when
+    # clocks where synchronized to GMT. However, we currently only
+    # understand v1 format tzfile(5) files which does handle years
+    # this far in the past, so our earliest known transition is in
+    # 1916.
+    tzinfo = pytz.timezone('Europe/London')
+    # transition_time = datetime(1847, 12, 1, 1, 15, 00, tzinfo=UTC)
+    # before = {
+    #     'tzname': 'LMT',
+    #     'utcoffset': timedelta(minutes=-75),
+    #     'dst': timedelta(0),
+    #     }
+    # after = {
+    #     'tzname': 'GMT',
+    #     'utcoffset': timedelta(0),
+    #     'dst': timedelta(0),
+    #     }
+    transition_time = datetime(1916, 5, 21, 2, 00, 00, tzinfo=UTC)
+    before = {
+        'tzname': 'GMT',
+        'utcoffset': timedelta(0),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'BST',
+        'utcoffset': timedelta(hours=1),
+        'dst': timedelta(hours=1),
+        }
+
+
+class LondonHistoryEndTestCase(USEasternDSTStartTestCase):
+    # Timezone switchovers are projected into the future, even
+    # though no official statements exist or could be believed even
+    # if they did exist. We currently only check the last known
+    # transition in 2037, as we are still using v1 format tzfile(5)
+    # files.
+    tzinfo = pytz.timezone('Europe/London')
+    # transition_time = datetime(2499, 10, 25, 1, 0, 0, tzinfo=UTC)
+    transition_time = datetime(2037, 10, 25, 1, 0, 0, tzinfo=UTC)
+    before = {
+        'tzname': 'BST',
+        'utcoffset': timedelta(hours=1),
+        'dst': timedelta(hours=1),
+        }
+    after = {
+        'tzname': 'GMT',
+        'utcoffset': timedelta(0),
+        'dst': timedelta(0),
+        }
+
+
+class NoumeaHistoryStartTestCase(USEasternDSTStartTestCase):
+    # Noumea adopted a whole hour offset in 1912. Previously
+    # it was 11 hours, 5 minutes and 48 seconds off UTC. However,
+    # due to limitations of the Python datetime library, we need
+    # to round that to 11 hours 6 minutes.
+    tzinfo = pytz.timezone('Pacific/Noumea')
+    transition_time = datetime(1912, 1, 12, 12, 54, 12, tzinfo=UTC)
+    before = {
+        'tzname': 'LMT',
+        'utcoffset': timedelta(hours=11, minutes=6),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'NCT',
+        'utcoffset': timedelta(hours=11),
+        'dst': timedelta(0),
+        }
+
+
+class NoumeaDSTEndTestCase(USEasternDSTStartTestCase):
+    # Noumea dropped DST in 1997.
+    tzinfo = pytz.timezone('Pacific/Noumea')
+    transition_time = datetime(1997, 3, 1, 15, 00, 00, tzinfo=UTC)
+    before = {
+        'tzname': 'NCST',
+        'utcoffset': timedelta(hours=12),
+        'dst': timedelta(hours=1),
+        }
+    after = {
+        'tzname': 'NCT',
+        'utcoffset': timedelta(hours=11),
+        'dst': timedelta(0),
+        }
+
+
+class NoumeaNoMoreDSTTestCase(NoumeaDSTEndTestCase):
+    # Noumea dropped DST in 1997. Here we test that it stops occuring.
+    tzinfo = pytz.timezone('Pacific/Noumea')
+    transition_time = datetime(2037, 3, 1, 15, 00, 00, tzinfo=UTC)
+    before = {
+        'tzname': 'NCT',
+        'utcoffset': timedelta(hours=11),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'NCT',
+        'utcoffset': timedelta(hours=11),
+        'dst': timedelta(0),
         }
 
 

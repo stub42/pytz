@@ -19,7 +19,6 @@ class ZdumpTestCase(unittest.TestCase):
             loc_dt.replace(tzinfo=None))
 
     def local_to_utc_check(self, zone, utc_dt, loc_dt, loc_tzname, is_dst):
-        loc_tz = pytz.timezone(zone)
         self.failUnlessEqual(
             loc_dt.astimezone(pytz.utc).replace(tzinfo=None),
             utc_dt.replace(tzinfo=None))
@@ -42,6 +41,8 @@ def test_suite():
             zone, utc_string, loc_string, tzname, is_dst = m.groups()
         else:
             raise RuntimeError, 'Dud line %r' % (line,)
+
+        is_dst = bool(int(is_dst))
 
         if zone != last_zone:
             classname = zone.replace(
@@ -88,19 +89,21 @@ def test_suite():
             is_dst=is_dst):
             self.utc_to_local_check(zone, utc_dt, loc_dt, tzname, is_dst)
         test_utc_to_local.__name__ = test_name
-        #test_utc_to_local.__doc__ = line
         setattr(test_class, test_name, test_utc_to_local)
 
         if not skip_local:
             test_name = 'test_local_to_utc_%04d_%02d_%02d_%02d_%02d_%02d' % (
-                utc_dt.year, utc_dt.month, utc_dt.day,
-                utc_dt.hour, utc_dt.minute, utc_dt.second)
+                loc_dt.year, loc_dt.month, loc_dt.day,
+                loc_dt.hour, loc_dt.minute, loc_dt.second)
+            if is_dst:
+                test_name += '_dst'
+            else:
+                test_name += '_nodst'
             def test_local_to_utc(
                 self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt, tzname=tzname,
                 is_dst=is_dst):
                 self.local_to_utc_check(zone, utc_dt, loc_dt, tzname, is_dst)
             test_local_to_utc.__name__ = test_name
-            #test_local_to_utc.__doc__ = line
             setattr(test_class, test_name, test_local_to_utc)
 
 

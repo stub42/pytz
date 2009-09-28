@@ -68,13 +68,13 @@ class BaseTzInfo(tzinfo):
 class StaticTzInfo(BaseTzInfo):
     '''A timezone that has a constant offset from UTC
 
-    These timezones are rare, as most regions have changed their
-    offset from UTC at some point in their history
+    These timezones are rare, as most locations have changed their
+    offset at some point in their history
     '''
     def fromutc(self, dt):
         '''See datetime.tzinfo.fromutc'''
         return (dt + self._utcoffset).replace(tzinfo=self)
-    
+
     def utcoffset(self,dt):
         '''See datetime.tzinfo.utcoffset'''
         return self._utcoffset
@@ -110,11 +110,10 @@ class StaticTzInfo(BaseTzInfo):
 
 class DstTzInfo(BaseTzInfo):
     '''A timezone that has a variable offset from UTC
-   
-    The offset might change if daylight savings time comes into effect,
-    or at a point in history when the region decides to change their 
-    timezone definition. 
 
+    The offset might change if daylight savings time comes into effect,
+    or at a point in history when the region decides to change their
+    timezone definition.
     '''
     # Overridden in subclass
     _utc_transition_times = None # Sorted list of DST transition times in UTC
@@ -180,7 +179,6 @@ class DstTzInfo(BaseTzInfo):
         >>> before = eastern.normalize(before)
         >>> before.strftime(fmt)
         '2002-10-27 01:50:00 EDT (-0400)'
-
         '''
         if dt.tzinfo is None:
             raise ValueError, 'Naive time - no tzinfo set'
@@ -194,13 +192,13 @@ class DstTzInfo(BaseTzInfo):
 
     def localize(self, dt, is_dst=False):
         '''Convert naive time to local time.
-        
+
         This method should be used to construct localtimes, rather
         than passing a tzinfo argument to a datetime constructor.
 
         is_dst is used to determine the correct timezone in the ambigous
         period at the end of daylight savings time.
-        
+
         >>> from pytz import timezone
         >>> fmt = '%Y-%m-%d %H:%M:%S %Z (%z)'
         >>> amdam = timezone('Europe/Amsterdam')
@@ -223,7 +221,7 @@ class DstTzInfo(BaseTzInfo):
         AmbiguousTimeError: 2004-10-31 02:00:00
 
         is_dst defaults to False
-        
+
         >>> amdam.localize(dt) == amdam.localize(dt, False)
         True
 
@@ -324,7 +322,7 @@ class DstTzInfo(BaseTzInfo):
                     )
         filtered_possible_loc_dt.sort(mycmp)
         return filtered_possible_loc_dt[0]
-        
+
     def utcoffset(self, dt):
         '''See datetime.tzinfo.utcoffset'''
         return self._utcoffset
@@ -388,7 +386,7 @@ class NonExistentTimeError(InvalidTimeError):
 
 def unpickler(zone, utcoffset=None, dstoffset=None, tzname=None):
     """Factory function for unpickling pytz tzinfo instances.
-    
+
     This is shared for both StaticTzInfo and DstTzInfo instances, because
     database changes could cause a zones implementation to switch between
     these two base classes and we can't break pickles on a pytz version
