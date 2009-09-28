@@ -27,7 +27,7 @@ def main():
         # the daterange we test against - zdump understands v2 format
         # files and will output historical records we can't cope with
         # otherwise.
-        zd_out, zd_in = popen2.popen2('%s -v -c 1901,2038 %s' % (zdump, zone))
+        zd_out, zd_in = popen2.popen2('%s -v -c 1902,2038 %s' % (zdump, zone))
         zd_in.close()
         # Skip bogus output on 64bit architectures, per Bug #213816
         lines = [
