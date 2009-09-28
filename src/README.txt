@@ -12,7 +12,7 @@ or higher. It also solves the issue of ambiguous times at the end
 of daylight savings, which you can read more about in the Python
 Library Reference (datetime.tzinfo).
 
-Amost all (over 540) of the Olson timezones are supported [*]_.
+Amost all of the Olson timezones are supported.
 
 Note that this library differs from the documented Python API for
 tzinfo implementations; if you want to create local wallclock
@@ -459,14 +459,4 @@ Contact
 ~~~~~~~
 
 Stuart Bishop <stuart@stuartbishop.net>
-
-.. [*]  The missing few are for Riyadh Solar Time in 1987, 1988 and 1989.
-	As Saudi Arabia gave up trying to cope with their timezone
-	definition, I see no reason to complicate my code further
-	to cope with them.  (I understand the intention was to set
-	sunset to 0:00 local time, the start of the Islamic day.
-	In the best case caused the DST offset to change daily and
-	worst case caused the DST offset to change each instant
-	depending on how you interpreted the ruling.)
-
 

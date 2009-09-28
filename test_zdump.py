@@ -17,7 +17,7 @@ class ZdumpTestCase(unittest.TestCase):
         self.failUnlessEqual(
             utc_dt.astimezone(loc_tz).replace(tzinfo=None),
             loc_dt.replace(tzinfo=None))
-       
+
     def local_to_utc_check(self, zone, utc_dt, loc_dt, loc_tzname, is_dst):
         loc_tz = pytz.timezone(zone)
         self.failUnlessEqual(
