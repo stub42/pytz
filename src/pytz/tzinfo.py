@@ -250,12 +250,14 @@ class DstTzInfo(BaseTzInfo):
         if dt.tzinfo is not None:
             raise ValueError, 'Not naive datetime (tzinfo is already set)'
 
-        # Find the possibly correct timezones. We probably just have one,
-        # but we might end up with two if we are in the end-of-DST
-        # transition period. Or possibly more in some particularly confused
-        # location...
+        # Find the two best possibilities.
         possible_loc_dt = set()
-        for tzinfo in self._tzinfos.values():
+        for delta in [timedelta(days=-1), timedelta(days=1)]:
+            loc_dt = dt + delta
+            idx = max(0, bisect_right(
+                self._utc_transition_times, loc_dt) - 1)
+            inf = self._transition_info[idx]
+            tzinfo = self._tzinfos[inf]
             loc_dt = tzinfo.normalize(dt.replace(tzinfo=tzinfo))
             if loc_dt.replace(tzinfo=None) == dt:
                 possible_loc_dt.add(loc_dt)

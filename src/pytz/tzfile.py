@@ -91,6 +91,9 @@ def build_tzinfo(zone, fp):
                             break # Found std time.
                     dst = inf[0] - stdinf[0]
 
+                if dst == 0: # Can't calculate the dst offset, so use 1hr.
+                    dst = 3600
+
             tzname = inf[2]
 
             # Round utcoffset and dst to the nearest minute or the

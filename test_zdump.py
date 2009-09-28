@@ -28,20 +28,17 @@ def test_suite():
     testcases = []
     raw_data = open(
         os.path.join(os.path.dirname(__file__), 'zdump.out'), 'r').readlines()
-    raw_data.reverse() # Keep tests running in alphabetical order
     last_zone = None
     test_class = None
-    for line in raw_data:
-        m = re.match(
-        r'^([^\s]+) \s+ (.+) \s UTC \s+ = \s+ (.+) \s ([^\s]+) \s+ '
-            r'isdst=(0|1)$',
-            line, re.X
-            )
-        if m:
-            zone, utc_string, loc_string, tzname, is_dst = m.groups()
-        else:
+    zdump_line_re = re.compile(r'''(?x)
+        ^([^\s]+) \s+ (.+) \s UTC \s+ = \s+ (.+) \s ([^\s]+) \s+ isdst=(0|1)$
+        ''')
+    for i in range(0, len(raw_data)):
+        line = raw_data[i]
+        m = zdump_line_re.search(line)
+        if m is None:
             raise RuntimeError, 'Dud line %r' % (line,)
-
+        zone, utc_string, loc_string, tzname, is_dst = m.groups()
         is_dst = bool(int(is_dst))
 
         if zone != last_zone:
@@ -50,31 +47,49 @@ def test_suite():
             test_class = type(classname, (ZdumpTestCase,), {})
             testcases.append(test_class)
             last_zone = zone
-            prev_loc_dt = None
-            prev_is_dst = False
+            skip_next_local = False
 
         utc_dt = datetime(
             *strptime(utc_string, '%a %b %d %H:%M:%S %Y')[:6])
         loc_dt = datetime(
             *strptime(loc_string, '%a %b %d %H:%M:%S %Y')[:6])
 
-        # Urgh - utcoffset() and dst() have to be rounded to the nearest
-        # minute, so we need to break our tests to match this limitation
-        real_offset = loc_dt - utc_dt
-        secs = real_offset.seconds + real_offset.days*86400
-        fake_offset = timedelta(seconds=int((secs+30)/60)*60)
-        loc_dt = utc_dt + fake_offset
+        def round_dt(loc_dt, utc_dt):
+            # Urgh - utcoffset() and dst() have to be rounded to the nearest
+            # minute, so we need to break our tests to match this limitation
+            real_offset = loc_dt - utc_dt
+            secs = real_offset.seconds + real_offset.days*86400
+            fake_offset = timedelta(seconds=int((secs+30)/60)*60)
+            return utc_dt + fake_offset
 
-        # If the naive time on the previous line is greater than on this
+        loc_dt = round_dt(loc_dt, utc_dt)
+
+        # If the naive time on the next line is less than on this
         # line, and we arn't seeing an end-of-dst transition, then
-        # we can't do our local->utc test since we are in an ambiguous
-        # time period (ie. we have wound back the clock but don't have
-        # differing is_dst flags to resolve the ambiguity)
-        skip_local = (
-            prev_loc_dt is not None and prev_loc_dt > loc_dt and
-            bool(prev_is_dst) == bool(is_dst))
-        prev_loc_dt = loc_dt
-        prev_is_dst = is_dst
+        # we can't do our local->utc tests for either this nor the
+        # next line since we are in an ambiguous time period (ie.
+        # we have wound back the clock but don't have differing
+        # is_dst flags to resolve the ambiguity)
+        skip_local = skip_next_local
+        skip_next_local = False
+        try:
+            m = zdump_line_re.match(raw_data[i+1])
+        except IndexError:
+            m = None
+        if m is not None:
+            (next_zone, next_utc_string, next_loc_string,
+                next_tzname, next_is_dst) = m.groups()
+            next_is_dst = bool(int(next_is_dst))
+            if next_zone == zone and next_is_dst == is_dst:
+                next_utc_dt = datetime(
+                    *strptime(next_utc_string, '%a %b %d %H:%M:%S %Y')[:6])
+                next_loc_dt = round_dt(
+                    datetime(*strptime(
+                        next_loc_string, '%a %b %d %H:%M:%S %Y')[:6]),
+                    next_utc_dt)
+                if next_loc_dt <= loc_dt:
+                    skip_local = True
+                    skip_next_local = True
 
         loc_tz = pytz.timezone(zone)
         loc_dt = loc_tz.localize(loc_dt, is_dst)
@@ -106,6 +121,10 @@ def test_suite():
             test_local_to_utc.__name__ = test_name
             setattr(test_class, test_name, test_local_to_utc)
 
+    classname = zone.replace(
+            '+', '_plus_').replace('-', '_minus_').replace('/','_')
+    test_class = type(classname, (ZdumpTestCase,), {})
+    testcases.append(test_class)
 
     suite = unittest.TestSuite()
     while testcases:
