@@ -460,18 +460,10 @@ class NoumeaDSTEndTestCase(USEasternDSTStartTestCase):
 
 class NoumeaNoMoreDSTTestCase(NoumeaDSTEndTestCase):
     # Noumea dropped DST in 1997. Here we test that it stops occuring.
-    tzinfo = pytz.timezone('Pacific/Noumea')
-    transition_time = datetime(2037, 3, 1, 15, 00, 00, tzinfo=UTC)
-    before = {
-        'tzname': 'NCT',
-        'utcoffset': timedelta(hours=11),
-        'dst': timedelta(0),
-        }
-    after = {
-        'tzname': 'NCT',
-        'utcoffset': timedelta(hours=11),
-        'dst': timedelta(0),
-        }
+    transition_time = (
+        NoumeaDSTEndTestCase.transition_time + timedelta(days=365*10))
+    before = NoumeaDSTEndTestCase.after
+    after = NoumeaDSTEndTestCase.after
 
 
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
