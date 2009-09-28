@@ -98,7 +98,7 @@ def test_suite():
             def test_local_to_utc(
                 self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt, tzname=tzname,
                 is_dst=is_dst):
-                self.utc_to_local_check(zone, utc_dt, loc_dt, tzname, is_dst)
+                self.local_to_utc_check(zone, utc_dt, loc_dt, tzname, is_dst)
             test_local_to_utc.__name__ = test_name
             #test_local_to_utc.__doc__ = line
             setattr(test_class, test_name, test_local_to_utc)
