@@ -27,7 +27,7 @@ def allzones():
                 ])
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]
-   
+
     if target:
         wanted = target + ['US/Eastern', 'UTC']
         zones = [z for z in zones if z in wanted]
@@ -128,7 +128,7 @@ def add_allzones(filename):
 
 def main(destdir):
     _destdir = os.path.join(os.path.abspath(destdir), 'dist')
-   
+
     dupe_src(_destdir)
     add_allzones(os.path.join(_destdir, 'pytz', '__init__.py'))
 

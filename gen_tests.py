@@ -23,7 +23,11 @@ def main():
         print 'Collecting zdump(1) output for %s in zdump.out' % (zone,)
         tname = zone.replace(
                 '+', '_plus_').replace('-', '_minus_').replace('/','_')
-        zd_out, zd_in = popen2.popen2('%s -v -c 1800,2038 %s' % (zdump, zone))
+        # We don't yet support v2 format tzfile(5) files, so limit
+        # the daterange we test against - zdump understands v2 format
+        # files and will output historical records we can't cope with
+        # otherwise.
+        zd_out, zd_in = popen2.popen2('%s -v -c 1902,2038 %s' % (zdump, zone))
         zd_in.close()
         # Skip bogus output on 64bit architectures, per Bug #213816
         lines = [
