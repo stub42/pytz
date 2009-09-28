@@ -84,15 +84,13 @@ def build_tzinfo(zone, fp):
                         break
                 dst = inf[0] - prev_inf[0] # dst offset
 
-                if dst < 0: # Negative dst? Look further.
+                if dst <= 0: # Bad dst? Look further.
                     for j in range(i+1, len(transitions)):
                         stdinf = ttinfo[lindexes[j]]
                         if not stdinf[1]:
-                            break # Found std time.
-                    dst = inf[0] - stdinf[0]
-
-                if dst == 0: # Can't calculate the dst offset, so use 1hr.
-                    dst = 3600
+                            dst = inf[0] - stdinf[0]
+                            if dst > 0:
+                                break # Found a useful std time.
 
             tzname = inf[2]
 
