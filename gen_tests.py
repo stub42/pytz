@@ -18,7 +18,7 @@ def main():
     dest_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
     datf = open(os.path.join(dest_dir, 'zdump.out'), 'w')
-    
+
     for zone in allzones():
         print 'Collecting zdump(1) output for %s in zdump.out' % (zone,)
         tname = zone.replace(
