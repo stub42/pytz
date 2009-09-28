@@ -1,5 +1,5 @@
 include *.txt setup.py
 recursive-include pytz *.py
 recursive-include pytz *.pot
-recursive-include pytz/zoneinfo *
+graft pytz/zoneinfo
 exclude test_zdump.py
