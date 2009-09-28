@@ -466,6 +466,22 @@ class NoumeaNoMoreDSTTestCase(NoumeaDSTEndTestCase):
     after = NoumeaDSTEndTestCase.after
 
 
+class TahitiTestCase(USEasternDSTStartTestCase):
+    # Tahiti has had a single transition in its history.
+    tzinfo = pytz.timezone('Pacific/Tahiti')
+    transition_time = datetime(1912, 10, 1, 9, 58, 16, tzinfo=UTC)
+    before = {
+        'tzname': 'LMT',
+        'utcoffset': timedelta(hours=-9, minutes=-58),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'TAHT',
+        'utcoffset': timedelta(hours=-10),
+        'dst': timedelta(0),
+        }
+
+
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
     tzinfo = reference.Eastern
     def test_arithmetic(self):
