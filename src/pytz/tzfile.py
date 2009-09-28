@@ -16,7 +16,7 @@ def build_tzinfo(zone, fp):
     head_size = calcsize(head_fmt)
     (magic,ttisgmtcnt,ttisstdcnt,leapcnt,
      timecnt,typecnt,charcnt) =  unpack(head_fmt, fp.read(head_size))
-    
+
     # Make sure it is a tzinfo(5) file
     assert magic == 'TZif'
 
@@ -83,6 +83,14 @@ def build_tzinfo(zone, fp):
                     if not prev_inf[1]:
                         break
                 dst = inf[0] - prev_inf[0] # dst offset
+
+                if dst < 0: # Negative dst? Look further.
+                    for j in range(i+1, len(transitions)):
+                        stdinf = ttinfo[lindexes[j]]
+                        if not stdinf[1]:
+                            break # Found std time.
+                    dst = inf[0] - stdinf[0]
+
             tzname = inf[2]
 
             # Round utcoffset and dst to the nearest minute or the

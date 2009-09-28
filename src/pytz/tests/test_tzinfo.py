@@ -334,6 +334,26 @@ class VilniusWMTEndTestCase(USEasternDSTStartTestCase):
         }
 
 
+class VilniusCESTStartTestCase(USEasternDSTStartTestCase):
+    # In 1941, Vilnius changed from MSG to CEST, switching to summer
+    # time while simultaneously reducing its UTC offset by two hours,
+    # causing the clocks to go backwards for this summer time
+    # switchover.
+    tzinfo = pytz.timezone('Europe/Vilnius')
+    instant = timedelta(seconds=31)
+    transition_time = datetime(1941, 6, 23, 21, 00, 00, tzinfo=UTC)
+    before = {
+        'tzname': 'MSK',
+        'utcoffset': timedelta(hours=3),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'CEST',
+        'utcoffset': timedelta(hours=2),
+        'dst': timedelta(hours=1),
+        }
+
+
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
     tzinfo = reference.Eastern
     def test_arithmetic(self):
