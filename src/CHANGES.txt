@@ -44,3 +44,7 @@
 
     - Ensure API can accept Unicode strings (Bug #96957)
 
+2009-09-29
+
+    - Fix test_zdump tests and bugs the fixed tests picked up, including
+      the fix for Bug #427444.
