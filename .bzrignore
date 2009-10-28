@@ -17,3 +17,6 @@
 
 # Generated datafile for test_zdump.py
 ./zdump.out
+
+# Where I keep my tarballs
+./elsie.nci.nih.gov/*.tar.gz
