@@ -106,7 +106,10 @@ def add_allzones(filename):
     # labelled 'common'. 
     cz.extend([
         'UTC', 'GMT', 'US/Eastern', 'US/Pacific', 'US/Mountain',
-        'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska'])
+        'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska',
+        # Canadian timezones per Bug #506341
+        'Canada/Newfoundland', 'Canada/Atlantic', 'Canada/Eastern',
+        'Canada/Central', 'Canada/Mountain', 'Canada/Pacific'])
     cz.sort()
 
     print >> outf, 'all_timezones = \\'
@@ -134,7 +137,6 @@ def main(destdir):
 
 target = None
 if __name__ == '__main__':
-    
     try:
         target = sys.argv[1:]
     except IndexError:
