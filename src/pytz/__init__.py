@@ -180,6 +180,10 @@ class UTC(datetime.tzinfo):
     """
     zone = "UTC"
 
+    _utcoffset = ZERO
+    _dst = ZERO
+    _tzname = zone
+
     def utcoffset(self, dt):
         return ZERO
 
