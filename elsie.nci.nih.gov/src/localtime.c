@@ -5,7 +5,7 @@
 
 #ifndef lint
 #ifndef NOID
-static char	elsieid[] = "@(#)localtime.c	8.9";
+static char	elsieid[] = "@(#)localtime.c	8.13";
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
@@ -350,6 +350,7 @@ register const int		doextend;
 					4 * TZ_MAX_TIMES];
 	} u;
 
+	sp->goback = sp->goahead = FALSE;
 	if (name == NULL && (name = TZDEFAULT) == NULL)
 		return -1;
 	{
@@ -555,7 +556,6 @@ register const int		doextend;
 					sp->ttis[sp->typecnt++] = ts.ttis[1];
 			}
 	}
-	sp->goback = sp->goahead = FALSE;
 	if (sp->timecnt > 1) {
 		for (i = 1; i < sp->timecnt; ++i)
 			if (typesequiv(sp, sp->types[i], sp->types[0]) &&
@@ -1163,7 +1163,7 @@ tzsetwall(void)
 
 #ifdef ALL_STATE
 	if (lclptr == NULL) {
-		lclptr = (struct state *) malloc(sizeof *lclptr);
+		lclptr = (struct state *) calloc(1, sizeof *lclptr);
 		if (lclptr == NULL) {
 			settzname();	/* all we can do */
 			return;
@@ -1194,7 +1194,7 @@ tzset(void)
 
 #ifdef ALL_STATE
 	if (lclptr == NULL) {
-		lclptr = (struct state *) malloc(sizeof *lclptr);
+		lclptr = (struct state *) calloc(1, sizeof *lclptr);
 		if (lclptr == NULL) {
 			settzname();	/* all we can do */
 			return;
@@ -1355,7 +1355,7 @@ struct tm * const	tmp;
 	if (!gmt_is_set) {
 		gmt_is_set = TRUE;
 #ifdef ALL_STATE
-		gmtptr = (struct state *) malloc(sizeof *gmtptr);
+		gmtptr = (struct state *) calloc(1, sizeof *gmtptr);
 		if (gmtptr != NULL)
 #endif /* defined ALL_STATE */
 			gmtload(gmtptr);
@@ -1889,6 +1889,10 @@ const long		offset;
 	int				types[TZ_MAX_TYPES];
 	int				okay;
 
+	if (tmp == NULL) {
+		errno = EINVAL;
+		return WRONG;
+	}
 	if (tmp->tm_isdst > 1)
 		tmp->tm_isdst = 1;
 	t = time2(tmp, funcp, offset, &okay);
@@ -1960,7 +1964,8 @@ time_t
 timelocal(tmp)
 struct tm * const	tmp;
 {
-	tmp->tm_isdst = -1;	/* in case it wasn't initialized */
+	if (tmp != NULL)
+		tmp->tm_isdst = -1;	/* in case it wasn't initialized */
 	return mktime(tmp);
 }
 
@@ -1968,7 +1973,8 @@ time_t
 timegm(tmp)
 struct tm * const	tmp;
 {
-	tmp->tm_isdst = 0;
+	if (tmp != NULL)
+		tmp->tm_isdst = 0;
 	return time1(tmp, gmtsub, 0L);
 }
 
@@ -1977,7 +1983,8 @@ timeoff(tmp, offset)
 struct tm * const	tmp;
 const long		offset;
 {
-	tmp->tm_isdst = 0;
+	if (tmp != NULL)
+		tmp->tm_isdst = 0;
 	return time1(tmp, gmtsub, offset);
 }
 
