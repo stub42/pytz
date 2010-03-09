@@ -51,6 +51,9 @@ If you already have the .egg file, you can use that too::
 Example & Usage
 ~~~~~~~~~~~~~~~
 
+Localized times and date arithmetic
+-----------------------------------
+
 >>> from datetime import datetime, timedelta
 >>> from pytz import timezone
 >>> import pytz
@@ -157,6 +160,74 @@ are no daylight savings time transitions to deal with.
 >>> utc_dt2 = au_dt.astimezone(utc)
 >>> utc_dt2.strftime(fmt)
 '2006-03-26 21:34:59 UTC+0000'
+
+
+tzinfo API
+----------
+
+The ``tzinfo`` instances returned by the ``timezone()`` function have
+been extended to cope with ambiguous times by adding an ``is_dst``
+parameter to then ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
+
+>>> tz = timezone('America/St_Johns')
+
+>>> normal = datetime(2009, 9, 1)
+>>> ambiguous = datetime(2009, 10, 31, 23, 30)
+
+the ``is_dst`` parameter is ignormed for most timestamps, but
+is used to resolve the ambiguity during ambiguous periods caused
+to DST transitions.
+
+>>> tz.utcoffset(normal, is_dst=True)
+datetime.timedelta(-1, 77400)
+>>> tz.dst(normal, is_dst=True)
+datetime.timedelta(0, 3600)
+>>> tz.tzname(normal, is_dst=True)
+'NDT'
+
+>>> tz.utcoffset(ambiguous, is_dst=True)
+datetime.timedelta(-1, 77400)
+>>> tz.dst(ambiguous, is_dst=True)
+datetime.timedelta(0, 3600)
+>>> tz.tzname(ambiguous, is_dst=True)
+'NDT'
+
+>>> tz.utcoffset(normal, is_dst=False)
+datetime.timedelta(-1, 77400)
+>>> tz.dst(normal, is_dst=False)
+datetime.timedelta(0, 3600)
+>>> tz.tzname(normal, is_dst=False)
+'NDT'
+
+>>> tz.utcoffset(ambiguous, is_dst=False)
+datetime.timedelta(-1, 73800)
+>>> tz.dst(ambiguous, is_dst=False)
+datetime.timedelta(0)
+>>> tz.tzname(ambiguous, is_dst=False)
+'NST'
+
+If ``is_dst`` is not specified, ambiguous timestamps will raise
+an ``AmbiguousTimeError`` exception.
+
+>>> tz.utcoffset(normal)
+datetime.timedelta(-1, 77400)
+>>> tz.dst(normal)
+datetime.timedelta(0, 3600)
+>>> tz.tzname(normal)
+'NDT'
+
+>>> tz.utcoffset(ambiguous)
+Traceback (most recent call last):
+[...]
+AmbiguousTimeError: 2009-10-31 23:30:00
+>>> tz.dst(ambiguous)
+Traceback (most recent call last):
+[...]
+AmbiguousTimeError: 2009-10-31 23:30:00
+>>> tz.tzname(ambiguous)
+Traceback (most recent call last):
+[...]
+AmbiguousTimeError: 2009-10-31 23:30:00
 
 
 Problems with Localtime
