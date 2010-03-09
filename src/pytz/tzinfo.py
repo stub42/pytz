@@ -83,8 +83,12 @@ class StaticTzInfo(BaseTzInfo):
         '''
         return self._utcoffset
 
-    def dst(self,dt):
-        '''See datetime.tzinfo.dst'''
+    def dst(self, dt, is_dst=None):
+        '''See datetime.tzinfo.dst
+
+        is_dst is ignored for StaticTzInfo, and exists only to
+        retain compatibility with DstTzInfo.
+        '''
         return _notime
 
     def tzname(self,dt):
@@ -356,9 +360,40 @@ class DstTzInfo(BaseTzInfo):
         else:
             return self._utcoffset
 
-    def dst(self, dt):
-        '''See datetime.tzinfo.dst'''
-        return self._dst
+    def dst(self, dt, is_dst=None):
+        '''See datetime.tzinfo.dst
+
+        The is_dst parameter may be used to remove ambiguity during DST
+        transitions.
+
+        >>> from pytz import timezone
+        >>> tz = timezone('America/St_Johns')
+
+        >>> normal = datetime(2009, 9, 1)
+
+        >>> tz.dst(normal)
+        datetime.timedelta(0, 3600)
+        >>> tz.dst(normal, is_dst=False)
+        datetime.timedelta(0, 3600)
+        >>> tz.dst(normal, is_dst=True)
+        datetime.timedelta(0, 3600)
+
+        >>> ambiguous = datetime(2009, 10, 31, 23, 30)
+
+        >>> tz.dst(ambiguous, is_dst=False)
+        datetime.timedelta(0)
+        >>> tz.dst(ambiguous, is_dst=True)
+        datetime.timedelta(0, 3600)
+        >>> tz.dst(ambiguous)
+        Traceback (most recent call last):
+        [...]
+        AmbiguousTimeError: 2009-10-31 23:30:00
+        '''
+        if dt.tzinfo is not self:
+            dt = self.localize(dt, is_dst)
+            return dt.tzinfo._dst
+        else:
+            return self._dst
 
     def tzname(self, dt):
         '''See datetime.tzinfo.tzname'''
