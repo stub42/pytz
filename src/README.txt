@@ -72,7 +72,7 @@ This is used to localize a naive datetime (datetime with no timezone
 information):
 
 >>> loc_dt = eastern.localize(datetime(2002, 10, 27, 6, 0, 0))
->>> print loc_dt.strftime(fmt)
+>>> print(loc_dt.strftime(fmt))
 2002-10-27 06:00:00 EST-0500
 
 The second way of building a localized time is by converting an existing
@@ -295,7 +295,7 @@ facility for constructing them unambiguously:
 >>> loc_dt = datetime(2002, 10, 27, 1, 30, 00)
 >>> est_dt = eastern.localize(loc_dt, is_dst=True)
 >>> edt_dt = eastern.localize(loc_dt, is_dst=False)
->>> print est_dt.strftime(fmt), '/', edt_dt.strftime(fmt)
+>>> print(est_dt.strftime(fmt) + ' / ' + edt_dt.strftime(fmt))
 2002-10-27 01:30:00 EDT-0400 / 2002-10-27 01:30:00 EST-0500
 
 If you pass None as the is_dst flag to localize(), pytz will refuse to
@@ -540,4 +540,5 @@ Contact
 ~~~~~~~
 
 Stuart Bishop <stuart@stuartbishop.net>
+
 

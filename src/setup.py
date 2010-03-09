@@ -8,8 +8,8 @@ try:
     from setuptools import setup
 except ImportError:
     if sys.version_info[:2] == (2,3):
-        print 'Python 2.3 install requires setuptools'
-        print 'http://www.python.org/pypi/setuptools/'
+        print('Python 2.3 install requires setuptools')
+        print('http://www.python.org/pypi/setuptools/')
         sys.exit(1)
     else:
         from distutils.core import setup

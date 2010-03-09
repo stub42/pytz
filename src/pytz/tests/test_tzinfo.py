@@ -2,7 +2,10 @@
 
 import sys, os, os.path
 import unittest, doctest
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 from datetime import datetime, tzinfo, timedelta
 
 if __name__ == '__main__':
@@ -12,6 +15,7 @@ if __name__ == '__main__':
 
 import pytz
 from pytz import reference
+from pytz.tzfile import _byte_string
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
@@ -25,7 +29,6 @@ NOTIME = timedelta(0)
 # UTC is reference implementation.  They both have the same timezone meaning.
 UTC = pytz.timezone('UTC')
 GMT = pytz.timezone('GMT')
-
 
 def prettydt(dt):
     """datetime as a string using a known format.
@@ -104,7 +107,7 @@ class PicklingTest(unittest.TestCase):
         tz = pytz.timezone('Australia/Melbourne')
         p = pickle.dumps(tz)
         tzname = tz._tzname
-        hacked_p = p.replace(tzname, '???')
+        hacked_p = p.replace(_byte_string(tzname), _byte_string('???'))
         self.failIfEqual(p, hacked_p)
         unpickled_tz = pickle.loads(hacked_p)
         self.failUnless(tz is unpickled_tz)
@@ -113,7 +116,9 @@ class PicklingTest(unittest.TestCase):
         # data will continue to be used.
         p = pickle.dumps(tz)
         new_utcoffset = tz._utcoffset.seconds + 42
-        hacked_p = p.replace(str(tz._utcoffset.seconds), str(new_utcoffset))
+        hacked_p = p.replace(
+            _byte_string(str(tz._utcoffset.seconds)),
+            _byte_string(str(new_utcoffset)))
         self.failIfEqual(p, hacked_p)
         unpickled_tz = pickle.loads(hacked_p)
         self.failUnlessEqual(unpickled_tz._utcoffset.seconds, new_utcoffset)
@@ -123,10 +128,10 @@ class PicklingTest(unittest.TestCase):
         # Ensure that applications serializing pytz instances as pickles
         # have no troubles upgrading to a new pytz release. These pickles
         # where created with pytz2006j
-        east1 = pickle.loads(
+        east1 = pickle.loads(_byte_string(
                 "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
                 "I0\nS'EST'\np3\ntRp4\n."
-                )
+                ))
         east2 = pytz.timezone('US/Eastern')
         self.failUnless(east1 is east2)
 

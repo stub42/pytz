@@ -102,13 +102,13 @@ class StaticTzInfo(BaseTzInfo):
     def localize(self, dt, is_dst=False):
         '''Convert naive time to local time'''
         if dt.tzinfo is not None:
-            raise ValueError, 'Not naive datetime (tzinfo is already set)'
+            raise ValueError('Not naive datetime (tzinfo is already set)')
         return dt.replace(tzinfo=self)
 
     def normalize(self, dt, is_dst=False):
         '''Correct the timezone information on the given datetime'''
         if dt.tzinfo is None:
-            raise ValueError, 'Naive time - no tzinfo set'
+            raise ValueError('Naive time - no tzinfo set')
         return dt.replace(tzinfo=self)
 
     def __repr__(self):
@@ -147,7 +147,7 @@ class DstTzInfo(BaseTzInfo):
             self._utcoffset, self._dst, self._tzname = self._transition_info[0]
             _tzinfos[self._transition_info[0]] = self
             for inf in self._transition_info[1:]:
-                if not _tzinfos.has_key(inf):
+                if inf not in _tzinfos:
                     _tzinfos[inf] = self.__class__(inf, _tzinfos)
 
     def fromutc(self, dt):
@@ -193,7 +193,7 @@ class DstTzInfo(BaseTzInfo):
         '2002-10-27 01:50:00 EDT (-0400)'
         '''
         if dt.tzinfo is None:
-            raise ValueError, 'Naive time - no tzinfo set'
+            raise ValueError('Naive time - no tzinfo set')
 
         # Convert dt in localtime to UTC
         offset = dt.tzinfo._utcoffset
@@ -260,7 +260,7 @@ class DstTzInfo(BaseTzInfo):
         NonExistentTimeError: 2008-03-09 02:00:00
         '''
         if dt.tzinfo is not None:
-            raise ValueError, 'Not naive datetime (tzinfo is already set)'
+            raise ValueError('Not naive datetime (tzinfo is already set)')
 
         # Find the two best possibilities.
         possible_loc_dt = set()
