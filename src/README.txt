@@ -169,7 +169,7 @@ deal with.
 
 The ``tzinfo`` instances returned by the ``timezone()`` function have
 been extended to cope with ambiguous times by adding an ``is_dst``
-parameter to then ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
+parameter to the ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
 
 >>> tz = timezone('America/St_Johns')
 
