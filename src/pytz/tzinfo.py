@@ -358,7 +358,9 @@ class DstTzInfo(BaseTzInfo):
         [...]
         AmbiguousTimeError: 2009-10-31 23:30:00
         '''
-        if dt.tzinfo is not self:
+        if dt is None:
+            return None
+        elif dt.tzinfo is not self:
             dt = self.localize(dt, is_dst)
             return dt.tzinfo._utcoffset
         else:
@@ -393,7 +395,9 @@ class DstTzInfo(BaseTzInfo):
         [...]
         AmbiguousTimeError: 2009-10-31 23:30:00
         '''
-        if dt.tzinfo is not self:
+        if dt is None:
+            return None
+        elif dt.tzinfo is not self:
             dt = self.localize(dt, is_dst)
             return dt.tzinfo._dst
         else:
@@ -428,7 +432,9 @@ class DstTzInfo(BaseTzInfo):
         [...]
         AmbiguousTimeError: 2009-10-31 23:30:00
         '''
-        if dt.tzinfo is not self:
+        if dt is None:
+            return self.zone
+        elif dt.tzinfo is not self:
             dt = self.localize(dt, is_dst)
             return dt.tzinfo._tzname
         else:

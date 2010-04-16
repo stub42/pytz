@@ -3,7 +3,7 @@
 import sys, os, os.path
 import unittest, doctest
 import cPickle as pickle
-from datetime import datetime, tzinfo, timedelta
+from datetime import datetime, time, timedelta, tzinfo
 
 if __name__ == '__main__':
     # Only munge path if invoked as a script. Testrunners should have setup
@@ -12,6 +12,7 @@ if __name__ == '__main__':
 
 import pytz
 from pytz import reference
+from pytz.tzinfo import StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
@@ -25,6 +26,7 @@ NOTIME = timedelta(0)
 # UTC is reference implementation.  They both have the same timezone meaning.
 UTC = pytz.timezone('UTC')
 GMT = pytz.timezone('GMT')
+assert isinstance(GMT, StaticTzInfo), 'GMT is no longer a StaticTzInfo'
 
 
 def prettydt(dt):
@@ -64,6 +66,20 @@ class BasicTest(unittest.TestCase):
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
         self.failUnless(now.timetuple() == now.utctimetuple())
+
+    def testUnknownOffsets(self):
+        # This tzinfo behavior is required to make
+        # datetime.time.{utcoffset, dst, tzname} work as documented.
+
+        dst_tz = pytz.timezone('US/Eastern')
+
+        # This information is not known when we don't have a date,
+        # so return None per API.
+        self.failUnless(dst_tz.utcoffset(None) is None)
+        self.failUnless(dst_tz.dst(None) is None)
+        # We don't know the abbreviation, but this is still a valid
+        # tzname per the Python documentation.
+        self.failUnlessEqual(dst_tz.tzname(None), 'US/Eastern')
 
 
 class PicklingTest(unittest.TestCase):
