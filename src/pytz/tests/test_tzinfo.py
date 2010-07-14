@@ -497,6 +497,44 @@ class TahitiTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(0),
         }
 
+class BanderasTestCase_2010_1(USEasternDSTStartTestCase):
+    # In 2010, America/Bahia_Banderas switched from MST to CST, and then
+    # 1 hour later daylight savings kicked in and it switched from CSG
+    # to CDT - two jumps 1 hour apart.
+    tzinfo = pytz.timezone('America/Bahia_Banderas')
+    transition_time = datetime(2010, 4, 4, 7, 0, 0, tzinfo=UTC)
+    before = {
+        'tzname': 'MST',
+        'utcoffset': timedelta(hours=-7),
+        'dst': timedelta(0),
+        }
+    after = {
+        'tzname': 'CST',
+        'utcoffset': timedelta(hours=-6),
+        'dst': timedelta(0),
+        }
+
+    after_after = {
+        'tzname': 'CDT',
+        'utcoffset': timedelta(hours=-5),
+        'dst': timedelta(0),
+        }
+
+    def testHourAfter(self):
+        self._test_all(
+                self.transition_time + timedelta(hours=1), self.after_after
+                )
+
+    def testTwoHoursAfter(self):
+        self._test_all(
+                self.transition_time + timedelta(hours=1), self.after_after
+                )
+
+    def testDayAfter(self):
+        self._test_all(
+                self.transition_time + timedelta(days=1), self.after_after
+                )
+
 
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
     tzinfo = reference.Eastern
@@ -642,6 +680,7 @@ class LocalTestCase(unittest.TestCase):
                 dt.strftime(fmt),
                 '2004-10-31 02:00:00 CET+0100'
                 )
+
 
 def test_suite():
     suite = unittest.TestSuite()
