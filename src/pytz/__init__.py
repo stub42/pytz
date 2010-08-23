@@ -358,7 +358,7 @@ class _FixedOffset(datetime.tzinfo):
         return FixedOffset, (self._minutes, )
 
     def dst(self, dt):
-        return None
+        return ZERO
 
     def tzname(self, dt):
         return None
@@ -387,12 +387,16 @@ def FixedOffset(offset, _tzinfos = {}):
         pytz.FixedOffset(-330)
         >>> one.utcoffset(datetime.datetime.now())
         datetime.timedelta(-1, 66600)
+        >>> one.dst(datetime.datetime.now())
+        datetime.timedelta(0)
 
         >>> two = FixedOffset(1380)
         >>> two
         pytz.FixedOffset(1380)
         >>> two.utcoffset(datetime.datetime.now())
         datetime.timedelta(0, 82800)
+        >>> two.dst(datetime.datetime.now())
+        datetime.timedelta(0)
 
     The datetime.timedelta must be between the range of -1 and 1 day,
     non-inclusive.
