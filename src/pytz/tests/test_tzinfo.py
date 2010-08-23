@@ -16,7 +16,7 @@ from pytz.tzinfo import StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
-EXPECTED_VERSION='2010k'
+EXPECTED_VERSION='2010l'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
