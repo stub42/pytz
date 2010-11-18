@@ -9,7 +9,7 @@ on how to use these modules.
 '''
 
 # The Olson database is updated several times a year.
-OLSON_VERSION = '2010m'
+OLSON_VERSION = '2010o'
 VERSION = OLSON_VERSION
 # Version format for a patch release - only one so far.
 #VERSION = OLSON_VERSION + '.2'
