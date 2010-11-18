@@ -44,6 +44,7 @@ def prettydt(dt):
         dt.hour, dt.minute, dt.second,
         dt.tzname(), offset)
 
+
 class BasicTest(unittest.TestCase):
 
     def testVersion(self):
@@ -643,6 +644,28 @@ class LocalTestCase(unittest.TestCase):
                 '2004-10-31 02:00:00 CET+0100'
                 )
 
+
+class CommonTimezonesTestCase(unittest.TestCase):
+    def test_bratislava(self):
+        # Bratislava is the default timezone for Slovakia, but our
+        # heuristics where not adding it to common_timezones. Ideally,
+        # common_timezones should be populated from zone.tab at runtime,
+        # but I'm hesitant to pay the startup cost as loading the list
+        # on demand whilst remaining backwards compatible seems
+        # difficult.
+        self.failUnless('Europe/Bratislava' in pytz.common_timezones)
+        self.failUnless('Europe/Bratislava' in pytz.common_timezones_set)
+
+    def test_us_eastern(self):
+        self.failUnless('US/Eastern' in pytz.common_timezones)
+        self.failUnless('US/Eastern' in pytz.common_timezones_set)
+
+    def test_belfast(self):
+        # Belfast uses London time.
+        self.failUnless('Europe/Belfast' in pytz.all_timezones_set)
+        self.failIf('Europe/Belfast' in pytz.common_timezones)
+        self.failIf('Europe/Belfast' in pytz.common_timezones_set)
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite('pytz'))
@@ -650,6 +673,7 @@ def test_suite():
     import test_tzinfo
     suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(test_tzinfo))
     return suite
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
