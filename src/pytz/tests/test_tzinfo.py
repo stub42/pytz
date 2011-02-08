@@ -2,7 +2,10 @@
 
 import sys, os, os.path
 import unittest, doctest
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 from datetime import datetime, time, timedelta, tzinfo
 
 if __name__ == '__main__':
@@ -12,6 +15,7 @@ if __name__ == '__main__':
 
 import pytz
 from pytz import reference
+from pytz.tzfile import _byte_string
 from pytz.tzinfo import StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
@@ -27,7 +31,6 @@ NOTIME = timedelta(0)
 UTC = pytz.timezone('UTC')
 GMT = pytz.timezone('GMT')
 assert isinstance(GMT, StaticTzInfo), 'GMT is no longer a StaticTzInfo'
-
 
 def prettydt(dt):
     """datetime as a string using a known format.
@@ -121,7 +124,7 @@ class PicklingTest(unittest.TestCase):
         tz = pytz.timezone('Australia/Melbourne')
         p = pickle.dumps(tz)
         tzname = tz._tzname
-        hacked_p = p.replace(tzname, '???')
+        hacked_p = p.replace(_byte_string(tzname), _byte_string('???'))
         self.failIfEqual(p, hacked_p)
         unpickled_tz = pickle.loads(hacked_p)
         self.failUnless(tz is unpickled_tz)
@@ -130,7 +133,14 @@ class PicklingTest(unittest.TestCase):
         # data will continue to be used.
         p = pickle.dumps(tz)
         new_utcoffset = tz._utcoffset.seconds + 42
-        hacked_p = p.replace(str(tz._utcoffset.seconds), str(new_utcoffset))
+
+        # Python 3 introduced a new pickle protocol where numbers are stored in
+        # hexadecimal representation. Here we extract the pickle
+        # representation of the number for the current Python version.
+        old_pickle_pattern = pickle.dumps(tz._utcoffset.seconds)[3:-1]
+        new_pickle_pattern = pickle.dumps(new_utcoffset)[3:-1]
+        hacked_p = p.replace(old_pickle_pattern, new_pickle_pattern)
+
         self.failIfEqual(p, hacked_p)
         unpickled_tz = pickle.loads(hacked_p)
         self.failUnlessEqual(unpickled_tz._utcoffset.seconds, new_utcoffset)
@@ -140,23 +150,23 @@ class PicklingTest(unittest.TestCase):
         # Ensure that applications serializing pytz instances as pickles
         # have no troubles upgrading to a new pytz release. These pickles
         # where created with pytz2006j
-        east1 = pickle.loads(
-                "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
-                "I0\nS'EST'\np3\ntRp4\n."
-                )
+        east1 = pickle.loads(_byte_string(
+            "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
+            "I0\nS'EST'\np3\ntRp4\n."
+            ))
         east2 = pytz.timezone('US/Eastern')
         self.failUnless(east1 is east2)
 
         # Confirm changes in name munging between 2006j and 2007c cause
         # no problems.
-        pap1 = pickle.loads(
-                "cpytz\n_p\np1\n(S'America/Port_minus_au_minus_Prince'"
-                "\np2\nI-17340\nI0\nS'PPMT'\np3\ntRp4\n."
-                )
+        pap1 = pickle.loads(_byte_string(
+            "cpytz\n_p\np1\n(S'America/Port_minus_au_minus_Prince'"
+            "\np2\nI-17340\nI0\nS'PPMT'\np3\ntRp4\n."))
         pap2 = pytz.timezone('America/Port-au-Prince')
         self.failUnless(pap1 is pap2)
 
-        gmt1 = pickle.loads("cpytz\n_p\np1\n(S'Etc/GMT_plus_10'\np2\ntRp3\n.")
+        gmt1 = pickle.loads(_byte_string(
+            "cpytz\n_p\np1\n(S'Etc/GMT_plus_10'\np2\ntRp3\n."))
         gmt2 = pytz.timezone('Etc/GMT+10')
         self.failUnless(gmt1 is gmt2)
 
