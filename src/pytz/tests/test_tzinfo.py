@@ -146,22 +146,22 @@ class PicklingTest(unittest.TestCase):
         # have no troubles upgrading to a new pytz release. These pickles
         # where created with pytz2006j
         east1 = pickle.loads(_byte_string(
-                "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
-                "I0\nS'EST'\np3\ntRp4\n."
-                ))
+            "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
+            "I0\nS'EST'\np3\ntRp4\n."
+            ))
         east2 = pytz.timezone('US/Eastern')
         self.failUnless(east1 is east2)
 
         # Confirm changes in name munging between 2006j and 2007c cause
         # no problems.
-        pap1 = pickle.loads(
-                "cpytz\n_p\np1\n(S'America/Port_minus_au_minus_Prince'"
-                "\np2\nI-17340\nI0\nS'PPMT'\np3\ntRp4\n."
-                )
+        pap1 = pickle.loads(_byte_string(
+            "cpytz\n_p\np1\n(S'America/Port_minus_au_minus_Prince'"
+            "\np2\nI-17340\nI0\nS'PPMT'\np3\ntRp4\n."))
         pap2 = pytz.timezone('America/Port-au-Prince')
         self.failUnless(pap1 is pap2)
 
-        gmt1 = pickle.loads("cpytz\n_p\np1\n(S'Etc/GMT_plus_10'\np2\ntRp3\n.")
+        gmt1 = pickle.loads(_byte_string(
+            "cpytz\n_p\np1\n(S'Etc/GMT_plus_10'\np2\ntRp3\n."))
         gmt2 = pytz.timezone('Etc/GMT+10')
         self.failUnless(gmt1 is gmt2)
 
