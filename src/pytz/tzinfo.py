@@ -332,13 +332,12 @@ class DstTzInfo(BaseTzInfo):
         # but that is just getting silly.
         #
         # Choose the earliest (by UTC) applicable timezone.
-        def mycmp(a,b):
-            return cmp(
-                    a.replace(tzinfo=None) - a.tzinfo._utcoffset,
-                    b.replace(tzinfo=None) - b.tzinfo._utcoffset,
-                    )
-        filtered_possible_loc_dt.sort(mycmp)
-        return filtered_possible_loc_dt[0]
+        sorting_keys = {}
+        for local_dt in filtered_possible_loc_dt:
+            key = local_dt.replace(tzinfo=None) - local_dt.tzinfo._utcoffset
+            sorting_keys[key] = local_dt
+        first_key = sorted(sorting_keys)[0]
+        return sorting_keys[first_key]
 
     def utcoffset(self, dt, is_dst=None):
         '''See datetime.tzinfo.utcoffset

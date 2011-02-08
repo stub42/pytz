@@ -261,18 +261,19 @@ in different timezones or analyze log files it is not acceptable.
 The best and simplest solution is to stick with using UTC.  The pytz
 package encourages using UTC for internal timezone representation by
 including a special UTC implementation based on the standard Python
-reference implementation in the Python documentation.  This timezone
-unpickles to be the same instance, and pickles to a relatively small
-size.  The UTC implementation can be obtained as pytz.utc, pytz.UTC,
-or pytz.timezone('UTC').
+reference implementation in the Python documentation.
+
+The UTC timezone unpickles to be the same instance, and pickles to a
+smaller size than other pytz tzinfo instances.  The UTC implementation
+can be obtained as pytz.utc, pytz.UTC, or pytz.timezone('UTC').
 
 >>> import pickle, pytz
 >>> dt = datetime(2005, 3, 1, 14, 13, 21, tzinfo=utc)
 >>> naive = dt.replace(tzinfo=None)
 >>> p = pickle.dumps(dt, 1)
 >>> naive_p = pickle.dumps(naive, 1)
->>> len(p), len(naive_p), len(p) - len(naive_p)
-(60, 43, 17)
+>>> len(p) - len(naive_p)
+17
 >>> new = pickle.loads(p)
 >>> new == dt
 True
