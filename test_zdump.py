@@ -4,7 +4,6 @@ import os.path, sys
 sys.path.insert(0, os.path.join('build', 'dist'))
 
 from datetime import datetime, timedelta
-import new
 import re
 from time import strptime
 import unittest
