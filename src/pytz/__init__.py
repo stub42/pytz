@@ -37,12 +37,6 @@ from tzinfo import AmbiguousTimeError, InvalidTimeError, NonExistentTimeError
 from tzinfo import unpickler
 from tzfile import build_tzinfo
 
-# Use 2.3 sets module implementation if set builtin is not available
-try:
-    set
-except NameError:
-    from sets import Set as set
-
 
 def open_resource(name):
     """Open a resource from the zoneinfo subdir for reading.
