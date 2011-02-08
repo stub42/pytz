@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 
 import os.path, sys
 sys.path.insert(0, os.path.join('build', 'dist'))
@@ -59,13 +59,13 @@ def test_suite():
             # minute, so we need to break our tests to match this limitation
             real_offset = loc_dt - utc_dt
             secs = real_offset.seconds + real_offset.days*86400
-            fake_offset = timedelta(seconds=int((secs+30)/60)*60)
+            fake_offset = timedelta(seconds=int((secs+30)//60)*60)
             return utc_dt + fake_offset
 
         loc_dt = round_dt(loc_dt, utc_dt)
 
         # If the naive time on the next line is less than on this
-        # line, and we arn't seeing an end-of-dst transition, then
+        # line, and we aren't seeing an end-of-dst transition, then
         # we can't do our local->utc tests for either this nor the
         # next line since we are in an ambiguous time period (ie.
         # we have wound back the clock but don't have differing

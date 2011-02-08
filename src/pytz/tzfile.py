@@ -111,8 +111,8 @@ def build_tzinfo(zone, fp):
             # datetime library will complain. Conversions to these timezones
             # might be up to plus or minus 30 seconds out, but it is
             # the best we can do.
-            utcoffset = int((utcoffset + 30) / 60) * 60
-            dst = int((dst + 30) / 60) * 60
+            utcoffset = int((utcoffset + 30) // 60) * 60
+            dst = int((dst + 30) // 60) * 60
             transition_info.append(memorized_ttinfo(utcoffset, dst, tzname))
 
         cls = type(zone, (DstTzInfo,), dict(
