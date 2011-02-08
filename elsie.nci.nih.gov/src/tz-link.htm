@@ -18,7 +18,7 @@
 <body>
 <h1>Sources for Time Zone and Daylight Saving Time Data</h1>
 <address>
-@(#)tz-link.htm	8.30
+@(#)tz-link.htm	8.31
 </address>
 <p>
 This file is in the public domain, so clarified as of
@@ -96,7 +96,9 @@ href="http://en.wikipedia.org/wiki/Unix_shell">shell</a> commands download
 these files to a <abbr>GNU</abbr>/Linux or similar host;
 see the downloaded
 <code>README</code> file for what to do next.</p>
-<pre style="margin-left: 2em"><code><a href="http://www.gnu.org/software/wget/">wget</a> 'ftp://elsie.nci.nih.gov/pub/tz*.tar.gz'
+<pre style="margin-left: 2em"><code>mkdir tz
+cd tz
+<a href="http://www.gnu.org/software/wget/">wget</a> 'ftp://elsie.nci.nih.gov/pub/tz*.tar.gz'
 <a href="http://www.gnu.org/software/gzip/">gzip</a> -dc tzcode*.tar.gz | <a href="http://www.gnu.org/software/tar/">tar</a> -xf -
 gzip -dc tzdata*.tar.gz | tar -xf -
 </code></pre>
