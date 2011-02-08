@@ -227,10 +227,11 @@ class DstTzInfo(BaseTzInfo):
         Use is_dst=None to raise an AmbiguousTimeError for ambiguous
         times at the end of daylight savings
 
-        >>> loc_dt1 = amdam.localize(dt, is_dst=None)
-        Traceback (most recent call last):
-            [...]
-        AmbiguousTimeError: 2004-10-31 02:00:00
+        >>> try:
+        ...     loc_dt1 = amdam.localize(dt, is_dst=None)
+        ... except AmbiguousTimeError:
+        ...     print('Ambiguous')
+        Ambiguous
 
         is_dst defaults to False
 
@@ -254,10 +255,11 @@ class DstTzInfo(BaseTzInfo):
         Use is_dst=None to raise a NonExistentTimeError for these skipped
         times.
 
-        >>> loc_dt1 = pacific.localize(dt, is_dst=None)
-        Traceback (most recent call last):
-            [...]
-        NonExistentTimeError: 2008-03-09 02:00:00
+        >>> try:
+        ...     loc_dt1 = pacific.localize(dt, is_dst=None)
+        ... except NonExistentTimeError:
+        ...     print('Non-existent')
+        Non-existent
         '''
         if dt.tzinfo is not None:
             raise ValueError('Not naive datetime (tzinfo is already set)')
@@ -353,10 +355,12 @@ class DstTzInfo(BaseTzInfo):
         >>> tz.utcoffset(ambiguous, is_dst=True)
         datetime.timedelta(-1, 77400)
 
-        >>> tz.utcoffset(ambiguous)
-        Traceback (most recent call last):
-        [...]
-        AmbiguousTimeError: 2009-10-31 23:30:00
+        >>> try:
+        ...     tz.utcoffset(ambiguous)
+        ... except AmbiguousTimeError:
+        ...     print('Ambiguous')
+        Ambiguous
+
         '''
         if dt is None:
             return None
@@ -390,10 +394,12 @@ class DstTzInfo(BaseTzInfo):
         datetime.timedelta(0)
         >>> tz.dst(ambiguous, is_dst=True)
         datetime.timedelta(0, 3600)
-        >>> tz.dst(ambiguous)
-        Traceback (most recent call last):
-        [...]
-        AmbiguousTimeError: 2009-10-31 23:30:00
+        >>> try:
+        ...     tz.dst(ambiguous)
+        ... except AmbiguousTimeError:
+        ...     print('Ambiguous')
+        Ambiguous
+
         '''
         if dt is None:
             return None
@@ -427,10 +433,11 @@ class DstTzInfo(BaseTzInfo):
         'NST'
         >>> tz.tzname(ambiguous, is_dst=True)
         'NDT'
-        >>> tz.tzname(ambiguous)
-        Traceback (most recent call last):
-        [...]
-        AmbiguousTimeError: 2009-10-31 23:30:00
+        >>> try:
+        ...     tz.tzname(ambiguous)
+        ... except AmbiguousTimeError:
+        ...     print('Ambiguous')
+        Ambiguous
         '''
         if dt is None:
             return self.zone

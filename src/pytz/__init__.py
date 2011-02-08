@@ -55,7 +55,7 @@ except NameError:
     # for Python 2.3 and Python 3.x a pain.
     def unicode(s):
         try:
-            return s.decode('US-ASCII')
+            return s.decode('unicode_escape')
         except AttributeError:
             return str(s)
 
@@ -145,15 +145,18 @@ def timezone(zone):
 
     Raises UnknownTimeZoneError if passed an unknown zone.
 
-    >>> timezone('Asia/Shangri-La')
-    Traceback (most recent call last):
-    ...
-    UnknownTimeZoneError: 'Asia/Shangri-La'
+    >>> try:
+    ...     timezone('Asia/Shangri-La')
+    ... except UnknownTimeZoneError:
+    ...     print('Unknown')
+    Unknown
 
-    >>> timezone(u'\N{TRADE MARK SIGN}')
-    Traceback (most recent call last):
-    ...
-    UnknownTimeZoneError: u'\u2122'
+    >>> try:
+    ...     timezone(unicode('\N{TRADE MARK SIGN}'))
+    ... except UnknownTimeZoneError:
+    ...     print('Unknown')
+    Unknown
+
     '''
     if zone.upper() == 'UTC':
         return utc
