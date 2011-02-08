@@ -133,9 +133,14 @@ class PicklingTest(unittest.TestCase):
         # data will continue to be used.
         p = pickle.dumps(tz)
         new_utcoffset = tz._utcoffset.seconds + 42
-        hacked_p = p.replace(
-            _byte_string(str(tz._utcoffset.seconds)),
-            _byte_string(str(new_utcoffset)))
+
+        # Python 3 introduced a new pickle protocol where numbers are stored in
+        # hexadecimal representation. Here we extract the pickle
+        # representation of the number for the current Python version.
+        old_pickle_pattern = pickle.dumps(tz._utcoffset.seconds)[3:-1]
+        new_pickle_pattern = pickle.dumps(new_utcoffset)[3:-1]
+        hacked_p = p.replace(old_pickle_pattern, new_pickle_pattern)
+
         self.failIfEqual(p, hacked_p)
         unpickled_tz = pickle.loads(hacked_p)
         self.failUnlessEqual(unpickled_tz._utcoffset.seconds, new_utcoffset)
