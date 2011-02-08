@@ -7,7 +7,7 @@ Introduction
 ~~~~~~~~~~~~
 
 pytz brings the Olson tz database into Python. This library allows
-accurate and cross platform timezone calculations using Python 2.3
+accurate and cross platform timezone calculations using Python 2.4
 or higher. It also solves the issue of ambiguous times at the end
 of daylight savings, which you can read more about in the Python
 Library Reference (``datetime.tzinfo``).
@@ -169,7 +169,7 @@ deal with.
 
 The ``tzinfo`` instances returned by the ``timezone()`` function have
 been extended to cope with ambiguous times by adding an ``is_dst``
-parameter to then ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
+parameter to the ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
 
 >>> tz = timezone('America/St_Johns')
 

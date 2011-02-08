@@ -2,12 +2,12 @@
 #
 
 MAKE=make
-PYTHON23=python2.3
 PYTHON24=python2.4
 PYTHON25=python2.5
 PYTHON26=python2.6
+PYTHON27=python2.7
 PYTHON31=python3.1
-PYTHON=${PYTHON25}
+PYTHON=${PYTHON26}
 OLSON=./elsie.nci.nih.gov
 TESTARGS=-vv
 TARGET=
@@ -25,10 +25,10 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip && \
-	${PYTHON23} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
 
@@ -38,13 +38,13 @@ upload: dist build/dist/locales/pytz.pot .stamp-upload
 	${PYTHON} setup.py register sdist \
 	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
 	    upload --sign && \
-	${PYTHON23} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign && \
 	${PYTHON24} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON25} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON26} setup.py register bdist_egg --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign
@@ -60,23 +60,23 @@ clean:
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON23} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON24} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON25} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON26} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON27} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON31} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON23} test_docs.py ${TESTARGS} \
 	    && ${PYTHON24} test_docs.py ${TESTARGS} \
 	    && ${PYTHON25} test_docs.py ${TESTARGS} \
 	    && ${PYTHON26} test_docs.py ${TESTARGS} \
+	    && ${PYTHON27} test_docs.py ${TESTARGS} \
 	    && ${PYTHON31} test_docs.py ${TESTARGS}
 
 test_zdump: dist
-	${PYTHON25} gen_tests.py ${TARGET} && \
-	${PYTHON25} test_zdump.py ${TESTARGS} && \
+	${PYTHON} gen_tests.py ${TARGET} && \
+	${PYTHON} test_zdump.py ${TESTARGS} && \
 	${PYTHON31} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo

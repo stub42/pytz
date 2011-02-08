@@ -6,7 +6,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from datetime import datetime, tzinfo, timedelta
+from datetime import datetime, time, timedelta, tzinfo
 
 if __name__ == '__main__':
     # Only munge path if invoked as a script. Testrunners should have setup
@@ -16,10 +16,11 @@ if __name__ == '__main__':
 import pytz
 from pytz import reference
 from pytz.tzfile import _byte_string
+from pytz.tzinfo import StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
-EXPECTED_VERSION='2010b'
+EXPECTED_VERSION='2010o'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
@@ -29,6 +30,7 @@ NOTIME = timedelta(0)
 # UTC is reference implementation.  They both have the same timezone meaning.
 UTC = pytz.timezone('UTC')
 GMT = pytz.timezone('GMT')
+assert isinstance(GMT, StaticTzInfo), 'GMT is no longer a StaticTzInfo'
 
 def prettydt(dt):
     """datetime as a string using a known format.
@@ -44,6 +46,7 @@ def prettydt(dt):
         dt.year, dt.month, dt.day,
         dt.hour, dt.minute, dt.second,
         dt.tzname(), offset)
+
 
 class BasicTest(unittest.TestCase):
 
@@ -67,6 +70,20 @@ class BasicTest(unittest.TestCase):
         self.failUnless(now.utcoffset() == NOTIME)
         self.failUnless(now.dst() == NOTIME)
         self.failUnless(now.timetuple() == now.utctimetuple())
+
+    def testUnknownOffsets(self):
+        # This tzinfo behavior is required to make
+        # datetime.time.{utcoffset, dst, tzname} work as documented.
+
+        dst_tz = pytz.timezone('US/Eastern')
+
+        # This information is not known when we don't have a date,
+        # so return None per API.
+        self.failUnless(dst_tz.utcoffset(None) is None)
+        self.failUnless(dst_tz.dst(None) is None)
+        # We don't know the abbreviation, but this is still a valid
+        # tzname per the Python documentation.
+        self.failUnlessEqual(dst_tz.tzname(None), 'US/Eastern')
 
 
 class PicklingTest(unittest.TestCase):
@@ -632,6 +649,28 @@ class LocalTestCase(unittest.TestCase):
                 '2004-10-31 02:00:00 CET+0100'
                 )
 
+
+class CommonTimezonesTestCase(unittest.TestCase):
+    def test_bratislava(self):
+        # Bratislava is the default timezone for Slovakia, but our
+        # heuristics where not adding it to common_timezones. Ideally,
+        # common_timezones should be populated from zone.tab at runtime,
+        # but I'm hesitant to pay the startup cost as loading the list
+        # on demand whilst remaining backwards compatible seems
+        # difficult.
+        self.failUnless('Europe/Bratislava' in pytz.common_timezones)
+        self.failUnless('Europe/Bratislava' in pytz.common_timezones_set)
+
+    def test_us_eastern(self):
+        self.failUnless('US/Eastern' in pytz.common_timezones)
+        self.failUnless('US/Eastern' in pytz.common_timezones_set)
+
+    def test_belfast(self):
+        # Belfast uses London time.
+        self.failUnless('Europe/Belfast' in pytz.all_timezones_set)
+        self.failIf('Europe/Belfast' in pytz.common_timezones)
+        self.failIf('Europe/Belfast' in pytz.common_timezones_set)
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite('pytz'))
@@ -639,6 +678,7 @@ def test_suite():
     import test_tzinfo
     suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(test_tzinfo))
     return suite
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')

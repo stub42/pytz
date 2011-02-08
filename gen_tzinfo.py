@@ -110,6 +110,14 @@ def add_allzones(filename):
         # Canadian timezones per Bug #506341
         'Canada/Newfoundland', 'Canada/Atlantic', 'Canada/Eastern',
         'Canada/Central', 'Canada/Mountain', 'Canada/Pacific'])
+    # And extend out list with all preferred country timezones.
+    zone_tab = open(os.path.join(zoneinfo, 'zone.tab'), 'r')
+    for line in zone_tab:
+        if line.startswith('#'):
+            continue
+        code, coordinates, zone = line.split(None, 4)[:3]
+        if zone not in cz:
+            cz.append(zone)
     cz.sort()
 
     print >> outf, 'all_timezones = \\'
