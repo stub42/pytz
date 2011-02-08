@@ -209,7 +209,7 @@ datetime.timedelta(0)
 'NST'
 
 If ``is_dst`` is not specified, ambiguous timestamps will raise
-an ``AmbiguousTimeError`` exception.
+an ``pytz.exceptions.AmbiguousTimeError`` exception.
 
 >>> tz.utcoffset(normal)
 datetime.timedelta(-1, 77400)
@@ -218,18 +218,22 @@ datetime.timedelta(0, 3600)
 >>> tz.tzname(normal)
 'NDT'
 
->>> tz.utcoffset(ambiguous)
-Traceback (most recent call last):
-[...]
-AmbiguousTimeError: 2009-10-31 23:30:00
->>> tz.dst(ambiguous)
-Traceback (most recent call last):
-[...]
-AmbiguousTimeError: 2009-10-31 23:30:00
->>> tz.tzname(ambiguous)
-Traceback (most recent call last):
-[...]
-AmbiguousTimeError: 2009-10-31 23:30:00
+>>> import pytz.exceptions
+>>> try:
+...     tz.utcoffset(ambiguous)
+... except pytz.exceptions.AmbiguousTimeError:
+...     print('pytz.exceptions.AmbiguousTimeError: %s' % ambiguous)
+pytz.exceptions.AmbiguousTimeError: 2009-10-31 23:30:00
+>>> try:
+...     tz.dst(ambiguous)
+... except pytz.exceptions.AmbiguousTimeError:
+...     print('pytz.exceptions.AmbiguousTimeError: %s' % ambiguous)
+pytz.exceptions.AmbiguousTimeError: 2009-10-31 23:30:00
+>>> try:
+...     tz.tzname(ambiguous)
+... except pytz.exceptions.AmbiguousTimeError:
+...     print('pytz.exceptions.AmbiguousTimeError: %s' % ambiguous)
+pytz.exceptions.AmbiguousTimeError: 2009-10-31 23:30:00
 
 
 Problems with Localtime
@@ -307,19 +311,23 @@ For example, 1:30am on 27th Oct 2002 happened twice in the US/Eastern
 timezone when the clocks where put back at the end of Daylight Savings
 Time:
 
->>> eastern.localize(datetime(2002, 10, 27, 1, 30, 00), is_dst=None)
-Traceback (most recent call last):
-...
-AmbiguousTimeError: 2002-10-27 01:30:00
+>>> dt = datetime(2002, 10, 27, 1, 30, 00)
+>>> try:
+...     eastern.localize(dt, is_dst=None)
+... except pytz.exceptions.AmbiguousTimeError:
+...     print('pytz.exceptions.AmbiguousTimeError: %s' % dt)
+pytz.exceptions.AmbiguousTimeError: 2002-10-27 01:30:00
 
 Similarly, 2:30am on 7th April 2002 never happened at all in the
 US/Eastern timezone, as the clocks where put forward at 2:00am skipping
 the entire hour:
 
->>> eastern.localize(datetime(2002, 4, 7, 2, 30, 00), is_dst=None)
-Traceback (most recent call last):
-...
-NonExistentTimeError: 2002-04-07 02:30:00
+>>> dt = datetime(2002, 4, 7, 2, 30, 00)
+>>> try:
+...     eastern.localize(dt, is_dst=None)
+... except pytz.exceptions.NonExistentTimeError:
+...     print('pytz.exceptions.NonExistentTimeError: %s' % dt)
+pytz.exceptions.NonExistentTimeError: 2002-04-07 02:30:00
 
 Both of these exceptions share a common base class to make error handling
 easier:
