@@ -393,14 +393,14 @@ for a particular country, looked up using the ISO 3166 country code.
 It returns a list of strings that can be used to retrieve the relevant
 tzinfo instance using ``pytz.timezone()``:
 
->>> pytz.country_timezones['nz']
-['Pacific/Auckland', 'Pacific/Chatham']
+>>> print(' '.join(pytz.country_timezones['nz']))
+Pacific/Auckland Pacific/Chatham
 
 The Olson database comes with a ISO 3166 country code to English country
 name mapping that pytz exposes as a dictionary:
 
->>> pytz.country_names['nz']
-'New Zealand'
+>>> print(pytz.country_names['nz'])
+New Zealand
 
 
 What is UTC
@@ -478,10 +478,10 @@ using the ``country_timezones()`` function. It requires an ISO-3166
 two letter country code.
 
 >>> from pytz import country_timezones
->>> country_timezones('ch')
-['Europe/Zurich']
->>> country_timezones('CH')
-['Europe/Zurich']
+>>> print(' '.join(country_timezones('ch')))
+Europe/Zurich
+>>> print(' '.join(country_timezones('CH')))
+Europe/Zurich
 
 
 License
