@@ -37,7 +37,7 @@ def test_suite():
         line = raw_data[i]
         m = zdump_line_re.search(line)
         if m is None:
-            raise RuntimeError, 'Dud line %r' % (line,)
+            raise RuntimeError('Dud line %r' % (line,))
         zone, utc_string, loc_string, tzname, is_dst = m.groups()
         is_dst = bool(int(is_dst))
 
