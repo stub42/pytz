@@ -7,12 +7,7 @@ import pytz, sys, os, os.path
 try:
     from setuptools import setup
 except ImportError:
-    if sys.version_info[:2] == (2,3):
-        print 'Python 2.3 install requires setuptools'
-        print 'http://www.python.org/pypi/setuptools/'
-        sys.exit(1)
-    else:
-        from distutils.core import setup
+    from distutils.core import setup
 
 me = 'Stuart Bishop'
 memail = 'stuart@stuartbishop.net'
