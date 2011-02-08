@@ -36,9 +36,10 @@ try:
 except ImportError:
     resource_stream = None
 
-from pytz.tzinfo import AmbiguousTimeError
-from pytz.tzinfo import InvalidTimeError
-from pytz.tzinfo import NonExistentTimeError
+from pytz.exceptions import AmbiguousTimeError
+from pytz.exceptions import InvalidTimeError
+from pytz.exceptions import NonExistentTimeError
+from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import unpickler
 from pytz.tzfile import build_tzinfo, _byte_string
 
@@ -101,22 +102,6 @@ def resource_exists(name):
 # def _(timezone_name):
 #     """Translate a timezone name using the current locale, returning Unicode"""
 #     return t.ugettext(timezone_name)
-
-
-class UnknownTimeZoneError(KeyError):
-    '''Exception raised when pytz is passed an unknown timezone.
-
-    >>> isinstance(UnknownTimeZoneError(), LookupError)
-    True
-
-    This class is actually a subclass of KeyError to provide backwards
-    compatibility with code relying on the undocumented behavior of earlier
-    pytz releases.
-
-    >>> isinstance(UnknownTimeZoneError(), KeyError)
-    True
-    '''
-    pass
 
 
 _tzinfo_cache = {}

@@ -8,6 +8,7 @@ except NameError:
     from sets import Set as set
 
 import pytz
+from pytz.exceptions import AmbiguousTimeError, NonExistentTimeError
 
 __all__ = []
 
@@ -471,29 +472,6 @@ class DstTzInfo(BaseTzInfo):
                 self._tzname
                 )
 
-
-class InvalidTimeError(Exception):
-    '''Base class for invalid time exceptions.'''
-
-
-class AmbiguousTimeError(InvalidTimeError):
-    '''Exception raised when attempting to create an ambiguous wallclock time.
-
-    At the end of a DST transition period, a particular wallclock time will
-    occur twice (once before the clocks are set back, once after). Both
-    possibilities may be correct, unless further information is supplied.
-
-    See DstTzInfo.normalize() for more info
-    '''
-
-
-class NonExistentTimeError(InvalidTimeError):
-    '''Exception raised when attempting to create a wallclock time that
-    cannot exist.
-
-    At the start of a DST transition period, the wallclock time jumps forward.
-    The instants jumped over never occur.
-    '''
 
 
 def unpickler(zone, utcoffset=None, dstoffset=None, tzname=None):
