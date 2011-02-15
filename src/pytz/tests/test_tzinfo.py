@@ -48,6 +48,14 @@ def prettydt(dt):
         dt.tzname(), offset)
 
 
+try:
+    unicode
+except NameError:
+    # Python 3.x doesn't have unicode(), making writing code
+    # for Python 2.3 and Python 3.x a pain.
+    unicode = str
+
+
 class BasicTest(unittest.TestCase):
 
     def testVersion(self):
@@ -84,6 +92,21 @@ class BasicTest(unittest.TestCase):
         # We don't know the abbreviation, but this is still a valid
         # tzname per the Python documentation.
         self.failUnlessEqual(dst_tz.tzname(None), 'US/Eastern')
+
+    def clearCache(self):
+        pytz._tzinfo_cache.clear()
+
+    def testUnicodeTimezone(self):
+        # We need to ensure that cold lookups work for both Unicode
+        # and traditional strings, and that the desired singleton is
+        # returned.
+        self.clearCache()
+        eastern = pytz.timezone(unicode('US/Eastern'))
+        self.assert_(eastern is pytz.timezone('US/Eastern'))
+
+        self.clearCache()
+        eastern = pytz.timezone('US/Eastern')
+        self.assert_(eastern is pytz.timezone(unicode('US/Eastern')))
 
 
 class PicklingTest(unittest.TestCase):

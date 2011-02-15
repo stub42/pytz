@@ -46,14 +46,39 @@ from pytz.tzfile import build_tzinfo, _byte_string
 
 try:
     unicode
-except NameError:
+
+except NameError: # Python 3.x
+
     # Python 3.x doesn't have unicode(), making writing code
     # for Python 2.3 and Python 3.x a pain.
-    def unicode(s):
-        try:
-            return s.decode('unicode_escape')
-        except AttributeError:
-            return str(s)
+    unicode = str
+
+    def ascii(s):
+        r"""
+        >>> ascii('Hello')
+        'Hello'
+        >>> ascii('\N{TRADE MARK SIGN}') #doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        UnicodeEncodeError: ...
+        """
+        s.encode('US-ASCII') # Raise an exception if not ASCII
+        return s # But return the original string - not a byte string.
+
+else: # Python 2.x
+
+    def ascii(s):
+        r"""
+        >>> ascii('Hello')
+        'Hello'
+        >>> ascii(u'Hello')
+        'Hello'
+        >>> ascii(u'\N{TRADE MARK SIGN}') #doctest: +IGNORE_EXCEPTION_DETAIL
+        Traceback (most recent call last):
+            ...
+        UnicodeEncodeError: ...
+        """
+        return s.encode('US-ASCII')
 
 
 def open_resource(name):
@@ -143,7 +168,7 @@ def timezone(zone):
         return utc
 
     try:
-        zone.encode('US-ASCII')
+        zone = ascii(zone)
     except UnicodeEncodeError:
         # All valid timezones are ASCII
         raise UnknownTimeZoneError(zone)
