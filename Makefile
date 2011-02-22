@@ -7,7 +7,9 @@ PYTHON25=python2.5
 PYTHON26=python2.6
 PYTHON27=python2.7
 PYTHON31=python3.1
+PYTHON32=python3.2
 PYTHON=${PYTHON26}
+PYTHON3=${PYTHON32}
 OLSON=./elsie.nci.nih.gov
 TESTARGS=-vv
 TARGET=
@@ -29,7 +31,8 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs
+	${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
 
 upload: dist build/dist/locales/pytz.pot .stamp-upload
@@ -47,6 +50,8 @@ upload: dist build/dist/locales/pytz.pot .stamp-upload
 	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON32} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign
 	touch $@
 
@@ -64,7 +69,8 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON25} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON26} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON27} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON31} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON31} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON32} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -72,12 +78,13 @@ test_docs: .stamp-tzinfo
 	    && ${PYTHON25} test_docs.py ${TESTARGS} \
 	    && ${PYTHON26} test_docs.py ${TESTARGS} \
 	    && ${PYTHON27} test_docs.py ${TESTARGS} \
-	    && ${PYTHON31} test_docs.py ${TESTARGS}
+	    && ${PYTHON31} test_docs.py ${TESTARGS} \
+	    && ${PYTHON32} test_docs.py ${TESTARGS}
 
 test_zdump: dist
 	${PYTHON} gen_tests.py ${TARGET} && \
 	${PYTHON} test_zdump.py ${TESTARGS} && \
-	${PYTHON31} test_zdump.py ${TESTARGS}
+	${PYTHON3} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 

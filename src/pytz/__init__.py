@@ -104,7 +104,7 @@ def open_resource(name):
 def resource_exists(name):
     """Return true if the given resource exists"""
     try:
-        open_resource(name)
+        open_resource(name).close()
         return True
     except IOError:
         return False
@@ -176,7 +176,11 @@ def timezone(zone):
     zone = _unmunge_zone(zone)
     if zone not in _tzinfo_cache:
         if zone in all_timezones_set:
-            _tzinfo_cache[zone] = build_tzinfo(zone, open_resource(zone))
+            fp = open_resource(zone)
+            try:
+                _tzinfo_cache[zone] = build_tzinfo(zone, fp)
+            finally:
+                fp.close()
         else:
             raise UnknownTimeZoneError(zone)
 
@@ -353,18 +357,21 @@ class _CountryTimezoneDict(_LazyDict):
     def _fill(self):
         data = {}
         zone_tab = open_resource('zone.tab')
-        for line in zone_tab:
-            line = line.decode('US-ASCII')
-            if line.startswith('#'):
-                continue
-            code, coordinates, zone = line.split(None, 4)[:3]
-            if zone not in all_timezones_set:
-                continue
-            try:
-                data[code].append(zone)
-            except KeyError:
-                data[code] = [zone]
-        self.data = data
+        try:
+            for line in zone_tab:
+                line = line.decode('US-ASCII')
+                if line.startswith('#'):
+                    continue
+                code, coordinates, zone = line.split(None, 4)[:3]
+                if zone not in all_timezones_set:
+                    continue
+                try:
+                    data[code].append(zone)
+                except KeyError:
+                    data[code] = [zone]
+            self.data = data
+        finally:
+            zone_tab.close()
 
 country_timezones = _CountryTimezoneDict()
 
@@ -378,13 +385,16 @@ class _CountryNameDict(_LazyDict):
     def _fill(self):
         data = {}
         zone_tab = open_resource('iso3166.tab')
-        for line in zone_tab.readlines():
-            line = line.decode('US-ASCII')
-            if line.startswith('#'):
-                continue
-            code, name = line.split(None, 1)
-            data[code] = name.strip()
-        self.data = data
+        try:
+            for line in zone_tab.readlines():
+                line = line.decode('US-ASCII')
+                if line.startswith('#'):
+                    continue
+                code, name = line.split(None, 1)
+                data[code] = name.strip()
+            self.data = data
+        finally:
+            zone_tab.close()
 
 country_names = _CountryNameDict()
 
