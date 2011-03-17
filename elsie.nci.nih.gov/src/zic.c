@@ -3,7 +3,7 @@
 ** 2006-07-17 by Arthur David Olson.
 */
 
-static char	elsieid[] = "@(#)zic.c	8.24";
+static char	elsieid[] = "@(#)zic.c	8.25";
 
 #include "private.h"
 #include "locale.h"
@@ -1639,10 +1639,11 @@ const char * const	string;
 					mrudst = types[i];
 				else	mrustd = types[i];
 			for (i = 0; i < typecnt; ++i)
-				if (writetype[i])
+				if (writetype[i]) {
 					if (isdsts[i])
 						hidst = i;
 					else	histd = i;
+				}
 			if (hidst >= 0 && mrudst >= 0 && hidst != mrudst &&
 				gmtoffs[hidst] != gmtoffs[mrudst]) {
 					isdsts[mrudst] = -1;
