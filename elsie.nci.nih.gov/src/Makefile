@@ -1,5 +1,5 @@
 # <pre>
-# @(#)Makefile	8.10
+# @(#)Makefile	8.11
 # This file is in the public domain, so clarified as of
 # 2009-05-17 by Arthur David Olson.
 
@@ -270,7 +270,7 @@ TABDATA=	iso3166.tab zone.tab
 DATA=		$(YDATA) $(NDATA) $(SDATA) $(TABDATA) leapseconds yearistype.sh
 WEB_PAGES=	tz-art.htm tz-link.htm
 MISC=		usno1988 usno1989 usno1989a usno1995 usno1997 usno1998 \
-			itca.jpg $(WEB_PAGES) checktab.awk workman.sh \
+			$(WEB_PAGES) checktab.awk workman.sh \
 			zoneinfo2tdf.pl
 ENCHILADA=	$(DOCS) $(SOURCES) $(DATA) $(MISC)
 
