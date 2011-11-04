@@ -17,7 +17,7 @@ if __name__ == '__main__':
 import pytz
 from pytz import reference
 from pytz.tzfile import _byte_string
-from pytz.tzinfo import StaticTzInfo
+from pytz.tzinfo import DstTzInfo, StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
@@ -699,6 +699,56 @@ class CommonTimezonesTestCase(unittest.TestCase):
         self.assertTrue('Europe/Belfast' in pytz.all_timezones_set)
         self.assertFalse('Europe/Belfast' in pytz.common_timezones)
         self.assertFalse('Europe/Belfast' in pytz.common_timezones_set)
+
+
+class BaseTzInfoTestCase:
+    '''Ensure UTC, StaticTzInfo and DstTzInfo work consistently.
+
+    These tests are run for each type of tzinfo.
+    '''
+    tz = None  # override
+    tzclass = None  # override
+
+    def test_expectedclass(self):
+        self.assertTrue(isinstance(self.tz, self.tz_class))
+
+    def test_fromutc(self):
+        # naive datetime.
+        dt1 = datetime(2011, 10, 31)
+
+        # localized datetime, same timezone.
+        dt2 = self.tz.localize(dt1)
+
+        # Both should give the same results. Note that the standard
+        # Python tzinfo.fromutc() only supports the second.
+        for dt in [dt1, dt2]:
+            loc_dt = self.tz.fromutc(dt)
+            loc_dt2 = pytz.utc.localize(dt1).astimezone(self.tz)
+            self.assertEqual(loc_dt, loc_dt2)
+
+        # localized datetime, different timezone.
+        new_tz = pytz.timezone('Europe/Paris')
+        self.assertTrue(self.tz is not new_tz)
+        dt3 = new_tz.localize(dt1)
+        self.assertRaises(ValueError, self.tz.fromutc, dt3)
+
+
+class UTCTestCase(unittest.TestCase, BaseTzInfoTestCase):
+    tz = pytz.utc
+    tz_class = tz.__class__
+
+
+class StaticTzInfoTestCase(unittest.TestCase, BaseTzInfoTestCase):
+    tz = pytz.timezone('GMT')
+    tz_class = StaticTzInfo
+
+
+class DstTzInfoTestCase(unittest.TestCase, BaseTzInfoTestCase):
+    tz = pytz.timezone('Australia/Melbourne')
+    tz_class = DstTzInfo
+
+    def test_isDstTzInfo(self):
+        self.assertTrue(isinstance(self.tz, DstTzInfo))
 
 
 def test_suite():

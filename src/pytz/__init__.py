@@ -212,6 +212,11 @@ class UTC(datetime.tzinfo):
     _dst = ZERO
     _tzname = zone
 
+    def fromutc(self, dt):
+        if dt.tzinfo is None:
+            return self.localize(dt)
+        return super(utc.__class__, self).fromutc(dt)
+
     def utcoffset(self, dt):
         return ZERO
 
