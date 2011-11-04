@@ -533,6 +533,24 @@ class TahitiTestCase(USEasternDSTStartTestCase):
         }
 
 
+class SamoaInternationalDateLineChange(USEasternDSTStartTestCase):
+    # At the end of 2011, Samoa will switch from being east of the
+    # international dateline to the west. There will be no Dec 30th
+    # 2011 and it will switch from UTC-11 to UTC+13.
+    tzinfo = pytz.timezone('Pacific/Apia')
+    transition_time = datetime(2011, 12, 30, 10, 0, 0, tzinfo=UTC)
+    before = {
+        'tzname': 'WSDT',
+        'utcoffset': timedelta(hours=-10),
+        'dst': timedelta(hours=1),
+        }
+    after = {
+        'tzname': 'WSDT',
+        'utcoffset': timedelta(hours=14),
+        'dst': timedelta(hours=1),
+        }
+
+
 class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
     tzinfo = reference.Eastern
     def test_arithmetic(self):
