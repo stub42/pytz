@@ -765,9 +765,6 @@ class DstTzInfoTestCase(unittest.TestCase, BaseTzInfoTestCase):
     tz = pytz.timezone('Australia/Melbourne')
     tz_class = DstTzInfo
 
-    def test_isDstTzInfo(self):
-        self.assertTrue(isinstance(self.tz, DstTzInfo))
-
 
 def test_suite():
     suite = unittest.TestSuite()
