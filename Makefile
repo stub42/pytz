@@ -22,6 +22,8 @@ all: dist
 # skip test_zdump, since it fails on AMD64, and takes a long time on i386
 check: test_tzinfo test_docs
 
+build: build/dist/locales/pytz.pot
+
 dist: build/dist/locales/pytz.pot .stamp-dist
 .stamp-dist: .stamp-tzinfo
 	cd build/dist && mkdir -p ../tarballs && \
