@@ -178,7 +178,8 @@ class DstTzInfo(BaseTzInfo):
 
     def fromutc(self, dt):
         '''See datetime.tzinfo.fromutc'''
-        if dt.tzinfo is not None and dt.tzinfo._tzinfos is not self._tzinfos:
+        if (dt.tzinfo is not None
+            and getattr(dt.tzinfo, '_tzinfos', None) is not self._tzinfos):
             raise ValueError('fromutc: dt.tzinfo is not self')
         dt = dt.replace(tzinfo=None)
         idx = max(0, bisect_right(self._utc_transition_times, dt) - 1)
