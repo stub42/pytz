@@ -237,7 +237,7 @@ class UTC(datetime.tzinfo):
             return dt
         if dt.tzinfo is None:
             raise ValueError('Naive time - no tzinfo set')
-        return dt.replace(tzinfo=self)
+        return dt.astimezone(self)
 
     def __repr__(self):
         return "<UTC>"
