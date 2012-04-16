@@ -725,7 +725,7 @@ class BaseTzInfoTestCase:
     These tests are run for each type of tzinfo.
     '''
     tz = None  # override
-    tzclass = None  # override
+    tz_class = None  # override
 
     def test_expectedclass(self):
         self.assertTrue(isinstance(self.tz, self.tz_class))
@@ -750,10 +750,42 @@ class BaseTzInfoTestCase:
         dt3 = new_tz.localize(dt1)
         self.assertRaises(ValueError, self.tz.fromutc, dt3)
 
+    def test_normalize(self):
+        other_tz = pytz.timezone('Europe/Paris')
+        self.assertTrue(self.tz is not other_tz)
 
-class UTCTestCase(unittest.TestCase, BaseTzInfoTestCase):
+        dt = datetime(2012, 3, 26, 12, 0)
+        other_dt = other_tz.localize(dt)
+
+        local_dt = self.tz.normalize(other_dt)
+
+        self.assertTrue(local_dt.tzinfo is not other_dt.tzinfo)
+        self.assertNotEqual(
+            local_dt.replace(tzinfo=None), other_dt.replace(tzinfo=None))
+
+    def test_astimezone(self):
+        other_tz = pytz.timezone('Europe/Paris')
+        self.assertTrue(self.tz is not other_tz)
+
+        dt = datetime(2012, 3, 26, 12, 0)
+        other_dt = other_tz.localize(dt)
+
+        local_dt = other_dt.astimezone(self.tz)
+
+        self.assertTrue(local_dt.tzinfo is not other_dt.tzinfo)
+        self.assertNotEqual(
+            local_dt.replace(tzinfo=None), other_dt.replace(tzinfo=None))
+
+
+class OptimizedUTCTestCase(unittest.TestCase, BaseTzInfoTestCase):
     tz = pytz.utc
     tz_class = tz.__class__
+
+
+class LegacyUTCTestCase(unittest.TestCase, BaseTzInfoTestCase):
+    # Deprecated timezone, but useful for comparison tests.
+    tz = pytz.timezone('Etc/UTC')
+    tz_class = StaticTzInfo
 
 
 class StaticTzInfoTestCase(unittest.TestCase, BaseTzInfoTestCase):

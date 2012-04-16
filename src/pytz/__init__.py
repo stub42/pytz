@@ -199,12 +199,8 @@ HOUR = datetime.timedelta(hours=1)
 class UTC(datetime.tzinfo):
     """UTC
 
-    Identical to the reference UTC implementation given in Python docs except
-    that it unpickles using the single module global instance defined beneath
-    this class declaration.
-
-    Also contains extra attributes and methods to match other pytz tzinfo
-    instances.
+    Optimized UTC implementation. It unpickles using the single module global
+    instance defined beneath this class declaration.
     """
     zone = "UTC"
 
@@ -237,6 +233,8 @@ class UTC(datetime.tzinfo):
 
     def normalize(self, dt, is_dst=False):
         '''Correct the timezone information on the given datetime'''
+        if dt.tzinfo is self:
+            return dt
         if dt.tzinfo is None:
             raise ValueError('Naive time - no tzinfo set')
         return dt.replace(tzinfo=self)
