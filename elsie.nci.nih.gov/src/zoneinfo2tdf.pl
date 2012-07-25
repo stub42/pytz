@@ -1,7 +1,5 @@
 #! /usr/bin/perl -w
 
-# @(#)zoneinfo2tdf.pl	8.2
-
 # Courtesy Ken Pizzini.
 
 use strict;
