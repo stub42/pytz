@@ -15,6 +15,9 @@
 ./elsie.nci.nih.gov/src/zdump
 ./elsie.nci.nih.gov/src/zic
 
+# Generated
+./elsie.nci.nih.gov/src/version.h
+
 # Generated datafile for test_zdump.py
 ./zdump.out
 
