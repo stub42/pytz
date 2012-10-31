@@ -50,9 +50,9 @@ upload: dist build/dist/locales/pytz.pot .stamp-upload
 	    upload --sign && \
 	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
-	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign && \
 	${PYTHON32} setup.py register bdist_egg --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign
 	touch $@
 
