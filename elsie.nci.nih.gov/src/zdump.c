@@ -17,6 +17,7 @@
 #include "time.h"	/* for struct tm */
 #include "stdlib.h"	/* for exit, malloc, atoi */
 #include "float.h"	/* for FLT_MAX and DBL_MAX */
+#include "limits.h"	/* for CHAR_BIT, LLONG_MAX */
 #include "ctype.h"	/* for isalpha et al. */
 #ifndef isascii
 #define isascii(x) 1
@@ -150,8 +151,35 @@ extern char *	optarg;
 extern int	optind;
 extern char *	tzname[2];
 
-static time_t	absolute_min_time;
-static time_t	absolute_max_time;
+/* The minimum and maximum finite time values.  Shift 'long long' or
+   'long' instead of 'time_t'; this avoids compile-time errors when
+   time_t is floating-point.  In practice, 'long long' is wide enough.  */
+static time_t const absolute_min_time =
+  ((time_t) 0.5 == 0.5
+   ? (sizeof (time_t) == sizeof (float) ? (time_t) -FLT_MAX
+      : sizeof (time_t) == sizeof (double) ? (time_t) -DBL_MAX
+      : sizeof (time_t) == sizeof (long double) ? (time_t) -LDBL_MAX
+      : 0)
+   : (time_t) -1 < 0
+#ifdef LLONG_MAX
+   ? (time_t) ((long long) -1 << (CHAR_BIT * sizeof (time_t) - 1))
+#else
+   ? (time_t) ((long) -1 << (CHAR_BIT * sizeof (time_t) - 1))
+#endif
+   : 0);
+static time_t const absolute_max_time =
+  ((time_t) 0.5 == 0.5
+   ? (sizeof (time_t) == sizeof (float) ? (time_t) FLT_MAX
+      : sizeof (time_t) == sizeof (double) ? (time_t) DBL_MAX
+      : sizeof (time_t) == sizeof (long double) ? (time_t) LDBL_MAX
+      : -1)
+   : (time_t) -1 < 0
+#ifdef LLONG_MAX
+   ? (time_t) (- (~ 0 < 0) - ((long long) -1 << (CHAR_BIT * sizeof (time_t) - 1)))
+#else
+   ? (time_t) (- (~ 0 < 0) - ((long) -1 << (CHAR_BIT * sizeof (time_t) - 1)))
+#endif
+   : (time_t) -1);
 static size_t	longest;
 static char *	progname;
 static int	warned;
@@ -161,7 +189,7 @@ static void	abbrok(const char * abbrp, const char * zone);
 static long	delta(struct tm * newp, struct tm * oldp) ATTRIBUTE_PURE;
 static void	dumptime(const struct tm * tmp);
 static time_t	hunt(char * name, time_t lot, time_t	hit);
-static void	setabsolutes(void);
+static void	checkabsolutes(void);
 static void	show(char * zone, time_t t, int v);
 static const char *	tformat(void);
 static time_t	yeartot(long y) ATTRIBUTE_PURE;
@@ -314,7 +342,7 @@ main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 		}
-		setabsolutes();
+		checkabsolutes();
 		cutlotime = yeartot(cutloyear);
 		cuthitime = yeartot(cuthiyear);
 	}
@@ -404,47 +432,13 @@ main(int argc, char *argv[])
 }
 
 static void
-setabsolutes(void)
+checkabsolutes(void)
 {
-	if (0.5 == (time_t) 0.5) {
-		/*
-		** time_t is floating.
-		*/
-		if (sizeof (time_t) == sizeof (float)) {
-			absolute_min_time = (time_t) -FLT_MAX;
-			absolute_max_time = (time_t) FLT_MAX;
-		} else if (sizeof (time_t) == sizeof (double)) {
-			absolute_min_time = (time_t) -DBL_MAX;
-			absolute_max_time = (time_t) DBL_MAX;
-		} else {
-			(void) fprintf(stderr,
+	if (absolute_max_time < absolute_min_time) {
+		(void) fprintf(stderr,
 _("%s: use of -v on system with floating time_t other than float or double\n"),
-				progname);
-			exit(EXIT_FAILURE);
-		}
-	} else if (0 > (time_t) -1) {
-		/*
-		** time_t is signed.  Assume overflow wraps around.
-		*/
-		time_t t = 0;
-		time_t t1 = 1;
-
-		while (t < t1) {
-			t = t1;
-			t1 = 2 * t1 + 1;
-		}
-
-		absolute_max_time = t;
-		t = -t;
-		absolute_min_time = t - 1;
-		if (t < absolute_min_time)
-			absolute_min_time = t;
-	} else {
-		/*
-		** time_t is unsigned.
-		*/
-		absolute_min_time = 0;
-		absolute_max_time = absolute_min_time - 1;
+			       progname);
+		exit(EXIT_FAILURE);
 	}
 }
 

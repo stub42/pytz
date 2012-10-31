@@ -439,6 +439,10 @@ extern int		logwtmp();
 #define settimeofday(t, tz) (settimeofday)(t)
 #endif /* HAVE_SETTIMEOFDAY == 1 */
 
+#ifdef TSP_SETDATE
+static int netsettime(struct timeval);
+#endif
+
 #ifndef TSP_SETDATE
 /*ARGSUSED*/
 #endif /* !defined TSP_SETDATE */
@@ -800,6 +804,7 @@ iffy(const time_t thist, const time_t thatt,
  * notifies the master that a correction is needed.
  * Returns 1 on success, 0 on failure.
  */
+static int
 netsettime(struct timeval ntv)
 {
 	int s, length, port, timed_ack, found, err;
@@ -812,7 +817,7 @@ netsettime(struct timeval ntv)
 	struct sockaddr_in sin, dest, from;
 
 	sp = getservbyname("timed", "udp");
-	if (sp == 0) {
+	if (! sp) {
 		fputs(_("udp/timed: unknown service\n"), stderr);
 		retval = 2;
 		return (0);
@@ -869,7 +874,7 @@ loop:
 	tout.tv_usec = 0;
 	FD_ZERO(&ready);
 	FD_SET(s, &ready);
-	found = select(FD_SETSIZE, &ready, 0, 0, &tout);
+	found = select(FD_SETSIZE, &ready, NULL, NULL, &tout);
 	length = sizeof err;
 	if (getsockopt(s, SOL_SOCKET, SO_ERROR, (char *)&err, &length) == 0
 	    && err) {
