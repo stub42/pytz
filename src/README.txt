@@ -12,16 +12,16 @@ or higher. It also solves the issue of ambiguous times at the end
 of daylight savings, which you can read more about in the Python
 Library Reference (``datetime.tzinfo``).
 
-Amost all of the Olson timezones are supported.
+Almost all of the Olson timezones are supported.
 
 Note that this library differs from the documented Python API for
 tzinfo implementations; if you want to create local wallclock
 times you need to use the ``localize()`` method documented in this
 document. In addition, if you perform date arithmetic on local
-times that cross DST boundaries, the results may be in an incorrect
+times that cross DST boundaries, the result may be in an incorrect
 timezone (ie. subtract 1 minute from 2002-10-27 1:00 EST and you get
 2002-10-27 0:59 EST instead of the correct 2002-10-27 1:59 EDT). A
-``normalize()`` method is provided to correct this. Unfortunatly these
+``normalize()`` method is provided to correct this. Unfortunately these
 issues cannot be resolved without modifying the Python datetime
 implementation.
 
@@ -119,7 +119,7 @@ timezone.
 >>> after.strftime(fmt)
 '2002-10-27 01:10:00 EST-0500'
 
-Creating localtimes is also tricky, and the reason why working with
+Creating local times is also tricky, and the reason why working with
 local times is not recommended. Unfortunately, you cannot just pass
 a ``tzinfo`` argument when constructing a datetime (see the next
 section for more details)
@@ -132,9 +132,8 @@ section for more details)
 >>> dt2.strftime(fmt)
 '2002-10-27 01:30:00 EST-0500'
 
-Converting between timezones also needs special attention. This also
-needs to use the ``normalize()`` method to ensure the conversion is
-correct.
+Converting between timezones also needs special attention. We also need
+to use the ``normalize()`` method to ensure the conversion is correct.
 
 >>> utc_dt = utc.localize(datetime.utcfromtimestamp(1143408899))
 >>> utc_dt.strftime(fmt)
