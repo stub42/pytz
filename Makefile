@@ -96,7 +96,12 @@ docs: dist
 	cp src/README.txt build/docs/source/index.txt
 	cp conf.py build/docs/source/conf.py
 	sphinx-build build/docs/source build/docs/built
+	chmod -R og-w build/docs/built
+	chmod -R a+rX build/docs/built
 
+upload_docs: docs
+	rsync -e ssh -ravP build/docs/built/ \
+	    web.sourceforge.net:/home/project-web/pytz/htdocs/
 
 .stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
 	${PYTHON} gen_tzinfo.py ${TARGET}

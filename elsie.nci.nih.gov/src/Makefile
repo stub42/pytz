@@ -2,8 +2,11 @@
 # This file is in the public domain, so clarified as of
 # 2009-05-17 by Arthur David Olson.
 
+# Package name for the code distribution.
+PACKAGE=	tzcode
+
 # Version numbers of the code and data distributions.
-VERSION=	2012h
+VERSION=	2012j
 
 # Change the line below for your time zone (after finding the zone you want in
 # the time zone files, or adding it to a time zone file).
@@ -224,14 +227,20 @@ GCC_DEBUG_FLAGS = -Dlint -g3 -O3 -fno-common -fstrict-aliasing \
 
 CFLAGS=
 
-# If you want zic's -s option used when installing, uncomment the next line
-# ZFLAGS=	-s
+# Linker flags.  Default to $(LFLAGS) for backwards compatibility
+# to tzcode2012h and earlier.
+
+LDFLAGS=	$(LFLAGS)
 
 zic=		./zic
 ZIC=		$(zic) $(ZFLAGS)
 
 # The name of a Posix-compliant `awk' on your system.
-AWK=		nawk
+AWK=		awk
+
+# The full path name of a Posix-compliant shell that supports the Korn shell's
+# 'select' statement, as an extension.  These days, Bash is the most popular.
+KSHELL=		/bin/bash
 
 # The path where SGML DTDs are kept.
 # The default is appropriate for Ubuntu.
@@ -334,14 +343,14 @@ INSTALL:	ALL install date.1
 		cp date.1 $(MANDIR)/man1/.
 
 version.h:
-		echo >$@ \
-		  'static char const TZVERSION[]="tz$(VERSION)";'
+		(echo 'static char const PKGVERSION[]="($(PACKAGE)) ";' && \
+		 echo 'static char const TZVERSION[]="$(VERSION)";') >$@
 
 zdump:		$(TZDOBJS)
-		$(CC) $(CFLAGS) $(LFLAGS) $(TZDOBJS) $(LDLIBS) -o $@
+		$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(TZDOBJS) $(LDLIBS)
 
 zic:		$(TZCOBJS) yearistype
-		$(CC) $(CFLAGS) $(LFLAGS) $(TZCOBJS) $(LDLIBS) -o $@
+		$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(TZCOBJS) $(LDLIBS)
 
 yearistype:	yearistype.sh
 		cp yearistype.sh yearistype
@@ -376,18 +385,19 @@ zones:		$(REDO)
 $(TZLIB):	$(LIBOBJS)
 		-mkdir $(TOPDIR) $(LIBDIR)
 		ar ru $@ $(LIBOBJS)
-		if [ -x /usr/ucb/ranlib -o -x /usr/bin/ranlib ] ; \
+		if [ -x /usr/ucb/ranlib ] || [ -x /usr/bin/ranlib ]; \
 			then ranlib $@ ; fi
 
 date:		$(DATEOBJS)
-		$(CC) $(CFLAGS) date.o localtime.o asctime.o strftime.o \
-			$(LDLIBS) -lc -o $@
+		$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(DATEOBJS) $(LDLIBS)
 
 tzselect:	tzselect.ksh
 		sed \
+			-e 's|#!/bin/bash|#!$(KSHELL)|g' \
 			-e 's|AWK=[^}]*|AWK=$(AWK)|g' \
+			-e 's|\(PKGVERSION\)=.*|\1='\''($(PACKAGE)) '\''|' \
 			-e 's|TZDIR=[^}]*|TZDIR=$(TZDIR)|' \
-			-e 's|\(TZVERSION\)=.*|\1=tz$(VERSION)|' \
+			-e 's|\(TZVERSION\)=.*|\1=$(VERSION)|' \
 			<$? >$@
 		chmod +x $@
 
@@ -402,14 +412,17 @@ check_web:	$(WEB_PAGES)
 clean:
 		rm -f core *.o *.out \
 		  date tzselect version.h zdump zic yearistype
+		rm -f -r tzpublic
 
 maintainer-clean: clean
 		@echo 'This command is intended for maintainers to use; it'
 		@echo 'deletes files that may need special tools to rebuild.'
-		rm -f *.[1-8].txt tzcode*.tar.gz tzdata*.tar.gz
+		rm -f *.[1-8].txt *.asc *.tar.gz
 
 names:
 		@echo $(ENCHILADA)
+
+public:		check check_public set-timestamps tarballs signatures
 
 # Set the time stamps to those of the git repository, if available,
 # and if the files have not changed since then.
@@ -430,26 +443,40 @@ set-timestamps:
 # The zics below ensure that each data file can stand on its own.
 # We also do an all-files run to catch links to links.
 
-public:		$(ENCHILADA) set-timestamps
+check_public:	$(ENCHILADA)
 		make maintainer-clean
 		make "CFLAGS=$(GCC_DEBUG_FLAGS)"
-		mkdir -m go-rwx /tmp/,tzpublic
-		-for i in $(TDATA) ; do zic -v -d /tmp/,tzpublic $$i 2>&1 | grep -v "starting year" ; done
-		for i in $(TDATA) ; do zic -d /tmp/,tzpublic $$i || exit; done
-		zic -v -d /tmp/,tzpublic $(TDATA) || exit
-		rm -f -r /tmp/,tzpublic
+		mkdir tzpublic
+		for i in $(TDATA) ; do \
+		  $(zic) -v -d tzpublic $$i 2>&1 || exit; \
+		done
+		$(zic) -v -d tzpublic $(TDATA)
+		rm -f -r tzpublic
+
+tarballs:	tzcode$(VERSION).tar.gz tzdata$(VERSION).tar.gz
+
+tzcode$(VERSION).tar.gz: $(COMMON) $(DOCS) $(SOURCES) $(MISC)
 		for i in *.[1-8] ; do \
 		  LC_ALL=C sh workman.sh $$i > $$i.txt && \
 		  touch -r $$i $$i.txt || exit; \
 		done
-		$(AWK) -f checktab.awk $(PRIMARY_YDATA)
 		LC_ALL=C && export LC_ALL && \
 		tar $(TARFLAGS) -cf - \
 		    $(COMMON) $(DOCS) $(SOURCES) $(MISC) *.[1-8].txt | \
-		  gzip $(GZIPFLAGS) > tzcode$(VERSION).tar.gz
+		  gzip $(GZIPFLAGS) > $@
+
+tzdata$(VERSION).tar.gz: $(COMMON) $(DATA)
 		LC_ALL=C && export LC_ALL && \
 		tar $(TARFLAGS) -cf - $(COMMON) $(DATA) | \
-		  gzip $(GZIPFLAGS) > tzdata$(VERSION).tar.gz
+		  gzip $(GZIPFLAGS) > $@
+
+signatures:	tzcode$(VERSION).tar.gz.asc tzdata$(VERSION).tar.gz.asc
+
+tzcode$(VERSION).tar.gz.asc: tzcode$(VERSION).tar.gz
+		gpg --armor --detach-sign $?
+
+tzdata$(VERSION).tar.gz.asc: tzdata$(VERSION).tar.gz
+		gpg --armor --detach-sign $?
 
 typecheck:
 		make clean
