@@ -111,6 +111,13 @@ upload_docs: docs
 
 .stamp-zoneinfo:
 	${MAKE} -C ${OLSON}/src TOPDIR=`pwd`/build install
+	# Break hard links, working around http://bugs.python.org/issue8876.
+	for d in zoneinfo zoneinfo-leaps zoneinfo-posix; do \
+	    rm -rf `pwd`/build/etc/$$d.tmp; \
+	    rsync -a `pwd`/build/etc/$$d/ `pwd`/build/etc/$$d.tmp; \
+	    rm -rf `pwd`/build/etc/$$d; \
+	    mv `pwd`/build/etc/$$d.tmp `pwd`/build/etc/$$d; \
+	done
 	touch $@
 
 build/dist/locales/pytz.pot: .stamp-tzinfo
