@@ -533,7 +533,7 @@ Issues & Limitations
   it. pytz is a direct translation of the Olson timezone database, and
   changes to the timezone definitions need to be made to this source.
   If you find errors they should be reported to the time zone mailing
-  list, linked from http://www.twinsun.com/tz/tz-link.htm
+  list, linked from http://www.iana.org/time-zones.
 
 
 Further Reading
