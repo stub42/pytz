@@ -8,7 +8,8 @@ PYTHON26=python2.6
 PYTHON27=python2.7
 PYTHON31=python3.1
 PYTHON32=python3.2
-PYTHON=${PYTHON26}
+PYTHON33=python3.3
+PYTHON=${PYTHON27}
 PYTHON3=${PYTHON32}
 OLSON=./elsie.nci.nih.gov
 TESTARGS=-vv
@@ -71,7 +72,8 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON26} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON27} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON31} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON32} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON32} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON33} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -80,7 +82,8 @@ test_docs: .stamp-tzinfo
 	    && ${PYTHON26} test_docs.py ${TESTARGS} \
 	    && ${PYTHON27} test_docs.py ${TESTARGS} \
 	    && ${PYTHON31} test_docs.py ${TESTARGS} \
-	    && ${PYTHON32} test_docs.py ${TESTARGS}
+	    && ${PYTHON32} test_docs.py ${TESTARGS} \
+	    && ${PYTHON33} test_docs.py ${TESTARGS}
 
 test_zdump: dist
 	${PYTHON} gen_tests.py ${TARGET} && \
