@@ -5,6 +5,7 @@ pytz setup script
 import pytz, sys, os, os.path
 
 try:
+    import setuptools.command
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
