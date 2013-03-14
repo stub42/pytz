@@ -1,3 +1,10 @@
+/*
+** Based on the UCB version with the copyright notice and sccsid
+** appearing below.
+**
+** This is ANSIish only when "multibyte character == plain character".
+*/
+
 #include "private.h"
 
 /*

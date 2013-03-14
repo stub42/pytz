@@ -426,8 +426,8 @@ usage(FILE *stream, int status)
 [ --version ] [ --help ] [ -v ] [ -l localtime ] [ -p posixrules ] \\\n\
 \t[ -d directory ] [ -L leapseconds ] [ -y yearistype ] [ filename ... ]\n\
 \n\
-Report bugs to tz@iana.org.\n"),
-		       progname, progname);
+Report bugs to %s.\n"),
+		       progname, progname, REPORT_BUGS_TO);
 	exit(status);
 }
 
@@ -1748,7 +1748,7 @@ stringoffset(char *result, long offset)
 	minutes = offset % MINSPERHOUR;
 	offset /= MINSPERHOUR;
 	hours = offset;
-	if (hours >= HOURSPERDAY) {
+	if (hours > HOURSPERDAY) {
 		result[0] = '\0';
 		return -1;
 	}
@@ -1851,7 +1851,9 @@ stringzone(char *result, const struct zone *const zpfirst, const int zonecount)
 			rp = &zp->z_rules[i];
 			if (stdrp == NULL || rp->r_hiyear > stdrp->r_hiyear ||
 				(rp->r_hiyear == stdrp->r_hiyear &&
-				rp->r_month > stdrp->r_month))
+				(rp->r_month > stdrp->r_month ||
+				(rp->r_month == stdrp->r_month &&
+				rp->r_dayofmonth > stdrp->r_dayofmonth))))
 					stdrp = rp;
 		}
 		if (stdrp != NULL && stdrp->r_stdoff != 0)
