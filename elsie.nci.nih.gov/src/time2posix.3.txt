@@ -1,4 +1,4 @@
-TIME2POSIX(3)                                                    TIME2POSIX(3)
+TIME2POSIX(3)              Library Functions Manual              TIME2POSIX(3)
 
 NAME
        time2posix, posix2time - convert seconds since the Epoch

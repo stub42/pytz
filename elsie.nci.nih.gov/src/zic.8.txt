@@ -1,4 +1,4 @@
-ZIC(8)                                                                  ZIC(8)
+ZIC(8)                      System Manager's Manual                     ZIC(8)
 
 NAME
        zic - time zone compiler

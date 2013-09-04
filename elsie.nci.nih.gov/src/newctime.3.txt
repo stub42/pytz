@@ -1,4 +1,4 @@
-NEWCTIME(3)                                                        NEWCTIME(3)
+NEWCTIME(3)                Library Functions Manual                NEWCTIME(3)
 
 NAME
        asctime, ctime, difftime, gmtime, localtime, mktime - convert date and

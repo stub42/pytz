@@ -1,4 +1,4 @@
-DATE(1)                                                                DATE(1)
+DATE(1)                     General Commands Manual                    DATE(1)
 
 NAME
        date - show and set date and time

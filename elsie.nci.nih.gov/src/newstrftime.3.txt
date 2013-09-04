@@ -1,4 +1,4 @@
-NEWSTRFTIME(3)                                                  NEWSTRFTIME(3)
+NEWSTRFTIME(3)             Library Functions Manual             NEWSTRFTIME(3)
 
 NAME
        strftime - format date and time

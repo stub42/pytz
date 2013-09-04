@@ -1,10 +1,11 @@
-ZDUMP(8)                                                              ZDUMP(8)
+ZDUMP(8)                    System Manager's Manual                   ZDUMP(8)
 
 NAME
        zdump - time zone dumper
 
 SYNOPSIS
-       zdump [ --version ] [ -v ] [ -c [loyear,]hiyear ] [ zonename ... ]
+       zdump [ --version ] [ -v ] [ -V ] [ -c [loyear,]hiyear ] [ -t
+       [lotime,]hitime ] [ zonename ... ]
 
 DESCRIPTION
        Zdump prints the current time in each zonename named on the command
@@ -23,14 +24,22 @@ DESCRIPTION
               highest possible time value, Each line ends with isdst=1 if the
               given time is Daylight Saving Time or isdst=0 otherwise.
 
+       -V     Like -v, except omit the times relative to the extreme time
+              values.  This generates output that is easier to compare to that
+              of implementations with different time representations.
+
        -c [loyear,]hiyear
               Cut off verbose output near the start of the given year(s).  By
               default, the program cuts off verbose output near the starts of
               the years -500 and 2500.
 
+       -t [lotime,]hitime
+              Cut off verbose output at the start of the given time(s), given
+              in decimal seconds since 1970-01-01 00:00:00 UTC.
+
 LIMITATIONS
-       The -v option may not be used on systems with floating-point time_t
-       values that are neither float nor double.
+       The -v and -V options may not be used on systems with floating-point
+       time_t values that are neither float nor double.
 
        Time discontinuities are found by sampling the results returned by
        localtime at twelve-hour intervals.  This works in all real-world

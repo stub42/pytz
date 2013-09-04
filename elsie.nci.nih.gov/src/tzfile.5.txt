@@ -1,4 +1,4 @@
-TZFILE(5)                                                            TZFILE(5)
+TZFILE(5)                     File Formats Manual                    TZFILE(5)
 
 NAME
        tzfile - time zone information

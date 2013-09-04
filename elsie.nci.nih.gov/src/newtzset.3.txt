@@ -1,4 +1,4 @@
-NEWTZSET(3)                                                        NEWTZSET(3)
+NEWTZSET(3)                Library Functions Manual                NEWTZSET(3)
 
 NAME
        tzset - initialize time conversion information

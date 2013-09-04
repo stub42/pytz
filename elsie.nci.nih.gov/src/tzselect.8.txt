@@ -1,4 +1,4 @@
-TZSELECT(8)                                                        TZSELECT(8)
+TZSELECT(8)                 System Manager's Manual                TZSELECT(8)
 
 NAME
        tzselect - select a time zone
