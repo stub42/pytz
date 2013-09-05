@@ -26,10 +26,6 @@ __all__ = [
     ]
 
 import sys, datetime, os.path, gettext
-try:
-    from UserDict import DictMixin
-except ImportError:
-    from collections import Mapping as DictMixin
 
 try:
     from pkg_resources import resource_stream
@@ -40,6 +36,7 @@ from pytz.exceptions import AmbiguousTimeError
 from pytz.exceptions import InvalidTimeError
 from pytz.exceptions import NonExistentTimeError
 from pytz.exceptions import UnknownTimeZoneError
+from pytz.lazy import LazyDict, LazyList, LazySet
 from pytz.tzinfo import unpickler
 from pytz.tzfile import build_tzinfo, _byte_string
 
@@ -292,36 +289,8 @@ def _p(*args):
 _p.__safe_for_unpickling__ = True
 
 
-class _LazyDict(DictMixin):
-    """Dictionary populated on first use."""
-    data = None
-    def __getitem__(self, key):
-        if self.data is None:
-            self._fill()
-        return self.data[key.upper()]
 
-    def __contains__(self, key):
-        if self.data is None:
-            self._fill()
-        return key in self.data
-
-    def __iter__(self):
-        if self.data is None:
-            self._fill()
-        return iter(self.data)
-
-    def __len__(self):
-        if self.data is None:
-            self._fill()
-        return len(self.data)
-
-    def keys(self):
-        if self.data is None:
-            self._fill()
-        return self.data.keys()
-
-
-class _CountryTimezoneDict(_LazyDict):
+class _CountryTimezoneDict(LazyDict):
     """Map ISO 3166 country code to a list of timezone names commonly used
     in that country.
 
@@ -379,7 +348,7 @@ class _CountryTimezoneDict(_LazyDict):
 country_timezones = _CountryTimezoneDict()
 
 
-class _CountryNameDict(_LazyDict):
+class _CountryNameDict(LazyDict):
     '''Dictionary proving ISO3166 code -> English name.
 
     >>> print(country_names['au'])

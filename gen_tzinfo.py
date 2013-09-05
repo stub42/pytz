@@ -122,17 +122,17 @@ def add_allzones(filename):
 
     print >> outf, 'all_timezones = \\'
     pprint(sorted(allzones()), outf)
-    print >> outf, '''all_timezones = [
-        tz for tz in all_timezones if resource_exists(tz)]
+    print >> outf, '''all_timezones = LazyList(
+        tz for tz in all_timezones if resource_exists(tz))
         '''
-    print >> outf, 'all_timezones_set = set(all_timezones)'
+    print >> outf, 'all_timezones_set = LazySet(all_timezones)'
 
     print >> outf, 'common_timezones = \\'
     pprint(cz, outf)
-    print >> outf, '''common_timezones = [
-        tz for tz in common_timezones if tz in all_timezones]
+    print >> outf, '''common_timezones = LazyList(
+            tz for tz in common_timezones if tz in all_timezones)
         '''
-    print >> outf, 'common_timezones_set = set(common_timezones)'
+    print >> outf, 'common_timezones_set = LazySet(common_timezones)'
 
     outf.close()
 
