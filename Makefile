@@ -33,6 +33,7 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
@@ -50,6 +51,8 @@ upload: dist build/dist/locales/pytz.pot .stamp-upload
 	${PYTHON26} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
+	    upload --sign && \
+	${PYTHON33} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
 	${PYTHON32} setup.py register bdist_egg --dist-dir=../tarballs \
 	    upload --sign && \
