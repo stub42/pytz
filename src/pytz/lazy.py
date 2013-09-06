@@ -66,14 +66,17 @@ class LazyDict(DictMixin):
 
 class LazyList(list):
     """List populated on first use."""
-    def __new__(cls, fill_iter):
+    def __new__(cls, fill_iter=None):
+
+        if fill_iter is None:
+            return list()
 
         class LazyList(list):
             _fill_iter = None
 
         _props = (
             '__str__', '__repr__', '__unicode__',
-            '__hash__', '__sizeof__', '__cmp__', '__nonzero__',
+            '__hash__', '__sizeof__', '__cmp__',
             '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
             'append', 'count', 'index', 'extend', 'insert', 'pop', 'remove',
             'reverse', 'sort', '__add__', '__radd__', '__iadd__', '__mul__',
@@ -83,17 +86,16 @@ class LazyList(list):
 
         def lazy(name):
             def _lazy(self, *args, **kw):
-                if self._fill_iter is not None:
-                    _fill_lock.acquire()
-                    try:
-                        if self._fill_iter is not None:
-                            list.extend(self, self._fill_iter)
-                            self._fill_iter = None
-                    finally:
-                        _fill_lock.release()
-                real = getattr(list, name)
-                setattr(self.__class__, name, real)
-                return real(self, *args, **kw)
+                _fill_lock.acquire()
+                try:
+                    if self._fill_iter is not None:
+                        list.extend(self, self._fill_iter)
+                        del self._fill_iter
+                    for method_name in _props:
+                        delattr(LazyList, method_name)
+                finally:
+                    _fill_lock.release()
+                return getattr(list, name)(self, *args, **kw)
             return _lazy
 
         for name in _props:
@@ -106,14 +108,17 @@ class LazyList(list):
 
 class LazySet(set):
     """Set populated on first use."""
-    def __new__(cls, fill_iter):
+    def __new__(cls, fill_iter=None):
+
+        if fill_iter is None:
+            return set()
 
         class LazySet(set):
             _fill_iter = None
 
         _props = (
             '__str__', '__repr__', '__unicode__',
-            '__hash__', '__sizeof__', '__cmp__', '__nonzero__',
+            '__hash__', '__sizeof__', '__cmp__',
             '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
             '__contains__', '__len__', '__nonzero__',
             '__getitem__', '__setitem__', '__delitem__', '__iter__',
@@ -128,18 +133,17 @@ class LazySet(set):
 
         def lazy(name):
             def _lazy(self, *args, **kw):
-                if self._fill_iter is not None:
-                    _fill_lock.acquire()
-                    try:
-                        if self._fill_iter is not None:
-                            for i in self._fill_iter:
-                                set.add(self, i)
-                            self._fill_iter = None
-                    finally:
-                        _fill_lock.release()
-                real = getattr(set, name)
-                setattr(self.__class__, name, real)
-                return real(self, *args, **kw)
+                _fill_lock.acquire()
+                try:
+                    if self._fill_iter is not None:
+                        for i in self._fill_iter:
+                            set.add(self, i)
+                        del self._fill_iter
+                    for method_name in _props:
+                        delattr(LazySet, method_name)
+                finally:
+                    _fill_lock.release()
+                return getattr(set, name)(self, *args, **kw)
             return _lazy
 
         for name in _props:
