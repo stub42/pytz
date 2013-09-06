@@ -71,8 +71,10 @@ class LazyList(list):
         if fill_iter is None:
             return list()
 
+        # We need a new class as we will be dynamically messing with its
+        # methods.
         class LazyList(list):
-            _fill_iter = None
+            pass
 
         _props = (
             '__str__', '__repr__', '__unicode__',
@@ -84,15 +86,16 @@ class LazyList(list):
             '__getitem__', '__setitem__', '__delitem__', '__iter__',
             '__reversed__', '__getslice__', '__setslice__', '__delslice__')
 
+        fill_iter = [fill_iter]
+
         def lazy(name):
             def _lazy(self, *args, **kw):
                 _fill_lock.acquire()
                 try:
-                    if self._fill_iter is not None:
-                        list.extend(self, self._fill_iter)
-                        del self._fill_iter
-                    for method_name in _props:
-                        delattr(LazyList, method_name)
+                    if len(fill_iter) > 0:
+                        list.extend(self, fill_iter.pop())
+                        for method_name in _props:
+                            delattr(LazyList, method_name)
                 finally:
                     _fill_lock.release()
                 return getattr(list, name)(self, *args, **kw)
@@ -102,7 +105,6 @@ class LazyList(list):
             setattr(LazyList, name, lazy(name))
 
         new_list = LazyList()
-        new_list._fill_iter = fill_iter
         return new_list
 
 
@@ -114,7 +116,7 @@ class LazySet(set):
             return set()
 
         class LazySet(set):
-            _fill_iter = None
+            pass
 
         _props = (
             '__str__', '__repr__', '__unicode__',
@@ -131,16 +133,17 @@ class LazySet(set):
             'symmetric_difference', 'symmetric_difference_update',
             'union', 'update')
 
+        fill_iter = [fill_iter]
+
         def lazy(name):
             def _lazy(self, *args, **kw):
                 _fill_lock.acquire()
                 try:
-                    if self._fill_iter is not None:
-                        for i in self._fill_iter:
+                    if len(fill_iter) > 0:
+                        for i in fill_iter.pop():
                             set.add(self, i)
-                        del self._fill_iter
-                    for method_name in _props:
-                        delattr(LazySet, method_name)
+                        for method_name in _props:
+                            delattr(LazySet, method_name)
                 finally:
                     _fill_lock.release()
                 return getattr(set, name)(self, *args, **kw)
@@ -150,5 +153,4 @@ class LazySet(set):
             setattr(LazySet, name, lazy(name))
 
         new_set = LazySet()
-        new_set._fill_iter = fill_iter
         return new_set
