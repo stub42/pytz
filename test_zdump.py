@@ -30,7 +30,7 @@ def test_suite():
     last_zone = None
     test_class = None
     zdump_line_re = re.compile(r'''(?x)
-        ^([^\s]+) \s+ (.+) \s UTC \s+ = \s+ (.+) \s ([^\s]+) \s+ isdst=(0|1)$
+        ^([^\s]+) \s+ (.+) \s UT \s+ = \s+ (.+) \s ([^\s]+) \s+ isdst=(0|1)$
         ''')
     for i in range(0, len(raw_data)):
         line = raw_data[i]
