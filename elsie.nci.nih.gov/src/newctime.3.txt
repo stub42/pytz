@@ -35,9 +35,8 @@ SYNOPSIS
        cc ... -ltz
 
 DESCRIPTION
-       Ctime converts a long integer, pointed to by clock, representing the
-       time in seconds since 00:00:00 UTC, 1970-01-01, and returns a pointer
-       to a string of the form
+       Ctime converts a long integer, pointed to by clock, and returns a
+       pointer to a string of the form
                             Thu Nov 24 18:22:48 1986\n\0
        Years requiring fewer than four characters are padded with leading
        zeroes.  For years longer than four characters, the string is of the
@@ -47,6 +46,14 @@ DESCRIPTION
        to make it less likely that older software that expects exactly 26
        bytes of output will mistakenly output misleading values for out-of-
        range years.
+
+       The *clock time stamp represents the time in seconds since 1970-01-01
+       00:00:00 Coordinated Universal Time (UTC).  The POSIX standard says
+       that time stamps must be nonnegative and must ignore leap seconds.
+       Many implementations extend POSIX by allowing negative time stamps, and
+       can therefore represent time stamps that predate the introduction of
+       UTC and are some other flavor of Universal Time (UT).  Some
+       implementations support leap seconds, in contradiction to POSIX.
 
        Localtime and gmtime return pointers to ``tm'' structures, described
        below.  Localtime corrects for the time zone and any time zone
@@ -98,7 +105,7 @@ DESCRIPTION
                    int tm_yday;     /* day of year (0 - 365) */
                    int tm_isdst;    /* is summer time in effect? */
                    char *tm_zone;   /* abbreviation of timezone name */
-                   long tm_gmtoff;  /* offset from UTC in seconds */
+                   long tm_gmtoff;  /* offset from UT in seconds */
 
        The tm_zone and tm_gmtoff fields exist, and are filled in, only if
        arrangements to do so were made when the library containing these
@@ -107,8 +114,9 @@ DESCRIPTION
 
        Tm_isdst is non-zero if summer time is in effect.
 
-       Tm_gmtoff is the offset (in seconds) of the time represented from UTC,
-       with positive values indicating east of the Prime Meridian.
+       Tm_gmtoff is the offset (in seconds) of the time represented from UT,
+       with positive values indicating east of the Prime Meridian.  The
+       field's name is derived from Greenwich Mean Time, a precursor of UT.
 
 FILES
        /usr/local/etc/zoneinfo             time zone information directory

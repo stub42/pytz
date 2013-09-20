@@ -4,8 +4,8 @@ NAME
        date - show and set date and time
 
 SYNOPSIS
-       date [ -u ] [ -c ] [ -n ] [ -d dsttype ] [ -t minutes-west ] [ -a
-       [+|-]sss.fff ] [ +format ] [ [yyyy]mmddhhmm[yy][.ss] ]
+       date [ -u ] [ -c ] [ -r seconds ] [ -n ] [ -d dsttype ] [ -t minutes-
+       west ] [ -a [+|-]sss.fff ] [ +format ] [ [yyyy]mmddhhmm[yy][.ss] ]
 
 DESCRIPTION
        Date without arguments writes the date and time to the standard output
@@ -85,7 +85,13 @@ DESCRIPTION
        These options are available:
 
        -u or -c
-              Use UTC when setting and showing the date and time.
+              Use Universal Time when setting and showing the date and time.
+
+       -r seconds
+              Output the date that corresponds to seconds past the epoch of
+              1970-01-01 00:00:00 UTC, where seconds should be an integer,
+              either decimal, octal (leading 0), or hexadecimal (leading 0x),
+              preceded by an optional sign.
 
        -n     Do not notify other networked systems of the time change.
 

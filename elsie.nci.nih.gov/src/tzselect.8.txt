@@ -4,7 +4,7 @@ NAME
        tzselect - select a time zone
 
 SYNOPSIS
-       tzselect
+       tzselect [ -c coord ] [ -n limit ] [ --help ] [ --version ]
 
 DESCRIPTION
        The tzselect program asks the user for information about the current
@@ -14,6 +14,41 @@ DESCRIPTION
 
        All interaction with the user is done via standard input and standard
        error.
+
+OPTIONS
+       -c coord
+              Instead of asking for continent and then country and then city,
+              ask for selection from time zones whose largest cities are
+              closest to the location with geographical coordinates coord.
+              Use ISO 6709 notation for coord, that is, a latitude immediately
+              followed by a longitude.  The latitude and longitude should be
+              signed integers followed by an optional decimal point and
+              fraction: positive numbers represent north and east, negative
+              south and west.  Latitudes with two and longitudes with three
+              integer digits are treated as degrees; latitudes with four or
+              six and longitudes with five or seven integer digits are treated
+              as DDMM, DDDMM, DDMMSS, or DDDMMSS representing DD or DDD
+              degrees, MM minutes, and zero or SS seconds, with any trailing
+              fractions represent fractional minutes or (if SS is present)
+              seconds.  The decimal point is that of the current locale.  For
+              example, in the (default) C locale, -c +40.689-074.045 specifies
+              40.689oN, 74.045oW, -c +4041.4-07402.7 specifies 40o41.4'N,
+              74o2.7'W, and -c +404121-0740240 specifies 40o41'21''N,
+              74o2'40''W.  If coord is not one of the documented forms, the
+              resulting behavior is unspecified.
+
+       -n limit
+              When -c is used, display the closest limit locations (default
+              10).
+
+       Applications should not assume that tzselect's output matches the
+       user's political preferences.
+
+--help
+Output help information and exit.
+
+--version
+Output version information and exit.
 
 ENVIRONMENT VARIABLES
        AWK    Name of a Posix-compliant awk program (default: awk).
@@ -26,7 +61,7 @@ FILES
               Table of ISO 3166 2-letter country codes and country names.
 
        TZDIR/zone.tab
-              Table of country codes, latitude and longitude, TZ values, and
+              Tables of country codes, latitude and longitude, zone names, and
               descriptive comments.
 
        TZDIR/TZ
