@@ -17,6 +17,7 @@
 
 # Generated
 ./elsie.nci.nih.gov/src/version.h
+./elsie.nci.nih.gov/src/leapseconds
 
 # Generated datafile for test_zdump.py
 ./zdump.out
