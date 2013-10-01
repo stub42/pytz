@@ -9,11 +9,11 @@ on how to use these modules.
 '''
 
 # The Olson database is updated several times a year.
-OLSON_VERSION = '2013e'
-VERSION = OLSON_VERSION
+OLSON_VERSION = '2013f'
+VERSION = '2013.6'  # Switching to pip compatible version numbering.
 # Version format for a patch release - only one so far.
 #VERSION = OLSON_VERSION + '.2'
-__version__ = OLSON_VERSION
+__version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
 
