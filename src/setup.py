@@ -32,7 +32,7 @@ setup (
     author_email=memail,
     maintainer=me,
     maintainer_email=memail,
-    url='http://pytz.sourceforge.net',
+    url='http://pythonhosted.org/pytz',
     license='MIT',
     keywords=['timezone','tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,

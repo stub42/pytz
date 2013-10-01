@@ -105,9 +105,16 @@ docs: dist
 	chmod -R og-w build/docs/built
 	chmod -R a+rX build/docs/built
 
-upload_docs: docs
+upload_docs: upload_docs_pythonhosted upload_docs_sf
+	@echo Uploaded
+
+upload_docs_sf: docs
 	rsync -e ssh -ravP build/docs/built/ \
 	    web.sourceforge.net:/home/project-web/pytz/htdocs/
+
+upload_docs_pythonhosted: docs
+	cd build/dist \
+	    && ${PYTHON} setup.py upload_docs --upload-dir=../docs/built
 
 .stamp-tzinfo: .stamp-zoneinfo gen_tzinfo.py build/etc/zoneinfo/GMT
 	${PYTHON} gen_tzinfo.py ${TARGET}
