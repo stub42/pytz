@@ -6,7 +6,7 @@
 PACKAGE=	tzcode
 
 # Version numbers of the code and data distributions.
-VERSION=	2013e
+VERSION=	2013f
 
 # Email address for bug reports.
 BUGEMAIL=	tz@iana.org
@@ -312,7 +312,7 @@ SOURCES=	$(HEADERS) $(LIBSRCS) $(NONLIBSRCS) $(NEWUCBSRCS) tzselect.ksh
 MANS=		newctime.3 newstrftime.3 newtzset.3 time2posix.3 \
 			tzfile.5 tzselect.8 zic.8 zdump.8
 COMMON=		Makefile
-DOCS=		README Theory $(MANS) date.1
+DOCS=		NEWS README Theory $(MANS) date.1
 PRIMARY_YDATA=	africa antarctica asia australasia \
 		europe northamerica southamerica
 YDATA=		$(PRIMARY_YDATA) pacificnew etcetera backward
@@ -472,16 +472,17 @@ public:		check check_public check_time_t_alternatives \
 # and if the files have not changed since then.
 # This uses GNU 'touch' syntax 'touch -d@N FILE',
 # where N is the number of seconds since 1970.
-# If git or GNU 'touch' is absent, do nothing.
+# If git or GNU 'touch' is absent, do nothing and fail.
 set-timestamps:
-		-TZ=UTC0 && export TZ && files=`git ls-files` && \
+		-files=`git ls-files` && \
 		touch -d @1 test.out && rm -f test.out && \
 		for file in $$files; do \
-		  test -z "`git diff --name-only $$file`" || continue; \
-		  cmd="touch -d @`git log -1 --format='format:%ct' $$file \
-			` $$file" && \
-		  echo "$$cmd" && \
-		  $$cmd || exit; \
+		  if git diff --quiet $$file; then \
+		    time=`git log -1 --format='tformat:%ct' $$file` && \
+		    touch -cmd @$$time $$file; \
+		  else \
+		    echo >&2 "$$file: warning: does not match repository"; \
+		  fi || exit; \
 		done
 
 # The zics below ensure that each data file can stand on its own.

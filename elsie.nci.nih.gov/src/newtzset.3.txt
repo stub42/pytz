@@ -121,8 +121,8 @@ DESCRIPTION
        Here are some examples of TZ values that directly specify the time zone
        rules; they use some of the extensions to POSIX.
 
-       EST5   stands for US eastern time (EST), 5 hours behind UTC, without
-              daylight saving.
+       EST5   stands for US Eastern Standard Time (EST), 5 hours behind UTC,
+              without daylight saving.
 
        FJT-12FJST,M10.3.1/146,M1.3.4/75
               stands for Fiji Time (FJT) and Fiji Summer Time (FJST), 12 hours
@@ -147,7 +147,7 @@ DESCRIPTION
               the initial WART is a placeholder.
 
        WGT3WGST,M3.5.0/-2,M10.5.0/-1
-              stands for Western Greenland time (WGT) and Western Greenland
+              stands for Western Greenland Time (WGT) and Western Greenland
               Summer Time (WGST), 3 hours behind UTC, where clocks follow the
               EU rules of springing forward on March's last Sunday at 01:00
               UTC (-02:00 local time) and falling back on October's last
