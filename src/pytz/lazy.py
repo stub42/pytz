@@ -30,7 +30,7 @@ class LazyDict(DictMixin):
                 if self.data is None:
                     self._fill()
             finally:
-                _fill_lock_release()
+                _fill_lock.release()
         return key in self.data
 
     def __iter__(self):
