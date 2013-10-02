@@ -95,6 +95,7 @@ test_zdump: dist
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 
+doc: docs
 
 docs: dist
 	mkdir -p build/docs/source/.static
@@ -106,7 +107,6 @@ docs: dist
 	chmod -R a+rX build/docs/built
 
 upload_docs: upload_docs_pythonhosted upload_docs_sf
-	@echo Uploaded
 
 upload_docs_sf: docs
 	rsync -e ssh -ravP build/docs/built/ \
