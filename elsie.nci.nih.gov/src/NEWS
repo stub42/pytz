@@ -1,6 +1,39 @@
 News for the tz database
 
 
+Release 2013g - 2013-09-30 21:08:26 -0700
+
+  Changes affecting current and near-future time stamps
+
+    Morocco now observes DST from the last Sunday in March to the last
+    Sunday in October, not April to September respectively.  (Thanks
+    to Steffen Thorsen.)
+
+  Changes affecting 'zic'
+
+    'zic' now runs on platforms that lack both hard links and symlinks.
+    (Thanks to Theo Veenker for reporting the problem, for MinGW.)
+    Also, fix some bugs on platforms that lack hard links but have symlinks.
+
+    'zic -v' again warns that Asia/Tehran has no POSIX environment variable
+    to predict the far future, fixing a bug introduced in 2013e.
+
+  Changes affecting the build procedure
+
+    The 'leapseconds' file is again put into the tzdata tarball.
+    Also, 'leapseconds.awk', so tzdata is self-contained.  (Thanks to
+    Matt Burgess and Ian Abbott.)  The timestamps of these and other
+    dependent files in tarballs are adjusted more consistently.
+
+  Changes affecting documentation and commentary
+
+    The README file is now part of the data tarball as well as the code.
+    It now states that files are public domain unless otherwise specified.
+    (Thanks to Andrew Main (Zefram) for asking for clarifications.)
+    Its details about the 1989 release moved to a place of honor near
+    the end of NEWS.
+
+
 Release 2013f - 2013-09-24 23:37:36 -0700
 
   Changes affecting near-future time stamps
@@ -2103,6 +2136,37 @@ Release 92 - 1992-04-25 18:17:03 -0000
   By popular demand (well, at any rate, following a request by kre at munnari)
 
 
+The 1989 update of the time zone package featured:
+
+  *	POSIXization (including interpretation of POSIX-style TZ environment
+	variables, provided by Guy Harris),
+  *	ANSIfication (including versions of "mktime" and "difftime"),
+  *	SVIDulation (an "altzone" variable)
+  *	MACHination (the "gtime" function)
+  *	corrections to some time zone data (including corrections to the rules
+	for Great Britain and New Zealand)
+  *	reference data from the United States Naval Observatory for folks who
+	want to do additional time zones
+  *	and the 1989 data for Saudi Arabia.
+
+  (Since this code will be treated as "part of the implementation" in some
+  places and as "part of the application" in others, there's no good way to
+  name functions, such as timegm, that are not part of the proposed ANSI C
+  standard; such functions have kept their old, underscore-free names in this
+  update.)
+
+  And the "dysize" function has disappeared; it was present to allow
+  compilation of the "date" command on old BSD systems, and a version of "date"
+  is now provided in the package.  The "date" command is not created when you
+  "make all" since it may lack options provided by the version distributed with
+  your operating system, or may not interact with the system in the same way
+  the native version does.
+
+  Since POSIX frowns on correct leap second handling, the default behavior of
+  the "zic" command (in the absence of a "-L" option) has been changed to omit
+  leap second information from its output files.
+
+
 -----
 Notes
 
@@ -2124,3 +2188,5 @@ the release (if all else fails; these are marked with a timezone of
 
 Earlier versions of the code and data were not announced on the tz
 list and are not summarized here.
+
+This file is in the public domain.

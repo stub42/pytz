@@ -6,7 +6,7 @@
 PACKAGE=	tzcode
 
 # Version numbers of the code and data distributions.
-VERSION=	2013f
+VERSION=	2013g
 
 # Email address for bug reports.
 BUGEMAIL=	tz@iana.org
@@ -107,6 +107,7 @@ LDLIBS=
 #  -DHAVE_INCOMPATIBLE_CTIME_R=1 if your system's time.h declares
 #	ctime_r and asctime_r incompatibly with the POSIX standard (Solaris 8).
 #  -DHAVE_INTTYPES_H=1 if you have a pre-C99 compiler with "inttypes.h"
+#  -DHAVE_LINK=0 if your system lacks a link function
 #  -DHAVE_SETTIMEOFDAY=0 if settimeofday does not exist (SVR0?)
 #  -DHAVE_SETTIMEOFDAY=1 if settimeofday has just 1 arg (SVR4)
 #  -DHAVE_SETTIMEOFDAY=2 if settimeofday uses 2nd arg (4.3BSD)
@@ -299,8 +300,8 @@ CC=		$(cc) -DTZDIR=\"$(TZDIR)\"
 
 TZCSRCS=	zic.c localtime.c asctime.c scheck.c ialloc.c
 TZCOBJS=	zic.o localtime.o asctime.o scheck.o ialloc.o
-TZDSRCS=	zdump.c localtime.c ialloc.c
-TZDOBJS=	zdump.o localtime.o ialloc.o
+TZDSRCS=	zdump.c localtime.c ialloc.c asctime.o
+TZDOBJS=	zdump.o localtime.o ialloc.o asctime.c
 DATESRCS=	date.c localtime.c strftime.c asctime.c
 DATEOBJS=	date.o localtime.o strftime.o asctime.o
 LIBSRCS=	localtime.c asctime.c difftime.c
@@ -311,8 +312,12 @@ NEWUCBSRCS=	date.c strftime.c
 SOURCES=	$(HEADERS) $(LIBSRCS) $(NONLIBSRCS) $(NEWUCBSRCS) tzselect.ksh
 MANS=		newctime.3 newstrftime.3 newtzset.3 time2posix.3 \
 			tzfile.5 tzselect.8 zic.8 zdump.8
-COMMON=		Makefile
-DOCS=		NEWS README Theory $(MANS) date.1
+MANTXTS=	newctime.3.txt newstrftime.3.txt newtzset.3.txt \
+			time2posix.3.txt \
+			tzfile.5.txt tzselect.8.txt zic.8.txt zdump.8.txt \
+			date.1.txt
+COMMON=		Makefile README
+DOCS=		NEWS Theory $(MANS) date.1 $(MANTXTS)
 PRIMARY_YDATA=	africa antarctica asia australasia \
 		europe northamerica southamerica
 YDATA=		$(PRIMARY_YDATA) pacificnew etcetera backward
@@ -320,8 +325,9 @@ NDATA=		systemv factory
 SDATA=		solar87 solar88 solar89
 TDATA=		$(YDATA) $(NDATA) $(SDATA)
 TABDATA=	iso3166.tab zone.tab
+LEAP_DEPS=	leapseconds.awk leap-seconds.list
 DATA=		$(YDATA) $(NDATA) $(SDATA) $(TABDATA) \
-			leap-seconds.list yearistype.sh
+			leapseconds $(LEAP_DEPS) yearistype.sh
 WEB_PAGES=	tz-art.htm tz-link.htm
 AWK_SCRIPTS=	checktab.awk leapseconds.awk
 MISC=		usno1988 usno1989 usno1989a usno1995 usno1997 usno1998 \
@@ -382,7 +388,7 @@ yearistype:	yearistype.sh
 		cp yearistype.sh yearistype
 		chmod +x yearistype
 
-leapseconds:	leapseconds.awk leap-seconds.list
+leapseconds:	$(LEAP_DEPS)
 		$(AWK) -f leapseconds.awk leap-seconds.list >$@
 
 posix_only:	zic $(TDATA)
@@ -460,22 +466,38 @@ clean:		clean_misc
 maintainer-clean: clean
 		@echo 'This command is intended for maintainers to use; it'
 		@echo 'deletes files that may need special tools to rebuild.'
-		rm -f *.[1-8].txt *.asc *.tar.gz
+		rm -f $(MANTXTS) *.asc *.tar.gz
 
 names:
 		@echo $(ENCHILADA)
 
 public:		check check_public check_time_t_alternatives \
-		set-timestamps tarballs signatures
+		tarballs signatures
+
+date.1.txt:	date.1
+newctime.3.txt:	newctime.3
+newstrftime.3.txt: newstrftime.3
+newtzset.3.txt:	newtzset.3
+time2posix.3.txt: time2posix.3
+tzfile.5.txt:	tzfile.5
+tzselect.8.txt:	tzselect.8
+zdump.8.txt:	zdump.8
+zic.8.txt:	zic.8
+
+$(MANTXTS):	workman.sh
+		LC_ALL=C sh workman.sh `expr $@ : '\(.*\)\.txt$$'` >$@
 
 # Set the time stamps to those of the git repository, if available,
 # and if the files have not changed since then.
 # This uses GNU 'touch' syntax 'touch -d@N FILE',
 # where N is the number of seconds since 1970.
 # If git or GNU 'touch' is absent, do nothing and fail.
-set-timestamps:
-		-files=`git ls-files` && \
-		touch -d @1 test.out && rm -f test.out && \
+# Also, set the timestamp of each prebuilt file like 'leapseconds'
+# to be the maximum of the files it depends on.
+set-timestamps.out: $(ENCHILADA)
+		rm -f $@
+		-files=`git ls-files $(ENCHILADA)` && \
+		touch -md @1 test.out && rm -f test.out && \
 		for file in $$files; do \
 		  if git diff --quiet $$file; then \
 		    time=`git log -1 --format='tformat:%ct' $$file` && \
@@ -484,13 +506,19 @@ set-timestamps:
 		    echo >&2 "$$file: warning: does not match repository"; \
 		  fi || exit; \
 		done
+		touch -cmr `ls -t $(LEAP_DEPS) | sed 1q` leapseconds
+		for file in `ls $(MANTXTS) | sed 's/\.txt$$//'`; do \
+		  touch -cmr `ls -t $$file workman.sh | sed 1q` $$file.txt || \
+		    exit; \
+		done
+		touch $@
 
 # The zics below ensure that each data file can stand on its own.
 # We also do an all-files run to catch links to links.
 
 check_public:	$(ENCHILADA)
 		make maintainer-clean
-		make "CFLAGS=$(GCC_DEBUG_FLAGS)"
+		make "CFLAGS=$(GCC_DEBUG_FLAGS)" $(ENCHILADA) all
 		mkdir tzpublic
 		for i in $(TDATA) ; do \
 		  $(zic) -v -d tzpublic $$i 2>&1 || exit; \
@@ -529,17 +557,13 @@ check_time_t_alternatives:
 
 tarballs:	tzcode$(VERSION).tar.gz tzdata$(VERSION).tar.gz
 
-tzcode$(VERSION).tar.gz: $(COMMON) $(DOCS) $(SOURCES) $(MISC)
-		for i in *.[1-8] ; do \
-		  LC_ALL=C sh workman.sh $$i > $$i.txt && \
-		  touch -r $$i $$i.txt || exit; \
-		done
+tzcode$(VERSION).tar.gz: set-timestamps.out
 		LC_ALL=C && export LC_ALL && \
 		tar $(TARFLAGS) -cf - \
-		    $(COMMON) $(DOCS) $(SOURCES) $(MISC) *.[1-8].txt | \
+		    $(COMMON) $(DOCS) $(SOURCES) $(MISC) | \
 		  gzip $(GZIPFLAGS) > $@
 
-tzdata$(VERSION).tar.gz: $(COMMON) $(DATA)
+tzdata$(VERSION).tar.gz: set-timestamps.out
 		LC_ALL=C && export LC_ALL && \
 		tar $(TARFLAGS) -cf - $(COMMON) $(DATA) | \
 		  gzip $(GZIPFLAGS) > $@
