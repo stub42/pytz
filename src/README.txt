@@ -517,6 +517,11 @@ using::
 
     bzr branch lp:pytz
 
+Announcements of new releases are made on
+`Launchpad <https://launchpad.net/pytz>`_, and the
+`Atom feed <http://feeds.launchpad.net/pytz/announcements.atom>`_
+hosted there.
+
 
 Bugs, Feature Requests & Patches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
