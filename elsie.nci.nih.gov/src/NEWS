@@ -1,5 +1,63 @@
 News for the tz database
 
+Release 2013h - 2013-10-25 15:32:32 -0700
+
+  Changes affecting current and future time stamps:
+
+    Libya has switched its time zone back to UTC+2 without DST,
+    instead of UTC+1 with DST.  (Thanks to Even Scharning.)
+
+    Western Sahara (Africa/El_Aaiun) uses Morocco's DST rules.
+    (Thanks to Gwillim Law.)
+
+  Changes affecting future time stamps:
+
+    Acre and (we guess) western Amazonas will switch from UTC-4 to UTC-5
+    on 2013-11-10.  This affects America/Rio_Branco and America/Eirunepe.
+    (Thanks to Steffen Thorsen.)
+
+    Add entries for DST transitions in Morocco in the year 2038.
+    This avoids some year-2038 glitches introduced in 2013g.
+    (Thanks to Yoshito Umaoka for reporting the problem.)
+
+  Changes affecting API
+
+    The 'tzselect' command no longer requires the 'select' command,
+    and should now work with /bin/sh on more platforms.  It also works
+    around a bug in BusyBox awk before version 1.21.0.  (Thanks to
+    Patrick 'P. J.' McDermott.)
+
+  Changes affecting code
+
+    Fix localtime overflow bugs with 32-bit unsigned time_t.
+
+    zdump no longer assumes sscanf returns maximal values on overflow.
+
+  Changes affecting the build procedure
+
+    The builder can specify which programs to use, if any, instead of
+    'ar' and 'ranlib', and libtz.a is now built locally before being
+    installed.  (Thanks to Michael Forney.)
+
+    A dependency typo in the 'zdump' rule has been fixed.
+    (Thanks to Andrew Paprocki.)
+
+    The Makefile has been simplified by assuming that 'mkdir -p' and 'cp -f'
+    work as specified by POSIX.2-1992 or later; this is portable nowadays.
+
+    'make clean' no longer removes 'leapseconds', since it's
+    host-independent and is part of the distribution.
+
+    The unused makefile macros TZCSRCS, TZDSRCS, DATESRCS have been removed.
+
+  Changes affecting documentation and commentary
+
+    tz-link.htm now mentions TC TIMEZONE's draft timezone service protocol
+    (thanks to Mike Douglass) and TimezoneJS.Date (thanks to Jim Fehrle).
+
+    Update URLs in tz-link page.  Add URLs for Microsoft Windows, since
+    8.1 introduces tz support.  Remove URLs for Tru64 and UnixWare (no
+    longer maintained) and for old advisories.  SOFA now does C.
 
 Release 2013g - 2013-09-30 21:08:26 -0700
 
