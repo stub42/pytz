@@ -66,6 +66,17 @@ class LazyDict(DictMixin):
 
 class LazyList(list):
     """List populated on first use."""
+
+    _props = [
+        '__str__', '__repr__', '__unicode__',
+        '__hash__', '__sizeof__', '__cmp__',
+        '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
+        'append', 'count', 'index', 'extend', 'insert', 'pop', 'remove',
+        'reverse', 'sort', '__add__', '__radd__', '__iadd__', '__mul__',
+        '__rmul__', '__imul__', '__contains__', '__len__', '__nonzero__',
+        '__getitem__', '__setitem__', '__delitem__', '__iter__',
+        '__reversed__', '__getslice__', '__setslice__', '__delslice__']
+
     def __new__(cls, fill_iter=None):
 
         if fill_iter is None:
@@ -76,16 +87,6 @@ class LazyList(list):
         class LazyList(list):
             pass
 
-        _props = (
-            '__str__', '__repr__', '__unicode__',
-            '__hash__', '__sizeof__', '__cmp__',
-            '__lt__', '__le__', '__eq__', '__ne__', '__gt__', '__ge__',
-            'append', 'count', 'index', 'extend', 'insert', 'pop', 'remove',
-            'reverse', 'sort', '__add__', '__radd__', '__iadd__', '__mul__',
-            '__rmul__', '__imul__', '__contains__', '__len__', '__nonzero__',
-            '__getitem__', '__setitem__', '__delitem__', '__iter__',
-            '__reversed__', '__getslice__', '__setslice__', '__delslice__')
-
         fill_iter = [fill_iter]
 
         def lazy(name):
@@ -94,18 +95,23 @@ class LazyList(list):
                 try:
                     if len(fill_iter) > 0:
                         list.extend(self, fill_iter.pop())
-                        for method_name in _props:
+                        for method_name in cls._props:
                             delattr(LazyList, method_name)
                 finally:
                     _fill_lock.release()
                 return getattr(list, name)(self, *args, **kw)
             return _lazy
 
-        for name in _props:
+        for name in cls._props:
             setattr(LazyList, name, lazy(name))
 
         new_list = LazyList()
         return new_list
+
+# Not all versions of Python declare the same magic methods.
+# Filter out properties that don't exist in this version of Python
+# from the list.
+LazyList._props = [prop for prop in LazyList._props if hasattr(list, prop)]
 
 
 class LazySet(set):

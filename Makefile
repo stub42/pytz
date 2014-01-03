@@ -60,13 +60,23 @@ upload: dist build/dist/locales/pytz.pot .stamp-upload
 	    upload --sign
 	touch $@
 
-test: test_tzinfo test_docs test_zdump
+test: test_lazy test_tzinfo test_docs test_zdump
 
 clean:
 	rm -f .stamp-*
 	rm -rf build/*/*
 	make -C ${OLSON}/src clean
 	find . -name \*.pyc | xargs rm -f
+
+test_lazy: .stamp-tzinfo
+	cd build/dist/pytz/tests \
+	    && ${PYTHON24} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON25} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON26} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON27} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON31} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON32} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON33} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
