@@ -1,5 +1,34 @@
 News for the tz database
 
+Release 2013i - 2013-12-17 07:25:23 -0800
+
+  Changes affecting near-future time stamps:
+
+    Jordan switches back to standard time at 00:00 on December 20, 2013.
+    The 2006-2011 transition schedule is planned to resume in 2014.
+    (Thanks to Steffen Thorsen.)
+
+  Changes affecting past time stamps:
+
+    In 2004, Cuba began DST on March 28, not April 4.
+    (Thanks to Steffen Thorsen.)
+
+  Changes affecting code
+
+    The compile-time flag NOSOLAR has been removed, as nowadays the
+    benefit of slightly shrinking runtime table size is outweighed by the
+    cost of disallowing potential future updates that exceed old limits.
+
+  Changes affecting documentation and commentary
+
+    The files solar87, solar88, and solar89 are no longer distributed.
+    They were a negative experiment -- that is, a demonstration that
+    tz data can represent solar time only with some difficulty and error.
+    Their presence in the distribution caused confusion, as Riyadh
+    civil time was generally not solar time in those years.
+
+    tz-link.htm now mentions Noda Time.  (Thanks to Matt Johnson.)
+
 Release 2013h - 2013-10-25 15:32:32 -0700
 
   Changes affecting current and future time stamps:
