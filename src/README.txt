@@ -288,11 +288,15 @@ True
 >>> pytz.utc is pytz.UTC is pytz.timezone('UTC')
 True
 
-Note that this instance is not the same instance (or implementation) as
-other timezones with the same meaning (GMT, Greenwich, Universal, etc.).
+Note that some other timezones are commonly thought of as the same (GMT,
+Greenwich, Universal, etc.). The definition of UTC is distinct from these
+other timezones, and they are not equivalent. For this reason, they will
+not compare the same in Python.
 
->>> utc is pytz.timezone('GMT')
+>>> utc == pytz.timezone('GMT')
 False
+
+See the section `What is UTC`_, below.
 
 If you insist on working with local times, this library provides a
 facility for constructing them unambiguously:
@@ -415,13 +419,19 @@ New Zealand
 What is UTC
 ~~~~~~~~~~~
 
-'UTC' is Universal Time, also known as Greenwich Mean Time or GMT
-in the United Kingdom. All other timezones are given as offsets from
-UTC. No daylight savings time occurs in UTC, making it a useful timezone
-to perform date arithmetic without worrying about the confusion and
-ambiguities caused by daylight savings time transitions, your country
-changing its timezone, or mobile computers that move roam through
-multiple timezones.
+'UTC' is `Coordinated Universal Time`_. It is a successor to, but distinct
+from, Greenwich Mean Time (GMT) and the various definitions of Universal
+Time. UTC is now the worldwide standard for regulating clocks and time
+measurement.
+
+All other timezones are defined relative to UTC, and include offsets like
+UTC+0800 — hours to add or subtract from UTC to derive the local time. No
+daylight saving time occurs in UTC, making it a useful timezone to perform
+date arithmetic without worrying about the confusion and ambiguities caused
+by daylight saving time transitions, your country changing its timezone, or
+mobile computers that roam through multiple timezones.
+
+..  _Coordinated Universal Time: https://en.wikipedia.org/wiki/Coordinated_Universal_Time
 
 
 Helpers
