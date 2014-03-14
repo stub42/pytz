@@ -9,7 +9,7 @@ Introduction
 pytz brings the Olson tz database into Python. This library allows
 accurate and cross platform timezone calculations using Python 2.4
 or higher. It also solves the issue of ambiguous times at the end
-of daylight savings, which you can read more about in the Python
+of daylight saving time, which you can read more about in the Python
 Library Reference (``datetime.tzinfo``).
 
 Almost all of the Olson timezones are supported.
@@ -90,7 +90,7 @@ constructors ''does not work'' with pytz for many timezones.
 >>> datetime(2002, 10, 27, 12, 0, 0, tzinfo=amsterdam).strftime(fmt)
 '2002-10-27 12:00:00 AMT+0020'
 
-It is safe for timezones without daylight savings trasitions though, such
+It is safe for timezones without daylight saving transitions though, such
 as UTC:
 
 >>> datetime(2002, 10, 27, 12, 0, 0, tzinfo=pytz.utc).strftime(fmt)
@@ -107,9 +107,9 @@ by humans.
 
 This library also allows you to do date arithmetic using local
 times, although it is more complicated than working in UTC as you
-need to use the ``normalize()`` method to handle daylight savings time
+need to use the ``normalize()`` method to handle daylight saving time
 and other timezone transitions. In this example, ``loc_dt`` is set
-to the instant when daylight savings time ends in the US/Eastern
+to the instant when daylight saving time ends in the US/Eastern
 timezone.
 
 >>> before = loc_dt - timedelta(minutes=10)
@@ -150,7 +150,7 @@ to use the ``normalize()`` method to ensure the conversion is correct.
 
 You can take shortcuts when dealing with the UTC side of timezone
 conversions. ``normalize()`` and ``localize()`` are not really
-necessary when there are no daylight savings time transitions to
+necessary when there are no daylight saving time transitions to
 deal with.
 
 >>> utc_dt = datetime.utcfromtimestamp(1143408899).replace(tzinfo=utc)
@@ -251,7 +251,7 @@ happens:
 In fact, every instant between 01:00 and 02:00 occurs twice. This means
 that if you try and create a time in the 'US/Eastern' timezone using
 the standard datetime syntax, there is no way to specify if you meant
-before of after the end-of-daylight-savings-time transition.
+before of after the end-of-daylight-saving-time transition.
 
 >>> loc_dt = datetime(2002, 10, 27, 1, 30, 00, tzinfo=eastern)
 >>> loc_dt.strftime(fmt)
@@ -312,7 +312,7 @@ guess and raise exceptions if you try to build ambiguous or non-existent
 times.
 
 For example, 1:30am on 27th Oct 2002 happened twice in the US/Eastern
-timezone when the clocks where put back at the end of Daylight Savings
+timezone when the clocks where put back at the end of Daylight Saving
 Time:
 
 >>> dt = datetime(2002, 10, 27, 1, 30, 00)
@@ -343,13 +343,13 @@ True
 
 Although ``localize()`` handles many cases, it is still not possible
 to handle all. In cases where countries change their timezone definitions,
-cases like the end-of-daylight-savings-time occur with no way of resolving
+cases like the end-of-daylight-saving-time occur with no way of resolving
 the ambiguity. For example, in 1915 Warsaw switched from Warsaw time to
 Central European time. So at the stroke of midnight on August 5th 1915
 the clocks were wound back 24 minutes creating an ambiguous time period
 that cannot be specified without referring to the timezone abbreviation
 or the actual UTC offset. In this case midnight happened twice, neither
-time during a daylight savings time period:
+time during a daylight saving time period:
 
 >>> warsaw = pytz.timezone('Europe/Warsaw')
 >>> loc_dt1 = warsaw.localize(datetime(1915, 8, 4, 23, 59, 59), is_dst=False)
@@ -363,7 +363,7 @@ time during a daylight savings time period:
 
 The only way of creating a time during the missing 24 minutes is
 converting from another timezone - because neither of the timezones
-involved where in daylight savings mode the API simply provides no way
+involved where in daylight saving mode the API simply provides no way
 to express it:
 
 >>> utc_dt = datetime(1915, 8, 4, 22, 36, tzinfo=pytz.utc)

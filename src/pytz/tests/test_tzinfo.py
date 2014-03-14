@@ -568,8 +568,8 @@ class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
 
     def testHourBefore(self):
         # Python's datetime library has a bug, where the hour before
-        # a daylight savings transition is one hour out. For example,
-        # at the end of US/Eastern daylight savings time, 01:00 EST
+        # a daylight saving transition is one hour out. For example,
+        # at the end of US/Eastern daylight saving time, 01:00 EST
         # occurs twice (once at 05:00 UTC and once at 06:00 UTC),
         # whereas the first should actually be 01:00 EDT.
         # Note that this bug is by design - by accepting this ambiguity
