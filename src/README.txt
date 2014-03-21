@@ -425,7 +425,7 @@ Time. UTC is now the worldwide standard for regulating clocks and time
 measurement.
 
 All other timezones are defined relative to UTC, and include offsets like
-UTC+0800 — hours to add or subtract from UTC to derive the local time. No
+UTC+0800 - hours to add or subtract from UTC to derive the local time. No
 daylight saving time occurs in UTC, making it a useful timezone to perform
 date arithmetic without worrying about the confusion and ambiguities caused
 by daylight saving time transitions, your country changing its timezone, or
