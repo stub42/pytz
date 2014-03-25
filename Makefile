@@ -41,7 +41,7 @@ dist: build/dist/locales/pytz.pot .stamp-dist
 upload: dist build/dist/locales/pytz.pot .stamp-upload
 .stamp-upload: .stamp-tzinfo
 	cd build/dist && \
-	echo ${PYTHON} setup.py register sdist \
+	${PYTHON} setup.py register sdist \
 	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
 	    upload --sign
 	-cd build/dist && \
