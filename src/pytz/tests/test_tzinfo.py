@@ -22,7 +22,7 @@ from pytz.tzinfo import DstTzInfo, StaticTzInfo
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
 EXPECTED_VERSION='2014.2'
-EXPECTED_OLSON_VERSION='2014a'
+EXPECTED_OLSON_VERSION='2014b'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
@@ -70,7 +70,7 @@ class BasicTest(unittest.TestCase):
         self.assertEqual(EXPECTED_OLSON_VERSION, pytz.OLSON_VERSION,
                 'Incorrect pytz version loaded. Import path is stuffed '
                 'or this test needs updating. (Wanted %s, got %s)'
-                % (EXPECTED_VERSION, pytz.__version__))
+                % (EXPECTED_OLSON_VERSION, pytz.OLSON_VERSION))
 
     def testGMT(self):
         now = datetime.now(tz=GMT)
