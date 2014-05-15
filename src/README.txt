@@ -88,7 +88,7 @@ Unfortunately using the tzinfo argument of the standard datetime
 constructors ''does not work'' with pytz for many timezones.
 
 >>> datetime(2002, 10, 27, 12, 0, 0, tzinfo=amsterdam).strftime(fmt)
-'2002-10-27 12:00:00 AMT+0020'
+'2002-10-27 12:00:00 LMT+0020'
 
 It is safe for timezones without daylight saving transitions though, such
 as UTC:

@@ -183,7 +183,8 @@ class PicklingTest(unittest.TestCase):
             "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
             "I0\nS'EST'\np3\ntRp4\n."
             ))
-        east2 = pytz.timezone('US/Eastern')
+        east2 = pytz.timezone('US/Eastern').localize(
+            datetime(2006, 1, 1)).tzinfo
         self.assertTrue(east1 is east2)
 
         # Confirm changes in name munging between 2006j and 2007c cause
@@ -191,7 +192,8 @@ class PicklingTest(unittest.TestCase):
         pap1 = pickle.loads(_byte_string(
             "cpytz\n_p\np1\n(S'America/Port_minus_au_minus_Prince'"
             "\np2\nI-17340\nI0\nS'PPMT'\np3\ntRp4\n."))
-        pap2 = pytz.timezone('America/Port-au-Prince')
+        pap2 = pytz.timezone('America/Port-au-Prince').localize(
+            datetime(1910, 1, 1)).tzinfo
         self.assertTrue(pap1 is pap2)
 
         gmt1 = pickle.loads(_byte_string(
