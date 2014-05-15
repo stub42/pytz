@@ -6,7 +6,7 @@
 PACKAGE=	tzcode
 
 # Version numbers of the code and data distributions.
-VERSION=	2014b
+VERSION=	2014c
 
 # Email address for bug reports.
 BUGEMAIL=	tz@iana.org
@@ -443,7 +443,7 @@ check_web:	$(WEB_PAGES)
 
 clean_misc:
 		rm -f core *.o *.out \
-		  date tzselect version.h zdump zic yearistype
+		  date tzselect version.h zdump zic yearistype libtz.a
 clean:		clean_misc
 		rm -fr tzpublic
 
