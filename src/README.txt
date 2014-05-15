@@ -249,11 +249,12 @@ happens:
       and 01:00 happens again (this time 01:00 EST)
 
 In fact, every instant between 01:00 and 02:00 occurs twice. This means
-that if you try and create a time in the 'US/Eastern' timezone using
+that if you try and create a time in the 'US/Eastern' timezone
 the standard datetime syntax, there is no way to specify if you meant
-before of after the end-of-daylight-saving-time transition.
+before of after the end-of-daylight-saving-time transition. Using the
+pytz custom syntax, the best you can do is make an educated guess:
 
->>> loc_dt = datetime(2002, 10, 27, 1, 30, 00, tzinfo=eastern)
+>>> loc_dt = eastern.localize(datetime(2002, 10, 27, 1, 30, 00))
 >>> loc_dt.strftime(fmt)
 '2002-10-27 01:30:00 EST-0500'
 
