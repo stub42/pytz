@@ -143,7 +143,7 @@ to use the ``normalize()`` method to ensure the conversion is correct.
 >>> au_tz = timezone('Australia/Sydney')
 >>> au_dt = au_tz.normalize(utc_dt.astimezone(au_tz))
 >>> au_dt.strftime(fmt)
-'2006-03-27 08:34:59 EST+1100'
+'2006-03-27 08:34:59 AEDT+1100'
 >>> utc_dt2 = utc.normalize(au_dt.astimezone(utc))
 >>> utc_dt2.strftime(fmt)
 '2006-03-26 21:34:59 UTC+0000'
@@ -159,7 +159,7 @@ deal with.
 >>> au_tz = timezone('Australia/Sydney')
 >>> au_dt = au_tz.normalize(utc_dt.astimezone(au_tz))
 >>> au_dt.strftime(fmt)
-'2006-03-27 08:34:59 EST+1100'
+'2006-03-27 08:34:59 AEDT+1100'
 >>> utc_dt2 = au_dt.astimezone(utc)
 >>> utc_dt2.strftime(fmt)
 '2006-03-26 21:34:59 UTC+0000'

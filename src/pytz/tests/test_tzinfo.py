@@ -21,8 +21,8 @@ from pytz.tzinfo import DstTzInfo, StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
-EXPECTED_VERSION='2014.4'
-EXPECTED_OLSON_VERSION='2014d'
+EXPECTED_VERSION='2014.7'
+EXPECTED_OLSON_VERSION='2014g'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
@@ -547,7 +547,7 @@ class SamoaInternationalDateLineChange(USEasternDSTStartTestCase):
     tzinfo = pytz.timezone('Pacific/Apia')
     transition_time = datetime(2011, 12, 30, 10, 0, 0, tzinfo=UTC)
     before = {
-        'tzname': 'WSDT',
+        'tzname': 'SDT',
         'utcoffset': timedelta(hours=-10),
         'dst': timedelta(hours=1),
         }
