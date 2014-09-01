@@ -71,7 +71,7 @@ test: test_lazy test_tzinfo test_docs test_zdump
 
 clean:
 	rm -f .stamp-*
-	rm -rf build/*/*
+	rm -rf build/*/* zdump.out
 	make -C ${OLSON}/src clean
 	find . -name \*.pyc | xargs rm -f
 
