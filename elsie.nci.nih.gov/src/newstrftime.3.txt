@@ -4,14 +4,10 @@ NAME
        strftime - format date and time
 
 SYNOPSIS
-       #include <sys/types.h>
        #include <time.h>
 
-       size_t strftime(buf, maxsize, format, timeptr)
-       char *buf;
-       size_t maxsize;
-       const char *format;
-       const struct tm *timeptr
+       size_t strftime(char *restrict buf, size_t maxsize,
+           char const *restrict format, struct tm const *restrict timeptr);
 
        cc ... -ltz
 
@@ -24,7 +20,7 @@ DESCRIPTION
        into the buffer.  A conversion specification consists of a percent sign
        and one other character.
 
-       No more than maxsize characters are be placed into the array.  If the
+       No more than maxsize characters are placed into the array.  If the
        total number of resulting characters, including the terminating null
        character, is not more than maxsize, strftime returns the number of
        characters in the array, not counting the terminating null.  Otherwise,

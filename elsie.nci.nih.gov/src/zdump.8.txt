@@ -4,8 +4,7 @@ NAME
        zdump - time zone dumper
 
 SYNOPSIS
-       zdump [ --version ] [ -v ] [ -V ] [ -c [loyear,]hiyear ] [ -t
-       [lotime,]hitime ] [ zonename ... ]
+       zdump [ option ... ] [ zonename ... ]
 
 DESCRIPTION
        Zdump prints the current time in each zonename named on the command

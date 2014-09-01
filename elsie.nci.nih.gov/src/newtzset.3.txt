@@ -4,21 +4,37 @@ NAME
        tzset - initialize time conversion information
 
 SYNOPSIS
-       void tzset()
+       #include <time.h>
+
+       timezone_t tzalloc(char const *TZ);
+
+       void tzfree(timezone_t tz);
+
+       void tzset(void);
 
        cc ... -ltz
 
 DESCRIPTION
-       Tzset uses the value of the environment variable TZ to set time
-       conversion information used by localtime.  If TZ does not appear in the
-       environment, the best available approximation to local wall clock time,
-       as specified by the tzfile(5)-format file localtime in the system time
-       conversion information directory, is used by localtime.  If TZ appears
-       in the environment but its value is a null string, Universal Time (UT)
-       is used, with the abbreviation "UTC" and without leap second
-       correction; please see newctime(3) for more about UT, UTC, and leap
-       seconds.  If TZ appears in the environment and its value is not a null
-       string:
+       Tzalloc allocates and returns a time zone object described by TZ.  If
+       TZ is not a valid time zone description, or if the object cannot be
+       allocated, tzalloc returns a null pointer and sets errno.
+
+       Tzfree frees a time zone object tz, which should have been successfully
+       allocated by tzalloc.  This invalidates any tm_zone pointers that tz
+       was used to set.
+
+       Tzset acts like tzalloc(getenv("TZ")), except it saves any resulting
+       time zone object into internal storage that is accessed by localtime,
+       localtime_r, and mktime.  The anonymous shared time zone object is
+       freed by the next call to tzset.  If the implied call to tzalloc fails,
+       tzset falls back on UTC.
+
+       If TZ is null, the best available approximation to local wall clock
+       time, as specified by the tzfile(5)-format file localtime in the system
+       time conversion information directory, is used.  If TZ is the empty
+       string, Universal Time (UT) is used, with the abbreviation "UTC" and
+       without leap second correction; please see newctime(3) for more about
+       UT, UTC, and leap seconds.  If TZ is nonnull and nonempty:
 
               if the value begins with a colon, it is used as a pathname of a
               file from which to read the time conversion information;
@@ -47,8 +63,8 @@ DESCRIPTION
                              summer time does not apply in this locale.
                              Upper- and lowercase letters are explicitly
                              allowed.  Any characters except a leading colon
-                             (:), digits, comma (,), minus (-), plus (+), and
-                             ASCII NUL are allowed.
+                             (:), digits, comma (,), ASCII minus (-), ASCII
+                             plus (+), and NUL bytes are allowed.
 
               offset         Indicates the value one must add to the local
                              time to arrive at Coordinated Universal Time.
@@ -64,11 +80,11 @@ DESCRIPTION
                              digits may be used; the value is always
                              interpreted as a decimal number.  The hour must
                              be between zero and 24, and the minutes (and
-                             seconds) -- if present -- between zero and 59.
-                             If preceded by a ``-'', the time zone shall be
-                             east of the Prime Meridian; otherwise it shall be
-                             west (which may be indicated by an optional
-                             preceding ``+'').
+                             seconds) - if present - between zero and 59.  If
+                             preceded by a "-", the time zone shall be east of
+                             the Prime Meridian; otherwise it shall be west
+                             (which may be indicated by an optional preceding
+                             "+".
 
               rule           Indicates when to change to and back from summer
                              time.  The rule has the form:
@@ -91,10 +107,10 @@ DESCRIPTION
 
                              Jn        The Julian day n (1 <= n <= 365).  Leap
                                        days are not counted; that is, in all
-                                       years -- including leap years --
-                                       February 28 is day 59 and March 1 is
-                                       day 60.  It is impossible to explicitly
-                                       refer to the occasional February 29.
+                                       years - including leap years - February
+                                       28 is day 59 and March 1 is day 60.  It
+                                       is impossible to explicitly refer to
+                                       the occasional February 29.
 
                              n         The zero-based Julian day
                                        (0 <= n <= 365).  Leap days are
@@ -103,20 +119,20 @@ DESCRIPTION
 
                              Mm.n.d    The d'th day (0 <= d <= 6) of week n of
                                        month m of the year (1 <= n <= 5,
-                                       1 <= m <= 12, where week 5 means ``the
-                                       last d day in month m'' which may occur
+                                       1 <= m <= 12, where week 5 means "the
+                                       last d day in month m" which may occur
                                        in either the fourth or the fifth
                                        week).  Week 1 is the first week in
                                        which the d'th day occurs.  Day zero is
                                        Sunday.
 
                              The time has the same format as offset except
-                             that POSIX does not allow a leading sign (``-''
-                             or ``+'').  As an extension to POSIX, the hours
-                             part of time can range from -167 through 167;
-                             this allows for unusual rules such as "the
-                             Saturday before the first Sunday of March".  The
-                             default, if time is not given, is 02:00:00.
+                             that POSIX does not allow a leading sign ("-" or
+                             "+").  As an extension to POSIX, the hours part
+                             of time can range from -167 through 167; this
+                             allows for unusual rules such as "the Saturday
+                             before the first Sunday of March".  The default,
+                             if time is not given, is 02:00:00.
 
        Here are some examples of TZ values that directly specify the time zone
        rules; they use some of the extensions to POSIX.
@@ -161,9 +177,6 @@ DESCRIPTION
 
        For compatibility with System V Release 3.1, a semicolon (;) may be
        used to separate the rule from the rest of the specification.
-
-       If the TZ environment variable does not specify a tzfile(5)-format and
-       cannot be interpreted as a direct specification, UTC is used.
 
 FILES
        /usr/local/etc/zoneinfo             time zone information directory

@@ -4,14 +4,12 @@ NAME
        zic - time zone compiler
 
 SYNOPSIS
-       zic [ --version ] [ -v ] [ -d directory ] [ -l localtime ] [ -p
-       posixrules ] [ -L leapsecondfilename ] [ -s ] [ -y command ] [ filename
-       ... ]
+       zic [ option ... ] [ filename ... ]
 
 DESCRIPTION
        Zic reads text from the file(s) named on the command line and creates
        the time conversion information files specified in this input.  If a
-       filename is -, the standard input is read.
+       filename is "-", the standard input is read.
 
        These options are available:
 
@@ -42,7 +40,7 @@ DESCRIPTION
 
        -v     Be more verbose, and complain about the following situations:
 
-              The input data specifies a link to a link.
+              The input specifies a link to a link.
 
               A year that appears in a data file is outside the range of years
               representable by time(2) values.
@@ -69,6 +67,10 @@ DESCRIPTION
               A time zone abbreviation has fewer than 3 characters.  POSIX
               requires at least 3.
 
+              An output file name contains a byte that is not an ASCII letter,
+              "-", "/", or "_"; or it contains a file name component that
+              contains more than 14 bytes or that starts with "-".
+
        -s     Limit time values stored in output files to values that are the
               same whether they're taken to be signed or unsigned.  You can
               use this option to generate SVVS-compatible files.
@@ -77,15 +79,29 @@ DESCRIPTION
               Use the given command rather than yearistype when checking year
               types (see below).
 
+       Input files should be text files, that is, they should be a series of
+       zero or more lines, each ending in a newline byte and containing at
+       most 511 bytes, and without any NUL bytes.  The input text's encoding
+       is typically UTF-8 or ASCII; it should have a unibyte representation
+       for the POSIX Portable Character Set (PPCS) <http://pubs.opengroup.org/
+       onlinepubs/9699919799/basedefs/V1_chap06.html> and the encoding's non-
+       unibyte characters should consist entirely of non-PPCS bytes.  Non-PPCS
+       characters typically occur only in comments: although output file names
+       and time zone abbreviations can contain nearly any character, other
+       software will work better if these are limited to the restricted syntax
+       described under the -v option.
+
        Input lines are made up of fields.  Fields are separated from one
-       another by one or more white space characters.  Leading and trailing
-       white space on input lines is ignored.  An unquoted sharp character (#)
-       in the input introduces a comment which extends to the end of the line
-       the sharp character appears on.  White space characters and sharp
-       characters may be enclosed in double quotes (") if they're to be used
-       as part of a field.  Any line that is blank (after comment stripping)
-       is ignored.  Non-blank lines are expected to be of one of three types:
-       rule lines, zone lines, and link lines.
+       another by one or more white space characters.  The white space
+       characters are space, form feed, carriage return, newline, tab, and
+       vertical tab.  Leading and trailing white space on input lines is
+       ignored.  An unquoted sharp character (#) in the input introduces a
+       comment which extends to the end of the line the sharp character
+       appears on.  White space characters and sharp characters may be
+       enclosed in double quotes (") if they're to be used as part of a field.
+       Any line that is blank (after comment stripping) is ignored.  Non-blank
+       lines are expected to be of one of three types: rule lines, zone lines,
+       and link lines.
 
        Names (such as month names) must be in English and are case
        insensitive.  Abbreviations, if used, must be unambiguous in context.
@@ -118,8 +134,8 @@ DESCRIPTION
                abbreviation) may be used to repeat the value of the FROM
                field.
 
-       TYPE    Gives the type of year in which the rule applies.  If TYPE is -
-               then the rule applies in all years between FROM and TO
+       TYPE    Gives the type of year in which the rule applies.  If TYPE is
+               "-" then the rule applies in all years between FROM and TO
                inclusive.  If TYPE is something else, then zic executes the
                command
                     yearistype year type
@@ -156,7 +172,10 @@ DESCRIPTION
                followed by the letter w if the given time is local "wall
                clock" time, s if the given time is local "standard" time, or u
                (or g or z) if the given time is universal time; in the absence
-               of an indicator, wall clock time is assumed.
+               of an indicator, wall clock time is assumed.  The intent is
+               that a rule line describes the instants when a clock/calendar
+               set to the type of time specified in the AT field would show
+               the specified date and time of day.
 
        SAVE    Gives the amount of time to be added to local standard time
                when the rule is in effect.  This field has the same format as
@@ -166,7 +185,7 @@ DESCRIPTION
        LETTER/S
                Gives the "variable part" (for example, the "S" or "D" in "EST"
                or "EDT") of time zone abbreviations to be used when this rule
-               is in effect.  If this field is -, the variable part is null.
+               is in effect.  If this field is "-", the variable part is null.
 
        A zone line has the form
 
@@ -174,12 +193,14 @@ DESCRIPTION
 
        For example:
 
-            Zone  Australia/Adelaide  9:30    Aus         CST     1971 Oct 31 2:00
+            Zone  Australia/Adelaide  9:30    Aus         AC%sT   1971 Oct 31  2:00
 
        The fields that make up a zone line are:
 
        NAME  The name of the time zone.  This is the name used in creating the
-             time conversion information file for the zone.
+             time conversion information file for the zone.  It should not
+             contain a file name component "." or ".."; a file name component
+             is a maximal substring that does not contain "/".
 
        GMTOFF
              The amount of time to add to UT to get standard time in this
@@ -220,14 +241,15 @@ DESCRIPTION
 
        A link line has the form
 
-            Link  LINK-FROM        LINK-TO
+            Link  TARGET           LINK-NAME
 
        For example:
 
             Link  Europe/Istanbul  Asia/Istanbul
 
-       The LINK-FROM field should appear as the NAME field in some zone line;
-       the LINK-TO field is used as an alternate name for that zone.
+       The TARGET field should appear as the NAME field in some zone line.
+       The LINK-NAME field is used as an alternate name for that zone; it has
+       the same syntax as a zone line's NAME field.
 
        Except for continuation lines, lines may appear in any order in the
        input.  However, the behavior is unspecified if multiple zone or link
@@ -272,9 +294,8 @@ EXTENDED EXAMPLE
 
          Link    Europe/Zurich  Switzerland
 
-       In this example, the zone is named Europe/Zurich but it has an alias
-
-       as Switzerland.  This example says that Zurich was 34 minutes and 8
+       In this example, the zone is named Europe/Zurich but it has an alias as
+       Switzerland.  This example says that Zurich was 34 minutes and 8
        seconds west of UT until 1853-07-16 at 00:00, when the legal offset was
        changed to 7o26'22.50''; although this works out to 0:29:45.50, the
        input format cannot represent fractional seconds so it is rounded here.
@@ -293,7 +314,7 @@ EXTENDED EXAMPLE
 
        For purposes of display, "LMT" and "BMT" were initially used,
        respectively.  Since Swiss rules and later EU rules were applied, the
-       display name for the timezone has been CET for standard time and CEST
+       display name for the time zone has been CET for standard time and CEST
        for daylight saving time.
 
 NOTES

@@ -4,38 +4,34 @@ NAME
        time2posix, posix2time - convert seconds since the Epoch
 
 SYNOPSIS
-       #include <sys/types.h>
        #include <time.h>
 
-       time_t time2posix(t)
-       time_t t
+       time_t time2posix(time_t t);
 
-       time_t posix2time(t)
-       time_t t
+       time_t posix2time(time_t t);
 
        cc ... -ltz
 
 DESCRIPTION
-       IEEE Standard 1003.1 (POSIX) legislates that a time_t value of
-       536457599 shall correspond to "Wed Dec 31 23:59:59 UTC 1986."  This
-       effectively implies that POSIX time_t's cannot include leap seconds
-       and, therefore, that the system time must be adjusted as each leap
-       occurs.
+       IEEE Standard 1003.1 (POSIX) requires the time_t value 536457599 to
+       stand for 1986-12-31 23:59:59 UTC.  This effectively implies that POSIX
+       time_t values cannot include leap seconds and, therefore, that the
+       system time must be adjusted as each leap occurs.
 
        If the time package is configured with leap-second support enabled,
        however, no such adjustment is needed and time_t values continue to
-       increase over leap events (as a true `seconds since...' value).  This
+       increase over leap events (as a true "seconds since..."  value).  This
        means that these values will differ from those required by POSIX by the
        net number of leap seconds inserted since the Epoch.
 
        Typically this is not a problem as the type time_t is intended to be
-       (mostly) opaque--time_t values should only be obtained-from and passed-
-       to functions such as time(2), localtime(3), mktime(3), and difftime(3).
-       However, POSIX gives an arithmetic expression for directly computing a
-       time_t value from a given date/time, and the same relationship is
-       assumed by some (usually older) applications.  Any programs
-       creating/dissecting time_t's using such a relationship will typically
-       not handle intervals over leap seconds correctly.
+       (mostly) opaque - time_t values should only be obtained-from and
+       passed-to functions such as time(2), localtime(3), mktime(3), and
+       difftime(3).  However, POSIX gives an arithmetic expression for
+       directly computing a time_t value from a given date/time, and the same
+       relationship is assumed by some (usually older) applications.  Any
+       programs creating/dissecting time_t's using such a relationship will
+       typically not handle intervals over leap seconds correctly.
 
        The time2posix and posix2time functions are provided to address this
        time_t mismatch by converting between local time_t values and their

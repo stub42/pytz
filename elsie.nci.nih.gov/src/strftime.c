@@ -19,16 +19,10 @@
 ** by the University of California, Berkeley. The name of the
 ** University may not be used to endorse or promote products derived
 ** from this software without specific prior written permission.
-** THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+** THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
 ** IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 */
-
-#ifndef LIBC_SCCS
-#ifndef lint
-static const char	sccsid[] = "@(#)strftime.c	5.4 (Berkeley) 3/14/89";
-#endif /* !defined lint */
-#endif /* !defined LIBC_SCCS */
 
 #include "tzfile.h"
 #include "fcntl.h"
@@ -47,15 +41,7 @@ struct lc_time_T {
 	const char *	date_fmt;
 };
 
-#ifdef LOCALE_HOME
-#include "sys/stat.h"
-static struct lc_time_T		localebuf;
-static struct lc_time_T *	_loc(void);
-#define Locale	_loc()
-#endif /* defined LOCALE_HOME */
-#ifndef LOCALE_HOME
 #define Locale	(&C_time_locale)
-#endif /* !defined LOCALE_HOME */
 
 static const struct lc_time_T	C_time_locale = {
 	{
@@ -107,7 +93,7 @@ static char *	_add(const char *, char *, const char *);
 static char *	_conv(int, const char *, char *, const char *);
 static char *	_fmt(const char *, const struct tm *, char *, const char *,
 			int *);
-static char *	_yconv(int, int, int, int, char *, const char *);
+static char *	_yconv(int, int, bool, bool, char *, char const *);
 
 extern char *	tzname[];
 
@@ -120,6 +106,16 @@ extern char *	tzname[];
 #define IN_THIS	2
 #define IN_ALL	3
 
+#if HAVE_STRFTIME_L
+size_t
+strftime_l(char *s, size_t maxsize, char const *format, struct tm const *t,
+	   locale_t locale)
+{
+  /* Just call strftime, as only the C locale is supported.  */
+  return strftime(s, maxsize, format, t);
+}
+#endif
+
 size_t
 strftime(char * const s, const size_t maxsize, const char *const format,
 	 const struct tm *const t)
@@ -128,25 +124,22 @@ strftime(char * const s, const size_t maxsize, const char *const format,
 	int	warn;
 
 	tzset();
-#ifdef LOCALE_HOME
-	localebuf.mon[0] = 0;
-#endif /* defined LOCALE_HOME */
 	warn = IN_NONE;
 	p = _fmt(((format == NULL) ? "%c" : format), t, s, s + maxsize, &warn);
 #ifndef NO_RUN_TIME_WARNINGS_ABOUT_YEAR_2000_PROBLEMS_THANK_YOU
 	if (warn != IN_NONE && getenv(YEAR_2000_NAME) != NULL) {
-		(void) fprintf(stderr, "\n");
+		fprintf(stderr, "\n");
 		if (format == NULL)
-			(void) fprintf(stderr, "NULL strftime format ");
-		else	(void) fprintf(stderr, "strftime format \"%s\" ",
+			fprintf(stderr, "NULL strftime format ");
+		else	fprintf(stderr, "strftime format \"%s\" ",
 				format);
-		(void) fprintf(stderr, "yields only two digits of years in ");
+		fprintf(stderr, "yields only two digits of years in ");
 		if (warn == IN_SOME)
-			(void) fprintf(stderr, "some locales");
+			fprintf(stderr, "some locales");
 		else if (warn == IN_THIS)
-			(void) fprintf(stderr, "the current locale");
-		else	(void) fprintf(stderr, "all locales");
-		(void) fprintf(stderr, "\n");
+			fprintf(stderr, "the current locale");
+		else	fprintf(stderr, "all locales");
+		fprintf(stderr, "\n");
 	}
 #endif /* !defined NO_RUN_TIME_WARNINGS_ABOUT_YEAR_2000_PROBLEMS_THANK_YOU */
 	if (p == s + maxsize)
@@ -199,8 +192,8 @@ label:
 				** something completely different.
 				** (ado, 1993-05-24)
 				*/
-				pt = _yconv(t->tm_year, TM_YEAR_BASE, 1, 0,
-					pt, ptlim);
+				pt = _yconv(t->tm_year, TM_YEAR_BASE,
+					    true, false, pt, ptlim);
 				continue;
 			case 'c':
 				{
@@ -317,9 +310,9 @@ label:
 					tm = *t;
 					mkt = mktime(&tm);
 					if (TYPE_SIGNED(time_t))
-						(void) sprintf(buf, "%"PRIdMAX,
+						sprintf(buf, "%"PRIdMAX,
 							(intmax_t) mkt);
-					else	(void) sprintf(buf, "%"PRIuMAX,
+					else	sprintf(buf, "%"PRIuMAX,
 							(uintmax_t) mkt);
 					pt = _add(buf, pt, ptlim);
 				}
@@ -355,7 +348,7 @@ label:
 ** (01-53)."
 ** (ado, 1993-05-24)
 **
-** From "http://www.ft.uni-erlangen.de/~mskuhn/iso-time.html" by Markus Kuhn:
+** From <http://www.ft.uni-erlangen.de/~mskuhn/iso-time.html> by Markus Kuhn:
 ** "Week 01 of a year is per definition the first week which has the
 ** Thursday in this year, which is equivalent to the week which contains
 ** the fourth day of January. In other words, the first week of a new year
@@ -428,9 +421,11 @@ label:
 							pt, ptlim);
 					else if (*format == 'g') {
 						*warnp = IN_ALL;
-						pt = _yconv(year, base, 0, 1,
+						pt = _yconv(year, base,
+							false, true,
 							pt, ptlim);
-					} else	pt = _yconv(year, base, 1, 1,
+					} else	pt = _yconv(year, base,
+							true, true,
 							pt, ptlim);
 				}
 				continue;
@@ -468,11 +463,13 @@ label:
 				continue;
 			case 'y':
 				*warnp = IN_ALL;
-				pt = _yconv(t->tm_year, TM_YEAR_BASE, 0, 1,
+				pt = _yconv(t->tm_year, TM_YEAR_BASE,
+					false, true,
 					pt, ptlim);
 				continue;
 			case 'Y':
-				pt = _yconv(t->tm_year, TM_YEAR_BASE, 1, 1,
+				pt = _yconv(t->tm_year, TM_YEAR_BASE,
+					true, true,
 					pt, ptlim);
 				continue;
 			case 'Z':
@@ -570,7 +567,7 @@ _conv(const int n, const char *const format, char *const pt,
 {
 	char	buf[INT_STRLEN_MAXIMUM(int) + 1];
 
-	(void) sprintf(buf, format, n);
+	sprintf(buf, format, n);
 	return _add(buf, pt, ptlim);
 }
 
@@ -591,7 +588,7 @@ _add(const char *str, char *pt, const char *const ptlim)
 */
 
 static char *
-_yconv(const int a, const int b, const int convert_top, const int convert_yy,
+_yconv(int a, int b, bool convert_top, bool convert_yy,
        char *pt, const char *const ptlim)
 {
 	register int	lead;
@@ -617,124 +614,3 @@ _yconv(const int a, const int b, const int convert_top, const int convert_yy,
 		pt = _conv(((trail < 0) ? -trail : trail), "%02d", pt, ptlim);
 	return pt;
 }
-
-#ifdef LOCALE_HOME
-static struct lc_time_T *
-_loc(void)
-{
-	static const char	locale_home[] = LOCALE_HOME;
-	static const char	lc_time[] = "LC_TIME";
-	static char *		locale_buf;
-
-	int			fd;
-	int			oldsun;	/* "...ain't got nothin' to do..." */
-	char *			lbuf;
-	char *			name;
-	char *			p;
-	const char **		ap;
-	const char *		plim;
-	char			filename[FILENAME_MAX];
-	struct stat		st;
-	size_t			namesize;
-	size_t			bufsize;
-
-	/*
-	** Use localebuf.mon[0] to signal whether locale is already set up.
-	*/
-	if (localebuf.mon[0])
-		return &localebuf;
-	name = setlocale(LC_TIME, NULL);
-	if (name == NULL || *name == '\0')
-		goto no_locale;
-	/*
-	** If the locale name is the same as our cache, use the cache.
-	*/
-	lbuf = locale_buf;
-	if (lbuf != NULL && strcmp(name, lbuf) == 0) {
-		p = lbuf;
-		for (ap = (const char **) &localebuf;
-			ap < (const char **) (&localebuf + 1);
-				++ap)
-					*ap = p += strlen(p) + 1;
-		return &localebuf;
-	}
-	/*
-	** Slurp the locale file into the cache.
-	*/
-	namesize = strlen(name) + 1;
-	if (sizeof filename <
-		((sizeof locale_home) + namesize + (sizeof lc_time)))
-			goto no_locale;
-	oldsun = 0;
-	(void) sprintf(filename, "%s/%s/%s", locale_home, name, lc_time);
-	fd = open(filename, O_RDONLY);
-	if (fd < 0) {
-		/*
-		** Old Sun systems have a different naming and data convention.
-		*/
-		oldsun = 1;
-		(void) sprintf(filename, "%s/%s/%s", locale_home,
-			lc_time, name);
-		fd = open(filename, O_RDONLY);
-		if (fd < 0)
-			goto no_locale;
-	}
-	if (fstat(fd, &st) != 0)
-		goto bad_locale;
-	if (st.st_size <= 0)
-		goto bad_locale;
-	bufsize = namesize + st.st_size;
-	locale_buf = NULL;
-	lbuf = (lbuf == NULL) ? malloc(bufsize) : realloc(lbuf, bufsize);
-	if (lbuf == NULL)
-		goto bad_locale;
-	(void) strcpy(lbuf, name);
-	p = lbuf + namesize;
-	plim = p + st.st_size;
-	if (read(fd, p, st.st_size) != st.st_size)
-		goto bad_lbuf;
-	if (close(fd) != 0)
-		goto bad_lbuf;
-	/*
-	** Parse the locale file into localebuf.
-	*/
-	if (plim[-1] != '\n')
-		goto bad_lbuf;
-	for (ap = (const char **) &localebuf;
-		ap < (const char **) (&localebuf + 1);
-			++ap) {
-				if (p == plim)
-					goto bad_lbuf;
-				*ap = p;
-				while (*p != '\n')
-					++p;
-				*p++ = '\0';
-	}
-	if (oldsun) {
-		/*
-		** SunOS 4 used an obsolescent format; see localdtconv(3).
-		** c_fmt had the ``short format for dates and times together''
-		** (SunOS 4 date, "%a %b %e %T %Z %Y" in the C locale);
-		** date_fmt had the ``long format for dates''
-		** (SunOS 4 strftime %C, "%A, %B %e, %Y" in the C locale).
-		** Discard the latter in favor of the former.
-		*/
-		localebuf.date_fmt = localebuf.c_fmt;
-	}
-	/*
-	** Record the successful parse in the cache.
-	*/
-	locale_buf = lbuf;
-
-	return &localebuf;
-
-bad_lbuf:
-	free(lbuf);
-bad_locale:
-	(void) close(fd);
-no_locale:
-	localebuf = C_time_locale;
-	locale_buf = NULL;
-	return &localebuf;
-}
-#endif /* defined LOCALE_HOME */
