@@ -2,6 +2,7 @@
 #
 
 MAKE=make
+SHELL=/bin/bash
 PYTHON24=python2.4
 PYTHON25=python2.5
 PYTHON26=python2.6
@@ -9,6 +10,7 @@ PYTHON27=python2.7
 PYTHON31=python3.1
 PYTHON32=python3.2
 PYTHON33=python3.3
+PYTHON34=python3.4
 PYTHON=${PYTHON27}
 PYTHON3=${PYTHON32}
 OLSON=./elsie.nci.nih.gov
@@ -22,50 +24,73 @@ all: dist
 
 check: test_tzinfo test_docs
 
-build: build/dist/locales/pytz.pot
+build: .stamp-tzinfo
 
-dist: build/dist/locales/pytz.pot .stamp-dist
-.stamp-dist: .stamp-tzinfo
+dist: sdist eggs wheels
+
+sdist: build
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
-	    --formats=bztar,gztar,zip && \
+	    --formats=bztar,gztar,zip
+
+eggs: build
+	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON34} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
 
-upload: dist build/dist/locales/pytz.pot .stamp-upload
-.stamp-upload: .stamp-tzinfo
-	cd build/dist && \
-	${PYTHON} setup.py register sdist \
-	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON24} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON25} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON26} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON33} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON32} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
-	-cd build/dist && \
-	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
-	    upload --sign
+wheels: build
+	cd build/dist && mkdir -p ../tarballs && \
+	${PYTHON26} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
+	${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
+	${PYTHON34} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
+	${PYTHON33} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
+	${PYTHON32} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
 	touch $@
+
+upload: sign
+	twine upload build/tarballs/*.{egg,whl,zip,bz2,gz,asc}
+
+sign: dist
+	rm -f build/tarballs/*.asc
+	for f in build/tarballs/*.{egg,whl,zip,bz2,gz} ; do \
+	    gpg --detach-sign -a $$f; \
+	done
+
+
+# upload: dist
+# 	cd build/dist && \
+# 	${PYTHON} setup.py register sdist \
+# 	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON24} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON25} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON26} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON33} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON32} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	-cd build/dist && \
+# 	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
+# 	    upload --sign
+# 	touch $@
 
 test: test_lazy test_tzinfo test_docs test_zdump
 
