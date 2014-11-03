@@ -342,30 +342,36 @@ True
 >>> isinstance(pytz.NonExistentTimeError(), pytz.InvalidTimeError)
 True
 
-Although ``localize()`` handles many cases, it is still not possible
-to handle all. In cases where countries change their timezone definitions,
-cases like the end-of-daylight-saving-time occur with no way of resolving
-the ambiguity. For example, in 1915 Warsaw switched from Warsaw time to
-Central European time. So at the stroke of midnight on August 5th 1915
-the clocks were wound back 24 minutes creating an ambiguous time period
-that cannot be specified without referring to the timezone abbreviation
-or the actual UTC offset. In this case midnight happened twice, neither
-time during a daylight saving time period:
+
+A special case is where countries change their timezone definitions
+with no daylight savings time switch. For example, in 1915 Warsaw
+switched from Warsaw time to Central European time with no daylight savings
+transition. So at the stroke of midnight on August 5th 1915 the clocks
+were wound back 24 minutes creating an ambiguous time period that cannot
+be specified without referring to the timezone abbreviation or the
+actual UTC offset. In this case midnight happened twice, neither time
+during a daylight saving time period. pytz handles this transition by
+treating the ambiguous period before the switch as daylight savings
+time, and the ambiguous period after as standard time.
+
 
 >>> warsaw = pytz.timezone('Europe/Warsaw')
->>> loc_dt1 = warsaw.localize(datetime(1915, 8, 4, 23, 59, 59), is_dst=False)
->>> loc_dt1.strftime(fmt)
+>>> amb_dt1 = warsaw.localize(datetime(1915, 8, 4, 23, 59, 59), is_dst=True)
+>>> amb_dt1.strftime(fmt)
 '1915-08-04 23:59:59 WMT+0124'
->>> loc_dt2 = warsaw.localize(datetime(1915, 8, 5, 00, 00, 00), is_dst=False)
->>> loc_dt2.strftime(fmt)
+>>> amb_dt2 = warsaw.localize(datetime(1915, 8, 4, 23, 59, 59), is_dst=False)
+>>> amb_dt2.strftime(fmt)
+'1915-08-04 23:59:59 CET+0100'
+>>> switch_dt = warsaw.localize(datetime(1915, 8, 5, 00, 00, 00), is_dst=False)
+>>> switch_dt.strftime(fmt)
 '1915-08-05 00:00:00 CET+0100'
->>> str(loc_dt2 - loc_dt1)
+>>> str(switch_dt - amb_dt1)
 '0:24:01'
+>>> str(switch_dt - amb_dt2)
+'0:00:01'
 
-The only way of creating a time during the missing 24 minutes is
-converting from another timezone - because neither of the timezones
-involved where in daylight saving mode the API simply provides no way
-to express it:
+The best way of creating a time during an ambiguous time period is
+by converting from another timezone such as UTC:
 
 >>> utc_dt = datetime(1915, 8, 4, 22, 36, tzinfo=pytz.utc)
 >>> utc_dt.astimezone(warsaw).strftime(fmt)
