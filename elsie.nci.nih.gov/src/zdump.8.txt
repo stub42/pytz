@@ -20,21 +20,32 @@ DESCRIPTION
               possible time value, the times both one second before and
               exactly at each detected time discontinuity, the time at one day
               less than the highest possible time value, and the time at the
-              highest possible time value, Each line ends with isdst=1 if the
-              given time is Daylight Saving Time or isdst=0 otherwise.
+              highest possible time value.  Each line is followed by isdst=D
+              where D is positive, zero, or negative depending on whether the
+              given time is daylight saving time, standard time, or an unknown
+              time type, respectively.  Each line is also followed by gmtoff=N
+              if the given local time is known to be N seconds east of
+              Greenwich.
 
        -V     Like -v, except omit the times relative to the extreme time
               values.  This generates output that is easier to compare to that
               of implementations with different time representations.
 
        -c [loyear,]hiyear
-              Cut off verbose output near the start of the given year(s).  By
-              default, the program cuts off verbose output near the starts of
-              the years -500 and 2500.
+              Cut off verbose output at the given year(s).  Cutoff times are
+              computed using the proleptic Gregorian calendar with year 0 and
+              with Universal Time (UT) ignoring leap seconds.  The lower bound
+              is exclusive and the upper is inclusive; for example, a loyear
+              of 1970 excludes a transition occurring at 1970-01-01 00:00:00
+              UTC but a hiyear of 1970 includes the transition.  The default
+              cutoff is -500,2500.
 
        -t [lotime,]hitime
-              Cut off verbose output at the start of the given time(s), given
-              in decimal seconds since 1970-01-01 00:00:00 UTC.
+              Cut off verbose output at the given time(s), given in decimal
+              seconds since 1970-01-01 00:00:00 Coordinated Universal Time
+              (UTC).  The zonename determines whether the count includes leap
+              seconds.  As with -c, the cutoff's lower bound is exclusive and
+              its upper bound is inclusive.
 
 LIMITATIONS
        Time discontinuities are found by sampling the results returned by

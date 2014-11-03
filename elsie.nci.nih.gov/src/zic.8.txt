@@ -120,10 +120,10 @@ DESCRIPTION
                part of.
 
        FROM    Gives the first year in which the rule applies.  Any integer
-               year can be supplied; the Gregorian calendar is assumed.  The
-               word minimum (or an abbreviation) means the minimum year
-               representable as an integer.  The word maximum (or an
-               abbreviation) means the maximum year representable as an
+               year can be supplied; the proleptic Gregorian calendar is
+               assumed.  The word minimum (or an abbreviation) means the
+               minimum year representable as an integer.  The word maximum (or
+               an abbreviation) means the maximum year representable as an
                integer.  Rules can describe times that are not representable
                as time values, with the unrepresentable times ignored; this
                allows rules to be portable among hosts with differing time

@@ -304,9 +304,38 @@ sumsize(size_t a, size_t b)
 static void tzset(void) { }
 #endif
 
-#if ! HAVE_LOCALTIME_RZ
+/* Assume gmtime_r works if localtime_r does.
+   A replacement localtime_r is defined below if needed.  */
+#if ! HAVE_LOCALTIME_R
 
-# if ! HAVE_LOCALTIME_R || ! HAVE_TZSET
+# undef gmtime_r
+# define gmtime_r zdump_gmtime_r
+
+static struct tm *
+gmtime_r(time_t *tp, struct tm *tmp)
+{
+  struct tm *r = gmtime(tp);
+  if (r) {
+    *tmp = *r;
+    r = tmp;
+  }
+  return r;
+}
+
+#endif
+
+/* Platforms with TM_ZONE don't need tzname, so they can use the
+   faster localtime_rz or localtime_r if available.  */
+
+#if defined TM_ZONE && HAVE_LOCALTIME_RZ
+# define USE_LOCALTIME_RZ true
+#else
+# define USE_LOCALTIME_RZ false
+#endif
+
+#if ! USE_LOCALTIME_RZ
+
+# if !defined TM_ZONE || ! HAVE_LOCALTIME_R || ! HAVE_TZSET
 #  undef localtime_r
 #  define localtime_r zdump_localtime_r
 static struct tm *
@@ -383,7 +412,31 @@ tzfree(timezone_t env)
   environ = env + 1;
   free(env[0]);
 }
-#endif /* ! HAVE_LOCALTIME_RZ */
+#endif /* ! USE_LOCALTIME_RZ */
+
+/* A UTC time zone, and its initializer.  */
+static timezone_t gmtz;
+static void
+gmtzinit(void)
+{
+  if (USE_LOCALTIME_RZ) {
+    static char const utc[] = "UTC0";
+    gmtz = tzalloc(utc);
+    if (!gmtz) {
+      perror(utc);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
+/* Convert *TP to UTC, storing the broken-down time into *TMP.
+   Return TMP if successful, NULL otherwise.  This is like gmtime_r(TP, TMP),
+   except typically faster if USE_LOCALTIME_RZ.  */
+static struct tm *
+my_gmtime_r(time_t *tp, struct tm *tmp)
+{
+  return USE_LOCALTIME_RZ ? localtime_rz(gmtz, tp, tmp) : gmtime_r(tp, tmp);
+}
 
 #ifndef TYPECHECK
 # define my_localtime_rz localtime_rz
@@ -622,6 +675,7 @@ main(int argc, char *argv[])
 			}
 		}
 	}
+	gmtzinit();
 	now = time(NULL);
 	longest = 0;
 	for (i = optind; i < argc; i++) {
@@ -654,12 +708,11 @@ main(int argc, char *argv[])
 		tmp = my_localtime_rz(tz, &t, &tm);
 		if (tmp)
 		  ab = saveabbr(&abbrev, &abbrevsize, &tm);
-		for ( ; ; ) {
-			newt = (t < absolute_max_time - SECSPERDAY / 2
+		while (t < cuthitime) {
+			newt = ((t < absolute_max_time - SECSPERDAY / 2
+				 && t + SECSPERDAY / 2 < cuthitime)
 				? t + SECSPERDAY / 2
-				: absolute_max_time);
-			if (cuthitime <= newt)
-				break;
+				: cuthitime);
 			newtmp = localtime_rz(tz, &newt, &newtm);
 			if ((tmp == NULL || newtmp == NULL) ? (tmp != newtmp) :
 				(delta(&newtm, &tm) != (newt - t) ||
@@ -798,19 +851,56 @@ delta(struct tm * newp, struct tm *oldp)
 	return result;
 }
 
+#ifndef TM_GMTOFF
+/* Return A->tm_yday, adjusted to compare it fairly to B->tm_yday.
+   Assume A and B differ by at most one year.  */
+static int
+adjusted_yday(struct tm const *a, struct tm const *b)
+{
+  int yday = a->tm_yday;
+  if (b->tm_year < a->tm_year)
+    yday += 365 + isleap_sum(b->tm_year, TM_YEAR_BASE);
+  return yday;
+}
+#endif
+
+/* If A is the broken-down local time and B the broken-down UTC for
+   the same instant, return A's UTC offset in seconds, where positive
+   offsets are east of Greenwich.  On failure, return LONG_MIN.  */
+static long
+gmtoff(struct tm const *a, struct tm const *b)
+{
+#ifdef TM_GMTOFF
+  return a->TM_GMTOFF;
+#else
+  if (! b)
+    return LONG_MIN;
+  else {
+    int ayday = adjusted_yday(a, b);
+    int byday = adjusted_yday(b, a);
+    int days = ayday - byday;
+    long hours = a->tm_hour - b->tm_hour + 24 * days;
+    long minutes = a->tm_min - b->tm_min + 60 * hours;
+    long seconds = a->tm_sec - b->tm_sec + 60 * minutes;
+    return seconds;
+  }
+#endif
+}
+
 static void
 show(timezone_t tz, char *zone, time_t t, bool v)
 {
 	register struct tm *	tmp;
-	struct tm tm;
+	register struct tm *	gmtmp;
+	struct tm tm, gmtm;
 
 	printf("%-*s  ", longest, zone);
 	if (v) {
-		tmp = gmtime(&t);
-		if (tmp == NULL) {
+		gmtmp = my_gmtime_r(&t, &gmtm);
+		if (gmtmp == NULL) {
 			printf(tformat(), t);
 		} else {
-			dumptime(tmp);
+			dumptime(gmtmp);
 			printf(" UT");
 		}
 		printf(" = ");
@@ -821,10 +911,10 @@ show(timezone_t tz, char *zone, time_t t, bool v)
 		if (*abbr(tmp) != '\0')
 			printf(" %s", abbr(tmp));
 		if (v) {
+			long off = gmtoff(tmp, gmtmp);
 			printf(" isdst=%d", tmp->tm_isdst);
-#ifdef TM_GMTOFF
-			printf(" gmtoff=%ld", tmp->TM_GMTOFF);
-#endif /* defined TM_GMTOFF */
+			if (off != LONG_MIN)
+			  printf(" gmtoff=%ld", off);
 		}
 	}
 	printf("\n");
@@ -838,9 +928,8 @@ abbr(struct tm const *tmp)
 #ifdef TM_ZONE
 	return tmp->TM_ZONE;
 #else
-	return ((0 <= tmp->tm_isdst && tmp->tm_isdst <= 1
-		 && tzname[tmp->tm_isdst])
-		? tzname[tmp->tm_isdst]
+	return (0 <= tmp->tm_isdst && tzname[0 < tmp->tm_isdst]
+		? tzname[0 < tmp->tm_isdst]
 		: "");
 #endif
 }
@@ -893,7 +982,7 @@ dumptime(register const struct tm *timeptr)
 		return;
 	}
 	/*
-	** The packaged localtime_rz and gmtime never put out-of-range
+	** The packaged localtime_rz and gmtime_r never put out-of-range
 	** values in tm_wday or tm_mon, but since this code might be compiled
 	** with other (perhaps experimental) versions, paranoia is in order.
 	*/
