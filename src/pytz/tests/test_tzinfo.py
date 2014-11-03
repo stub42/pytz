@@ -659,6 +659,23 @@ class LocalTestCase(unittest.TestCase):
         loc_time = loc_tz.localize(datetime(1945, 9, 30, 1, 0, 0), is_dst=0)
         self.assertEqual(loc_time.strftime('%Z%z'), 'EST-0500')
 
+        # Weird changes - ambiguous time (end-of-DST like) but is_dst==False
+        for zonename, ambiguous_naive, expected in [
+                ('Europe/Warsaw', datetime(1915, 8, 4, 23, 59, 59),
+                 ['1915-08-04 23:59:59 WMT+0124',
+                  '1915-08-04 23:59:59 CET+0100']),
+                ('Europe/Moscow', datetime(2014, 10, 26, 1, 30),
+                 ['2014-10-26 01:30:00 MSK+0400',
+                  '2014-10-26 01:30:00 MSK+0300'])]:
+            loc_tz = pytz.timezone(zonename)
+            self.assertRaises(pytz.AmbiguousTimeError,
+                loc_tz.localize, ambiguous_naive, is_dst=None
+                )
+            # Also test non-boolean is_dst in the weird case
+            for dst in [True, timedelta(1), False, timedelta(0)]:
+                loc_time = loc_tz.localize(ambiguous_naive, is_dst=dst)
+                self.assertEqual(loc_time.strftime(fmt), expected[not dst])
+
     def testNormalize(self):
         tz = pytz.timezone('US/Eastern')
         dt = datetime(2004, 4, 4, 7, 0, 0, tzinfo=UTC).astimezone(tz)
@@ -677,7 +694,7 @@ class LocalTestCase(unittest.TestCase):
     def testPartialMinuteOffsets(self):
         # utcoffset in Amsterdam was not a whole minute until 1937
         # However, we fudge this by rounding them, as the Python
-        # datetime library 
+        # datetime library
         tz = pytz.timezone('Europe/Amsterdam')
         utc_dt = datetime(1914, 1, 1, 13, 40, 28, tzinfo=UTC) # correct
         utc_dt = utc_dt.replace(second=0) # But we need to fudge it
@@ -817,4 +834,3 @@ def test_suite():
 if __name__ == '__main__':
     warnings.simplefilter("error") # Warnings should be fatal in tests.
     unittest.main(defaultTest='test_suite')
-
