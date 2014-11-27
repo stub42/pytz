@@ -80,7 +80,8 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON27} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON31} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON32} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON33} test_lazy.py ${TESTARGS}
+	    && ${PYTHON33} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON34} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -90,17 +91,13 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON27} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON31} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON32} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON33} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON33} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON34} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON24} test_docs.py ${TESTARGS} \
-	    && ${PYTHON25} test_docs.py ${TESTARGS} \
-	    && ${PYTHON26} test_docs.py ${TESTARGS} \
 	    && ${PYTHON27} test_docs.py ${TESTARGS} \
-	    && ${PYTHON31} test_docs.py ${TESTARGS} \
-	    && ${PYTHON32} test_docs.py ${TESTARGS} \
-	    && ${PYTHON33} test_docs.py ${TESTARGS}
+	    && ${PYTHON34} test_docs.py ${TESTARGS}
 
 test_zdump: dist
 	${PYTHON} gen_tests.py ${TARGET} && \
