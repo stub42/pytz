@@ -154,6 +154,20 @@ build/dist/locales/pytz.pot: .stamp-tzinfo
 #	pygettext --extract-all --no-location \
 #	    --default-domain=pytz --output-dir=locales
 
+IANA_URL=http://www.iana.org/time-zones/repository
 
+sync:
+	cd elsie.nci.nih.gov && \
+	    rm -f tz{code,data}-latest.tar.gz{,.asc} && \
+	    wget -S ${IANA_URL}/tzcode-latest.tar.gz && \
+	    wget -S ${IANA_URL}/tzcode-latest.tar.gz.asc && \
+	    gpg --verify tzcode-latest.tar.gz.asc tzcode-latest.tar.gz && \
+	    wget -S ${IANA_URL}/tzdata-latest.tar.gz && \
+	    wget -S ${IANA_URL}/tzdata-latest.tar.gz.asc && \
+	    gpg --verify tzdata-latest.tar.gz.asc tzdata-latest.tar.gz && \
+	    cd src && \
+	    tar xzf ../tzcode-latest.tar.gz && \
+	    tar xzf ../tzdata-latest.tar.gz && \
+	    echo Done
 
 .PHONY: all check dist test test_tzinfo test_docs test_zdump
