@@ -24,3 +24,4 @@
 
 # Where I keep my tarballs
 ./elsie.nci.nih.gov/*.tar.gz
+./elsie.nci.nih.gov/*.tar.gz.asc
