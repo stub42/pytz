@@ -153,7 +153,8 @@ class PicklingTest(unittest.TestCase):
         tz = pytz.timezone('Australia/Melbourne')
         p = pickle.dumps(tz)
         tzname = tz._tzname
-        hacked_p = p.replace(_byte_string(tzname), _byte_string('???'))
+        hacked_p = p.replace(_byte_string(tzname),
+                             _byte_string('?'*len(tzname)))
         self.assertNotEqual(p, hacked_p)
         unpickled_tz = pickle.loads(hacked_p)
         self.assertTrue(tz is unpickled_tz)
