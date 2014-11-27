@@ -55,6 +55,7 @@ wheels: build
 	touch $@
 
 upload: sign
+	${PYTHON} setup.py register
 	twine upload build/tarballs/*.{egg,whl,zip,bz2,gz,asc}
 
 sign: dist
@@ -62,35 +63,6 @@ sign: dist
 	for f in build/tarballs/*.{egg,whl,zip,bz2,gz} ; do \
 	    gpg --detach-sign -a $$f; \
 	done
-
-
-# upload: dist
-# 	cd build/dist && \
-# 	${PYTHON} setup.py register sdist \
-# 	    --formats=bztar,gztar,zip --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON24} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON25} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON26} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON27} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON33} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON32} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	-cd build/dist && \
-# 	${PYTHON31} setup.py register bdist_egg --dist-dir=../tarballs \
-# 	    upload --sign
-# 	touch $@
 
 test: test_lazy test_tzinfo test_docs test_zdump
 
