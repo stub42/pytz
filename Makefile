@@ -55,7 +55,7 @@ wheels: build
 	touch $@
 
 upload: sign
-	${PYTHON} setup.py register
+	cd build/dist && ${PYTHON} setup.py register
 	twine upload build/tarballs/*.{egg,whl,zip,bz2,gz,asc}
 
 sign: dist
