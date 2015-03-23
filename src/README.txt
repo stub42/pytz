@@ -510,6 +510,15 @@ Europe/Zurich
 Europe/Zurich
 
 
+Internationalization - i18n/l10n
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pytz is an interface to the IANA database, which uses ASCII names. The `Unicode  Consortium's Unicode Locales (CLDR) <http://cldr.unicode.org>`_
+project provides translations. Thomas Khyn's 
+`l18n <https://pypi.python.org/pypi/l18n>`_ package can be used to access
+these translations from Python.
+
+
 License
 ~~~~~~~
 
