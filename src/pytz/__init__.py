@@ -329,7 +329,7 @@ class _CountryTimezoneDict(LazyDict):
         zone_tab = open_resource('zone.tab')
         try:
             for line in zone_tab:
-                line = line.decode('US-ASCII')
+                line = line.decode('UTF-8')
                 if line.startswith('#'):
                     continue
                 code, coordinates, zone = line.split(None, 4)[:3]
@@ -357,7 +357,7 @@ class _CountryNameDict(LazyDict):
         zone_tab = open_resource('iso3166.tab')
         try:
             for line in zone_tab.readlines():
-                line = line.decode('US-ASCII')
+                line = line.decode('UTF-8')
                 if line.startswith('#'):
                     continue
                 code, name = line.split(None, 1)
