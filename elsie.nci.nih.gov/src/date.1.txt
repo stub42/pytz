@@ -4,8 +4,8 @@ NAME
        date - show and set date and time
 
 SYNOPSIS
-       date [ -u ] [ -c ] [ -r seconds ] [ -n ] [ -d dsttype ] [ -t minutes-
-       west ] [ -a [+|-]sss.fff ] [ +format ] [ [yyyy]mmddhhmm[yy][.ss] ]
+       date [ -u ] [ -c ] [ -r seconds ] [ +format ] [ [yyyy]mmddhhmm[yy][.ss]
+       ]
 
 DESCRIPTION
        Date without arguments writes the date and time to the standard output
@@ -92,27 +92,6 @@ DESCRIPTION
               1970-01-01 00:00:00 UTC, where seconds should be an integer,
               either decimal, octal (leading 0), or hexadecimal (leading 0x),
               preceded by an optional sign.
-
-       -n     Do not notify other networked systems of the time change.
-
-       -d dsttype
-              Set the kernel-stored Daylight Saving Time type to the given
-              value.  (The kernel-stored DST type is used mostly by "old"
-              binaries.)
-
-       -t minutes-west
-              Set the kernel-stored "minutes west of UTC" value to the one
-              given on the command line.  (The kernel-stored DST type is used
-              mostly by "old" binaries.)
-
-       -a adjustment
-              Change the time forward (or backward) by the number of seconds
-              (and fractions thereof) specified in the adjustment argument.
-              Either the seconds part or the fractions part of the argument
-              (but not both) may be omitted.  On BSD-based systems, the
-              adjustment is made by changing the rate at which time advances;
-              on System-V-based systems, the adjustment is made by changing
-              the time.
 
 FILES
        /usr/lib/locale/L/LC_TIME           description of time locale L

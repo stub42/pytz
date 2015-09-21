@@ -5,7 +5,7 @@
 PACKAGE=	tzcode
 
 # Version numbers of the code and data distributions.
-VERSION=	2015d
+VERSION=	2015f
 
 # Email address for bug reports.
 BUGEMAIL=	tz@iana.org
@@ -102,7 +102,6 @@ LDLIBS=
 
 # Add the following to the end of the "CFLAGS=" line as needed.
 #  -DBIG_BANG=-9999999LL if the Big Bang occurred at time -9999999 (see zic.c)
-#  -DHAVE_ADJTIME=0 if 'adjtime' does not exist (SVR0?)
 #  -DHAVE_DOS_FILE_NAMES if file names have drive specifiers etc. (MS-DOS)
 #  -DHAVE_GETTEXT=1 if 'gettext' works (GNU, Linux, Solaris); also see LDLIBS
 #  -DHAVE_INCOMPATIBLE_CTIME_R=1 if your system's time.h declares
@@ -113,10 +112,6 @@ LDLIBS=
 #  -DHAVE_LOCALTIME_RZ=0 if you do not want zdump to use localtime_rz
 #	This defaults to 1 if a working localtime_rz seems to be available.
 #	localtime_rz can make zdump significantly faster, but is nonstandard.
-#  -DHAVE_SETTIMEOFDAY=0 if settimeofday does not exist (SVR0?)
-#  -DHAVE_SETTIMEOFDAY=1 if settimeofday has just 1 arg (SVR4)
-#  -DHAVE_SETTIMEOFDAY=2 if settimeofday uses 2nd arg (4.3BSD)
-#  -DHAVE_SETTIMEOFDAY=3 if settimeofday ignores 2nd arg (4.4BSD)
 #  -DHAVE_STDINT_H=1 if you have a pre-C99 compiler with "stdint.h"
 #  -DHAVE_STRFTIME_L=1 if <time.h> declares locale_t and strftime_l
 #	This defaults to 0 if _POSIX_VERSION < 200809, 1 otherwise.
@@ -126,7 +121,6 @@ LDLIBS=
 #  -DHAVE_SYS_WAIT_H=0 if your compiler lacks a "sys/wait.h"
 #  -DHAVE_TZSET=0 if your system lacks a tzset function
 #  -DHAVE_UNISTD_H=0 if your compiler lacks a "unistd.h" (Microsoft C++ 7?)
-#  -DHAVE_UTMPX_H=1 if your compiler has a "utmpx.h"
 #  -DNO_RUN_TIME_WARNINGS_ABOUT_YEAR_2000_PROBLEMS_THANK_YOU=1
 #	if you do not want run time warnings about formats that may cause
 #	year 2000 grief
@@ -147,7 +141,7 @@ LDLIBS=
 #  -DZIC_MAX_ABBR_LEN_WO_WARN=3
 #	(or some other number) to set the maximum time zone abbreviation length
 #	that zic will accept without a warning (the default is 6)
-#  $(GCC_DEBUG_FLAGS) if you are using GCC and want lots of checking
+#  $(GCC_DEBUG_FLAGS) if you are using recent GCC and want lots of checking
 GCC_DEBUG_FLAGS = -Dlint -g3 -O3 -fno-common -fstrict-aliasing \
 	-Wall -Wextra \
 	-Wbad-function-cast -Wcast-align -Wdate-time \
@@ -292,23 +286,24 @@ TAB_CHAR=	'	'
 SAFE_CHARSET1=	$(TAB_CHAR)' !\"'$$sharp'$$%&'\''()*+,./0123456789:;<=>?@'
 SAFE_CHARSET2=	'ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\^_`'
 SAFE_CHARSET3=	'abcdefghijklmnopqrstuvwxyz{|}~'
-SAFE_CHARSET=	]$(SAFE_CHARSET1)$(SAFE_CHARSET2)$(SAFE_CHARSET3)-
-SAFE_CHAR=	'['$(SAFE_CHARSET)']'
-# NONSYM_CHAR is a regular expression that matches any character
-# except for a small number of symbols, where we prefer to stick with
+SAFE_CHARSET=	$(SAFE_CHARSET1)$(SAFE_CHARSET2)$(SAFE_CHARSET3)
+SAFE_CHAR=	'[]'$(SAFE_CHARSET)'-]'
+
+# OK_CHAR matches any character allowed in the distributed files.
+# This is the same as SAFE_CHAR, except that multibyte letters are
+# also allowed so that commentary can contain people's names and quote
+# non-English sources.  For non-letters the sources are limited to
 # ASCII renderings for the convenience of maintainers whose text editors
 # mishandle UTF-8 by default (e.g., XEmacs 21.4.22).
-NONSYM_CHAR=	'[^–—°′″≈≠≤≥±−×÷∞←→↔·•§¶«»‘’‚‛“”„‟‹›「」『』〝〞〟]'
+OK_CHAR=	'[][:alpha:]'$(SAFE_CHARSET)'-]'
 
 # SAFE_LINE matches a line of safe characters.
-# SAFE_SHARP_LINE is similar, except any character can follow '#';
+# SAFE_SHARP_LINE is similar, except any OK character can follow '#';
 # this is so that comments can contain non-ASCII characters.
-# NONSYM_LINE matches a line of non-symbols.
-# VALID_LINE matches a line of any validly-encoded characters.
+# OK_LINE matches a line of OK characters.
 SAFE_LINE=	'^'$(SAFE_CHAR)'*$$'
-SAFE_SHARP_LINE='^'$(SAFE_CHAR)'*('$$sharp$(NONSYM_CHAR)'*)?$$'
-NONSYM_LINE=	'^'$(NONSYM_CHAR)'*$$'
-VALID_LINE=	'^.*$$'
+SAFE_SHARP_LINE='^'$(SAFE_CHAR)'*('$$sharp$(OK_CHAR)'*)?$$'
+OK_LINE=	'^'$(OK_CHAR)'*$$'
 
 # Flags to give 'tar' when making a distribution.
 # Try to use flags appropriate for GNU tar.
@@ -322,6 +317,8 @@ TARFLAGS=	`if tar $(GNUTARFLAGS) --version >/dev/null 2>&1; \
 GZIPFLAGS=	-9n
 
 ###############################################################################
+
+#MAKE=		make
 
 cc=		cc
 CC=		$(cc) -DTZDIR=\"$(TZDIR)\"
@@ -371,7 +368,7 @@ SHELL=		/bin/sh
 
 all:		tzselect zic zdump libtz.a $(TABDATA)
 
-ALL:		all date
+ALL:		all date $(ENCHILADA)
 
 install:	all $(DATA) $(REDO) $(MANS)
 		mkdir -p $(DESTDIR)$(ETCDIR) $(DESTDIR)$(TZDIR) \
@@ -475,14 +472,11 @@ check:		check_character_set check_white_space check_links check_sorted \
 check_character_set: $(ENCHILADA)
 		LC_ALL=en_US.utf8 && export LC_ALL && \
 		sharp='#' && \
-		! grep -Env $(SAFE_LINE) $(MANS) date.1 $(MANTXTS) \
+		! grep -Env $(SAFE_LINE) Makefile $(MANS) date.1 $(MANTXTS) \
 			$(MISC) $(SOURCES) $(WEB_PAGES) && \
 		! grep -Env $(SAFE_SHARP_LINE) $(TDATA) backzone \
-			iso3166.tab leapseconds yearistype.sh zone.tab && \
-		test $$(grep -Ecv $(SAFE_SHARP_LINE) Makefile) -eq 1 && \
-		! grep -Env $(NONSYM_LINE) CONTRIBUTING NEWS README Theory \
-			$(MANS) date.1 zone1970.tab && \
-		! grep -Env $(VALID_LINE) $(ENCHILADA)
+			leapseconds yearistype.sh zone.tab && \
+		! grep -Env $(OK_LINE) $(ENCHILADA)
 
 check_white_space: $(ENCHILADA)
 		! grep -En ' '$(TAB_CHAR)"|$$(printf '[\f\r\v]')" $(ENCHILADA)
@@ -573,9 +567,9 @@ set-timestamps.out: $(ENCHILADA)
 # The zics below ensure that each data file can stand on its own.
 # We also do an all-files run to catch links to links.
 
-check_public:	$(ENCHILADA)
-		make maintainer-clean
-		make "CFLAGS=$(GCC_DEBUG_FLAGS)" $(ENCHILADA) all
+check_public:
+		$(MAKE) maintainer-clean
+		$(MAKE) "CFLAGS=$(GCC_DEBUG_FLAGS)" ALL
 		mkdir tzpublic
 		for i in $(TDATA) ; do \
 		  $(zic) -v -d tzpublic $$i 2>&1 || exit; \
@@ -594,8 +588,8 @@ check_time_t_alternatives:
 		zones=`$(AWK) '/^[^#]/ { print $$3 }' <zone1970.tab` && \
 		for type in $(TIME_T_ALTERNATIVES); do \
 		  mkdir -p tzpublic/$$type && \
-		  make clean_misc && \
-		  make TOPDIR=`pwd`/tzpublic/$$type \
+		  $(MAKE) clean_misc && \
+		  $(MAKE) TOPDIR=`pwd`/tzpublic/$$type \
 		    CFLAGS='$(CFLAGS) -Dtime_tz='"'$$type'" \
 		    REDO='$(REDO)' \
 		    install && \
@@ -641,12 +635,12 @@ tzdata$(VERSION).tar.gz.asc: tzdata$(VERSION).tar.gz
 		gpg --armor --detach-sign $?
 
 typecheck:
-		make clean
+		$(MAKE) clean
 		for i in "long long" unsigned; \
 		do \
-			make CFLAGS="-DTYPECHECK -D__time_t_defined -D_TIME_T \"-Dtime_t=$$i\"" ; \
+			$(MAKE) CFLAGS="-DTYPECHECK -D__time_t_defined -D_TIME_T \"-Dtime_t=$$i\"" ; \
 			./zdump -v Europe/Rome ; \
-			make clean ; \
+			$(MAKE) clean ; \
 		done
 
 zonenames:	$(TDATA)

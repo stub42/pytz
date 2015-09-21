@@ -119,13 +119,6 @@ or that starts with
 Limit time values stored in output files to values that are the same
 whether they're taken to be signed or unsigned.
 You can use this option to generate SVVS-compatible files.
-.TP
-.BI "\*-y " command
-Use the given
-.I command
-rather than
-.B yearistype
-when checking year types (see below).
 .PP
 Input files should be text files, that is, they should be a series of
 zero or more lines, each ending in a newline byte and containing at
@@ -203,27 +196,11 @@ may be used to repeat the value of the
 field.
 .TP
 .B TYPE
-Gives the type of year in which the rule applies.
-If
-.B TYPE
-is
+should be
 .q \*-
-then the rule applies in all years between
-.B FROM
-and
-.B TO
-inclusive.
-If
-.B TYPE
-is something else, then
+and is present for compatibility with older versions of
 .I zic
-executes the command
-.ti +.5i
-\fByearistype\fP \fIyear\fP \fItype\fP
-.br
-to check the type of a year:
-an exit status of zero is taken to mean that the year is of the given type;
-an exit status of one is taken to mean that the year is not of the given type.
+in which it could contain year types.
 .TP
 .B IN
 Names the month in which the rule takes effect.
@@ -299,6 +276,12 @@ field
 and
 .B s
 suffixes are not used).
+Only the sum of standard time and this amount matters; for example,
+.I zic
+does not distinguish a 10:30 standard time plus an 0:30
+.B SAVE
+from a 10:00 standard time plus a 1:00
+.BR SAVE .
 .TP
 .B LETTER/S
 Gives the
@@ -357,6 +340,8 @@ alternately, an amount of time to add to local standard time.
 If this field is
 .B \*-
 then standard time always applies in the time zone.
+When an amount of time is given, only the sum of standard time and
+this amount matters.
 .TP
 .B FORMAT
 The format for time zone abbreviations in this time zone.
@@ -365,16 +350,32 @@ The pair of characters
 is used to show where the
 .q "variable part"
 of the time zone abbreviation goes.
+Alternately, a format can use the pair of characters
+.B %z
+to stand for the UTC offset in the form
+.RI \(+- hh ,
+.RI \(+- hhmm ,
+or
+.RI \(+- hhmmss ,
+using the shortest form that does not lose information, where
+.IR hh ,
+.IR mm ,
+and
+.I ss
+are the hours, minutes, and seconds east (+) or west (\(mi) of UTC.
 Alternately,
 a slash (/)
 separates standard and daylight abbreviations.
+To conform to POSIX, a time zone abbreviation should contain only
+alphanumeric ASCII characters, "+" and "\*-".
 .TP
 .B UNTILYEAR [MONTH [DAY [TIME]]]
 The time at which the UT offset or the rule(s) change for a location.
 It is specified as a year, a month, a day, and a time of day.
 If this is specified,
 the time zone information is generated from the given UT offset
-and rule change until the time specified.
+and rule change until the time specified, which is interpreted using
+the rules in effect just before the transition.
 The month, day, and time of day have the same format as the IN, ON, and AT
 fields of a rule; trailing fields can be omitted, and default to the
 earliest possible value for the missing fields.
@@ -392,6 +393,11 @@ Continuation lines may contain
 .q "until"
 information, just as zone lines do, indicating that the next line is a further
 continuation.
+.PP
+If a zone changes at the same instant that a rule would otherwise take
+effect in the earlier zone or continuation line, the rule is ignored.
+In a single zone it is an error if two rules take effect at the same
+instant, or if two zone changes take effect at the same instant.
 .PP
 A link line has the form
 .sp
