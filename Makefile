@@ -11,6 +11,7 @@ PYTHON31=python3.1
 PYTHON32=python3.2
 PYTHON33=python3.3
 PYTHON34=python3.4
+PYTHON35=python3.5
 PYTHON=${PYTHON27}
 PYTHON3=${PYTHON32}
 OLSON=./elsie.nci.nih.gov
@@ -39,6 +40,7 @@ eggs: build
 	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs && \
+	${PYTHON35} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON34} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs && \
 	${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs && \
@@ -49,6 +51,7 @@ wheels: build
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON26} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
 	${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
+	${PYTHON35} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
 	${PYTHON34} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
 	${PYTHON33} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
 	${PYTHON32} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
@@ -81,7 +84,8 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON31} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON32} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON33} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON34} test_lazy.py ${TESTARGS}
+	    && ${PYTHON34} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON35} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -92,7 +96,8 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON31} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON32} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON33} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON34} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON34} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON35} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
