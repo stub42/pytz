@@ -3,9 +3,6 @@ TZFILE(5)                     File Formats Manual                    TZFILE(5)
 NAME
        tzfile - time zone information
 
-SYNOPSIS
-       #include <tzfile.h>
-
 DESCRIPTION
        The time zone information files used by tzset(3) begin with the magic
        characters "TZif" to identify them as time zone information files,
@@ -43,10 +40,10 @@ DESCRIPTION
        at which the rules for computing local time change.  Next come
        tzh_timecnt one-byte unsigned integer values; each one tells which of
        the different types of local time types described in the file is
-       associated with the same-indexed transition time.  These values serve
-       as indices into an array of ttinfo structures (with tzh_typecnt
-       entries) that appears next in the file; these structures are defined as
-       follows:
+       associated with the time period starting with the same-indexed
+       transition time.  These values serve as indices into an array of ttinfo
+       structures (with tzh_typecnt entries) that appears next in the file;
+       these structures are defined as follows:
 
             struct ttinfo {
                  int32_t        tt_gmtoff;
@@ -65,8 +62,9 @@ DESCRIPTION
        Then there are tzh_leapcnt pairs of four-byte values, written in
        standard byte order; the first value of each pair gives the time (as
        returned by time(2)) at which a leap second occurs; the second gives
-       the total number of leap seconds to be applied after the given time.
-       The pairs of values are sorted in ascending order by time.
+       the total number of leap seconds to be applied during the time period
+       starting at the given time.  The pairs of values are sorted in
+       ascending order by time.
 
        Then there are tzh_ttisstdcnt standard/wall indicators, each stored as
        a one-byte value; they tell whether the transition times associated
