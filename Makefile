@@ -35,26 +35,26 @@ sdist: build
 	    --formats=bztar,gztar,zip
 
 eggs: build
-	cd build/dist && mkdir -p ../tarballs && \
-	${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON35} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON34} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs && \
-	${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs && \
+	cd build/dist && mkdir -p ../tarballs
+	cd build/dist && ${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON35} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON34} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs
 	touch $@
 
 wheels: build
-	cd build/dist && mkdir -p ../tarballs && \
-	${PYTHON26} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
-	${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
-	${PYTHON35} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
-	${PYTHON34} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
-	${PYTHON33} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
-	${PYTHON32} setup.py bdist_wheel --universal --dist-dir=../tarballs && \
+	cd build/dist && mkdir -p ../tarballs
+	cd build/dist && ${PYTHON26} setup.py bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON35} setup.py bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON34} setup.py bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON33} setup.py bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON32} setup.py bdist_wheel --universal --dist-dir=../tarballs
 	touch $@
 
 upload: sign
