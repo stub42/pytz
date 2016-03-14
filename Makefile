@@ -27,14 +27,13 @@ check: test_tzinfo test_docs
 
 build: .stamp-tzinfo
 
-dist: sdist eggs wheels
 
-sdist: build
+dist: build eggs wheels
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip
 
-eggs: build
+eggs:
 	cd build/dist && mkdir -p ../tarballs
 	cd build/dist && ${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs
@@ -45,9 +44,8 @@ eggs: build
 	cd build/dist && ${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs
-	touch $@
 
-wheels: build
+wheels:
 	cd build/dist && mkdir -p ../tarballs
 	cd build/dist && ${PYTHON26} setup.py bdist_wheel --universal --dist-dir=../tarballs
 	cd build/dist && ${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs
@@ -55,7 +53,6 @@ wheels: build
 	cd build/dist && ${PYTHON34} setup.py bdist_wheel --universal --dist-dir=../tarballs
 	cd build/dist && ${PYTHON33} setup.py bdist_wheel --universal --dist-dir=../tarballs
 	cd build/dist && ${PYTHON32} setup.py bdist_wheel --universal --dist-dir=../tarballs
-	touch $@
 
 upload: sign
 	cd build/dist && ${PYTHON} setup.py register
@@ -172,4 +169,4 @@ sync:
 	    tar xzf ../tzdata-latest.tar.gz && \
 	    echo Done
 
-.PHONY: all check dist test test_tzinfo test_docs test_zdump
+.PHONY: all check dist test test_tzinfo test_docs test_zdump eggs wheels build
