@@ -2,13 +2,15 @@
 	PUBLIC "-//W3C//DTD HTML 4.01//EN"
 	"http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-<title>Sources for Time Zone and Daylight Saving Time Data</title>
+<head profile="http://dublincore.org/documents/2008/08/04/dc-html/">
+<title>Sources for time zone and daylight saving time data</title>
 <link rel="schema.DC" href="http://purl.org/DC/elements/1.1/">
 <meta http-equiv="Content-type" content='text/html; charset="UTF-8"'>
+<meta name="DC.Title"
+ content="Sources for time zone and daylight saving time data">
 <meta name="DC.Creator" content="Eggert, Paul">
 <meta name="DC.Contributor" content="Olson, Arthur David">
-<meta name="DC.Date" content="2015-10-01">
+<meta name="DC.Date" content="2015-12-13">
 <meta name="DC.Description"
  content="Sources of information about time zones and daylight saving time">
 <meta name="DC.Identifier"
@@ -17,7 +19,7 @@
  content="database,daylight saving,DST,time zone,timezone,tz,zoneinfo">
 </head>
 <body>
-<h1>Sources for Time Zone and Daylight Saving Time Data</h1>
+<h1>Sources for time zone and daylight saving time data</h1>
 <h2>The <code><abbr title="time zone">tz</abbr></code> database</h2>
 <p>
 The <a href="https://en.wikipedia.org/wiki/Public_domain">public-domain</a>
@@ -168,6 +170,24 @@ href="http://blog.jonudell.net/2009/10/23/a-literary-appreciation-of-the-olsonzo
 literary appreciation of the Olson/Zoneinfo/tz database</a> comments on the
 database's style.</li>
 </ul>
+<h2>Editing <code><abbr>tz</abbr></code> database source files</h2>
+<p>Sources for the <code><abbr>tz</abbr></code> database are
+<a href="https://en.wikipedia.org/wiki/UTF-8"><abbr
+title="Unicode Transformation Format 8-bit">UTF-8</abbr></a>
+<a href="https://en.wikipedia.org/wiki/Text_file">text files</a>
+with lines terminated by <a href="https://en.wikipedia.org/wiki/Newline"><abbr
+title="linefeed">LF</abbr></a>,
+which can be modified by common text editors such
+as <a href="https://www.gnu.org/software/emacs/">GNU Emacs</a>,
+<a href="https://wiki.gnome.org/Apps/Gedit">gedit</a>, and
+<a href="http://www.vim.org/">vim</a>. One
+editor has a package to simplify editing further:</p>
+<ul>
+<li><a href="https://packagecontrol.io/packages/zoneinfo">Sublime
+zoneinfo</a> is a <a href="http://www.sublimetext.com/">Sublime
+Text</a> package for syntax highlighting <code><abbr>tz</abbr></code>
+source files.</li>
+</ul>
 <h2>Web sites using recent versions of the <code><abbr>tz</abbr></code> database</h2>
 <p>
 These are listed roughly in ascending order of complexity and fanciness.
@@ -175,6 +195,8 @@ These are listed roughly in ascending order of complexity and fanciness.
 <ul>
 <li><a href="http://time.is">Time.is</a> shows locations'
 time and zones in a simple format.</li>
+<li><a href="https://www.timejones.com/">TimeJones.com</a> is a simple
+time zone converter.</li>
 <li><a
 href="http://twiki.org/cgi-bin/xtra/tzdatepick.html">Date and Time Gateway</a>
 lets you see the <code><abbr>TZ</abbr></code> values directly.</li>
@@ -356,6 +378,14 @@ a <code><abbr>tz</abbr></code> binary file reader written in C that
 creates a <code>GTimeZone</code> object representing sets
 of <abbr>UT</abbr> offsets.
 It is freely available under the <abbr>LGPL</abbr>.</li>
+<li>The
+<a href="https://github.com/bloomberg/bde/wiki">BDE Standard Library</a>'s
+<code>baltzo::TimeZoneUtil</code> component contains a C++
+implementation of a binary file reader. It is freely available under
+the Apache License.</li>
+<li><a href="https://github.com/google/cctz">CCTZ</a> is a simple C++
+library that translates between UTC and civil time and can read binary
+files. It is freely available under the Apache License.</li>
 <li><a href="http://bmsi.com/java/#TZ">ZoneInfo.java</a>
 is a <code><abbr>tz</abbr></code> binary file reader written in Java.
 It is freely available under the <abbr>LGPL</abbr>.</li>
