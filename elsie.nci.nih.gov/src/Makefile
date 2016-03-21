@@ -5,7 +5,7 @@
 PACKAGE=	tzcode
 
 # Version numbers of the code and data distributions.
-VERSION=	2016a
+VERSION=	2016b
 
 # Email address for bug reports.
 BUGEMAIL=	tz@iana.org
@@ -106,6 +106,8 @@ LDLIBS=
 
 # Add the following to the end of the "CFLAGS=" line as needed.
 #  -DBIG_BANG=-9999999LL if the Big Bang occurred at time -9999999 (see zic.c)
+#  -DHAVE_DECL_ASCTIME_R=0 if <time.h> does not declare asctime_r
+#  -DHAVE_DIRECT_H if mkdir needs <direct.h> (MS-Windows)
 #  -DHAVE_DOS_FILE_NAMES if file names have drive specifiers etc. (MS-DOS)
 #  -DHAVE_GETTEXT=1 if 'gettext' works (GNU, Linux, Solaris); also see LDLIBS
 #  -DHAVE_INCOMPATIBLE_CTIME_R=1 if your system's time.h declares
@@ -116,6 +118,8 @@ LDLIBS=
 #  -DHAVE_LOCALTIME_RZ=0 if you do not want zdump to use localtime_rz
 #	This defaults to 1 if a working localtime_rz seems to be available.
 #	localtime_rz can make zdump significantly faster, but is nonstandard.
+#  -DHAVE_POSIX_DECLS=0 if your system's include files do not declare
+#	functions like 'link' or variables like 'tzname' required by POSIX
 #  -DHAVE_STDINT_H=1 if you have a pre-C99 compiler with "stdint.h"
 #  -DHAVE_STRFTIME_L=1 if <time.h> declares locale_t and strftime_l
 #	This defaults to 0 if _POSIX_VERSION < 200809, 1 otherwise.
@@ -360,7 +364,7 @@ MANTXTS=	newctime.3.txt newstrftime.3.txt newtzset.3.txt \
 			tzfile.5.txt tzselect.8.txt zic.8.txt zdump.8.txt \
 			date.1.txt
 COMMON=		CONTRIBUTING LICENSE Makefile NEWS README Theory
-WEB_PAGES=	tz-art.htm tz-link.htm
+WEB_PAGES=	tz-art.htm tz-how-to.html tz-link.htm
 DOCS=		$(MANS) date.1 $(MANTXTS) $(WEB_PAGES)
 PRIMARY_YDATA=	africa antarctica asia australasia \
 		europe northamerica southamerica
