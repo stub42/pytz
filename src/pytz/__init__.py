@@ -8,9 +8,9 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-# The Olson database is updated several times a year.
-OLSON_VERSION = '2016a'
-VERSION = '2016.1'  # Switching to pip compatible version numbering.
+# The IANA (nee Olson) database is updated several times a year.
+OLSON_VERSION = '2016b'
+VERSION = '2016.2'  # Switching to pip compatible version numbering.
 __version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
