@@ -13,7 +13,7 @@ PYTHON33=python3.3
 PYTHON34=python3.4
 PYTHON35=python3.5
 PYTHON=${PYTHON27}
-PYTHON3=${PYTHON32}
+PYTHON3=${PYTHON35}
 OLSON=./elsie.nci.nih.gov
 TESTARGS=-vv
 TARGET=
@@ -47,12 +47,8 @@ eggs:
 
 wheels:
 	cd build/dist && mkdir -p ../tarballs
-	cd build/dist && ${PYTHON26} setup.py bdist_wheel --universal --dist-dir=../tarballs
 	cd build/dist && ${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs
 	cd build/dist && ${PYTHON35} setup.py bdist_wheel --universal --dist-dir=../tarballs
-	cd build/dist && ${PYTHON34} setup.py bdist_wheel --universal --dist-dir=../tarballs
-	cd build/dist && ${PYTHON33} setup.py bdist_wheel --universal --dist-dir=../tarballs
-	cd build/dist && ${PYTHON32} setup.py bdist_wheel --universal --dist-dir=../tarballs
 
 upload: sign
 	cd build/dist && ${PYTHON} setup.py register
