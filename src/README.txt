@@ -134,19 +134,21 @@ section for more details)
 >>> dt2.strftime(fmt)
 '2002-10-27 01:30:00 EST-0500'
 
-Converting between timezones also needs special attention. We also need
-to use the ``normalize()`` method to ensure the conversion is correct.
+Converting between timezones is more easily done, using the
+standard astimezone method.
 
 >>> utc_dt = utc.localize(datetime.utcfromtimestamp(1143408899))
 >>> utc_dt.strftime(fmt)
 '2006-03-26 21:34:59 UTC+0000'
 >>> au_tz = timezone('Australia/Sydney')
->>> au_dt = au_tz.normalize(utc_dt.astimezone(au_tz))
+>>> au_dt = utc_dt.astimezone(au_tz)
 >>> au_dt.strftime(fmt)
 '2006-03-27 08:34:59 AEDT+1100'
->>> utc_dt2 = utc.normalize(au_dt.astimezone(utc))
+>>> utc_dt2 = au_dt.astimezone(utc)
 >>> utc_dt2.strftime(fmt)
 '2006-03-26 21:34:59 UTC+0000'
+>>> utc_dt == utc_dt2
+True
 
 You can take shortcuts when dealing with the UTC side of timezone
 conversions. ``normalize()`` and ``localize()`` are not really
