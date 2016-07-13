@@ -540,10 +540,11 @@ This package will be updated after releases of the Olson timezone
 database.  The latest version can be downloaded from the `Python Package
 Index <http://pypi.python.org/pypi/pytz/>`_.  The code that is used
 to generate this distribution is hosted on launchpad.net and available
-using the `Bazaar version control system <http://bazaar-vcs.org>`_
-using::
+using git::
 
-    bzr branch lp:pytz
+    git clone https://git.launchpad.net/pytz
+
+A mirror on github is also available at https://github.com/stub42/pytz
 
 Announcements of new releases are made on
 `Launchpad <https://launchpad.net/pytz>`_, and the
