@@ -12,8 +12,8 @@ PYTHON32=python3.2
 PYTHON33=python3.3
 PYTHON34=python3.4
 PYTHON35=python3.5
-PYTHON=${PYTHON27}
-PYTHON3=${PYTHON35}
+PYTHON=/usr/bin/python
+PYTHON3=/usr/bin/python3
 IANA=./tz
 IANA_GIT=https://github.com/eggert/tz.git
 
@@ -32,28 +32,28 @@ build: .stamp-tzinfo
 
 dist: build eggs wheels
 	cd build/dist && mkdir -p ../tarballs && \
-	${PYTHON} setup.py sdist --dist-dir ../tarballs \
+	${PYTHON} setup.py -q sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip
 
 eggs:
 	cd build/dist && mkdir -p ../tarballs
-	cd build/dist && ${PYTHON24} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON25} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON26} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON27} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON35} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON34} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON33} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON32} setup.py bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON31} setup.py bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON24} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON25} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON26} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON27} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON35} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON34} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON33} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON32} setup.py -q bdist_egg --dist-dir=../tarballs
+	cd build/dist && ${PYTHON31} setup.py -q bdist_egg --dist-dir=../tarballs
 
 wheels:
 	cd build/dist && mkdir -p ../tarballs
-	cd build/dist && ${PYTHON27} setup.py bdist_wheel --universal --dist-dir=../tarballs
-	cd build/dist && ${PYTHON35} setup.py bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON} setup.py -q bdist_wheel --universal --dist-dir=../tarballs
+	cd build/dist && ${PYTHON3} setup.py -q bdist_wheel --universal --dist-dir=../tarballs
 
 upload: sign
-	cd build/dist && ${PYTHON} setup.py register
+	cd build/dist && ${PYTHON3} setup.py register
 	twine upload build/tarballs/*.{egg,whl,zip,bz2,gz,asc}
 
 sign: dist
