@@ -14,7 +14,9 @@ PYTHON34=python3.4
 PYTHON35=python3.5
 PYTHON=${PYTHON27}
 PYTHON3=${PYTHON35}
-OLSON=./elsie.nci.nih.gov
+IANA=./tz
+IANA_GIT=https://github.com/eggert/tz.git
+
 TESTARGS=-vv
 TARGET=
 #TARGET=Europe/Amsterdam Europe/Moscow W-SU Etc/GMT+2 Atlantic/South_Georgia Europe/Warsaw Europe/Vilnius
@@ -65,7 +67,7 @@ test: test_lazy test_tzinfo test_docs test_zdump
 clean:
 	rm -f .stamp-*
 	rm -rf build/*/* zdump.out
-	make -C ${OLSON}/src clean
+	make -C ${IANA} clean
 	find . -name \*.pyc | xargs rm -f
 
 test_lazy: .stamp-tzinfo
@@ -132,7 +134,7 @@ upload_docs_pythonhosted: docs
 	touch $@
 
 .stamp-zoneinfo:
-	${MAKE} -C ${OLSON}/src TOPDIR=`pwd`/build install
+	${MAKE} -C ${IANA} TOPDIR=`pwd`/build install
 	# Break hard links, working around http://bugs.python.org/issue8876.
 	for d in zoneinfo zoneinfo-leaps zoneinfo-posix; do \
 	    rm -rf `pwd`/build/etc/$$d.tmp; \
@@ -149,20 +151,31 @@ build/dist/locales/pytz.pot: .stamp-tzinfo
 #	pygettext --extract-all --no-location \
 #	    --default-domain=pytz --output-dir=locales
 
-IANA_URL=http://www.iana.org/time-zones/repository
+# Switch to using a git subtree of https://github.com/eggert/tz
+#
+# IANA_URL=http://www.iana.org/time-zones/repository
+# 
+# sync:
+# 	cd elsie.nci.nih.gov && \
+# 	    rm -f tz{code,data}-latest.tar.gz{,.asc} && \
+# 	    wget -S ${IANA_URL}/tzcode-latest.tar.gz && \
+# 	    wget -S ${IANA_URL}/tzcode-latest.tar.gz.asc && \
+# 	    gpg --verify tzcode-latest.tar.gz.asc tzcode-latest.tar.gz && \
+# 	    wget -S ${IANA_URL}/tzdata-latest.tar.gz && \
+# 	    wget -S ${IANA_URL}/tzdata-latest.tar.gz.asc && \
+# 	    gpg --verify tzdata-latest.tar.gz.asc tzdata-latest.tar.gz && \
+# 	    cd src && \
+# 	    tar xzf ../tzcode-latest.tar.gz && \
+# 	    tar xzf ../tzdata-latest.tar.gz && \
+# 	    echo Done
 
 sync:
-	cd elsie.nci.nih.gov && \
-	    rm -f tz{code,data}-latest.tar.gz{,.asc} && \
-	    wget -S ${IANA_URL}/tzcode-latest.tar.gz && \
-	    wget -S ${IANA_URL}/tzcode-latest.tar.gz.asc && \
-	    gpg --verify tzcode-latest.tar.gz.asc tzcode-latest.tar.gz && \
-	    wget -S ${IANA_URL}/tzdata-latest.tar.gz && \
-	    wget -S ${IANA_URL}/tzdata-latest.tar.gz.asc && \
-	    gpg --verify tzdata-latest.tar.gz.asc tzdata-latest.tar.gz && \
-	    cd src && \
-	    tar xzf ../tzcode-latest.tar.gz && \
-	    tar xzf ../tzdata-latest.tar.gz && \
-	    echo Done
+	if [ -n "$(TAG)" ]; then \
+	    git subtree pull --prefix=tz --squash $(IANA_GIT) $(TAG) \
+		-m "IANA $(TAG)"; \
+	else \
+	    echo "Usage: make sync TAG=2016f"; \
+	fi
+
 
 .PHONY: all check dist test test_tzinfo test_docs test_zdump eggs wheels build

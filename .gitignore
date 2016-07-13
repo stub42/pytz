@@ -2,26 +2,11 @@
 *.py[co]
 
 # Build-related files
-./.stamp-dist
-./.stamp-tzinfo
-./.stamp-zoneinfo
+.stamp-dist
+.stamp-tzinfo
+.stamp-zoneinfo
 # For whatever reason, build/ is versioned, so the * is necessary.
-./build/*
-
-# tz compiled files
-./elsie.nci.nih.gov/src/*.o
-./elsie.nci.nih.gov/src/tzselect
-./elsie.nci.nih.gov/src/yearistype
-./elsie.nci.nih.gov/src/zdump
-./elsie.nci.nih.gov/src/zic
-
-# Generated
-./elsie.nci.nih.gov/src/version.h
-./elsie.nci.nih.gov/src/leapseconds
+build/*
 
 # Generated datafile for test_zdump.py
-./zdump.out
-
-# Where I keep my tarballs
-./elsie.nci.nih.gov/*.tar.gz
-./elsie.nci.nih.gov/*.tar.gz.asc
+zdump.out

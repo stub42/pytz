@@ -46,7 +46,7 @@ def allzones():
 def links():
     '''Mapping of alias -> canonical name'''
     l = {}
-    olson_src_files = glob('elsie.nci.nih.gov/src/*')
+    olson_src_files = glob('tz/*')
     assert olson_src_files, 'No src files'
     for filename in olson_src_files:
         # Filenames containing a '.' are not data files.
@@ -103,7 +103,7 @@ def add_allzones(filename):
             and not z.startswith('SystemV/')
             and not z.startswith('Etc/')]
     # And extend our list manually with stuff we think deserves to be
-    # labelled 'common'. 
+    # labelled 'common'.
     cz.extend([
         'UTC', 'GMT', 'US/Eastern', 'US/Pacific', 'US/Mountain',
         'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska',
