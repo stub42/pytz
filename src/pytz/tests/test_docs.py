@@ -13,7 +13,7 @@ class DocumentationTestCase(unittest.TestCase):
         '''Confirm the README.txt is pure ASCII.'''
         f = open(README, 'rb')
         try:
-            f.read().decode('US-ASCII')
+            f.read().decode('ASCII')
         finally:
             f.close()
 
