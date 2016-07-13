@@ -25,11 +25,6 @@ __all__ = [
 
 import sys, datetime, os.path, gettext
 
-try:
-    from pkg_resources import resource_stream
-except ImportError:
-    resource_stream = None
-
 from pytz.exceptions import AmbiguousTimeError
 from pytz.exceptions import InvalidTimeError
 from pytz.exceptions import NonExistentTimeError
@@ -88,11 +83,17 @@ def open_resource(name):
             raise ValueError('Bad path segment: %r' % part)
     filename = os.path.join(os.path.dirname(__file__),
                             'zoneinfo', *name_parts)
-    if not os.path.exists(filename) and resource_stream is not None:
+    if not os.path.exists(filename):
         # http://bugs.launchpad.net/bugs/383171 - we avoid using this
         # unless absolutely necessary to help when a broken version of
         # pkg_resources is installed.
-        return resource_stream(__name__, 'zoneinfo/' + name)
+        try:
+            from pkg_resources import resource_stream
+        except ImportError:
+            resource_stream = None
+
+        if resource_stream is not None:
+            return resource_stream(__name__, 'zoneinfo/' + name)
     return open(filename, 'rb')
 
 
