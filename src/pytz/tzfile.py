@@ -66,7 +66,7 @@ def build_tzinfo(zone, fp):
         i += 3
 
     # Now build the timezone object
-    if len(transitions) == 0:
+    if len(ttinfo) ==1 or len(transitions) == 0:
         ttinfo[0][0], ttinfo[0][2]
         cls = type(zone, (StaticTzInfo,), dict(
             zone=zone,

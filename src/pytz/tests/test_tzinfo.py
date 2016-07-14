@@ -114,6 +114,12 @@ class BasicTest(unittest.TestCase):
         eastern = pytz.timezone('US/Eastern')
         self.assertTrue(eastern is pytz.timezone(unicode('US/Eastern')))
 
+    def testStaticTzInfo(self):
+        # Ensure that static timezones are correctly detected,
+        # per lp:1602807
+        static = pytz.timezone('Etc/GMT-4')
+        self.assertTrue(isinstance(static, StaticTzInfo))
+
 
 class PicklingTest(unittest.TestCase):
 
