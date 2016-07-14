@@ -59,7 +59,7 @@ upload: sign
 sign: dist
 	rm -f build/tarballs/*.asc
 	for f in build/tarballs/*.{egg,whl,zip,bz2,gz} ; do \
-	    gpg --detach-sign -a $$f; \
+	    gpg2 --detach-sign -a $$f; \
 	done
 
 test: test_lazy test_tzinfo test_docs test_zdump
@@ -160,10 +160,10 @@ build/dist/locales/pytz.pot: .stamp-tzinfo
 # 	    rm -f tz{code,data}-latest.tar.gz{,.asc} && \
 # 	    wget -S ${IANA_URL}/tzcode-latest.tar.gz && \
 # 	    wget -S ${IANA_URL}/tzcode-latest.tar.gz.asc && \
-# 	    gpg --verify tzcode-latest.tar.gz.asc tzcode-latest.tar.gz && \
+# 	    gpg2 --verify tzcode-latest.tar.gz.asc tzcode-latest.tar.gz && \
 # 	    wget -S ${IANA_URL}/tzdata-latest.tar.gz && \
 # 	    wget -S ${IANA_URL}/tzdata-latest.tar.gz.asc && \
-# 	    gpg --verify tzdata-latest.tar.gz.asc tzdata-latest.tar.gz && \
+# 	    gpg2 --verify tzdata-latest.tar.gz.asc tzdata-latest.tar.gz && \
 # 	    cd src && \
 # 	    tar xzf ../tzcode-latest.tar.gz && \
 # 	    tar xzf ../tzdata-latest.tar.gz && \
