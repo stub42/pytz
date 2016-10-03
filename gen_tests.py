@@ -27,14 +27,11 @@ def main():
         # the daterange we test against - zdump understands v2 format
         # files and will output historical records we can't cope with
         # otherwise.
-        command = '%s -v -c 1902,2038 %s' % (zdump, zone)
-        process = subprocess.Popen(
-            command, shell=True,
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
-        zd_in, zd_out = (process.stdin, process.stdout)
+        command = [zdump, '-v', '-c', '1902,2038', zone]
+        zd_out = subprocess.check_output(command)
         # Skip bogus output on 64bit architectures, per Bug #213816
         lines = [
-            line.strip() for line in zd_out.readlines()
+            line.strip() for line in zd_out.splitlines()
             if not line.decode('utf-8').strip().endswith('NULL')]
 
         for line in lines:

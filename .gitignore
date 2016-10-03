@@ -7,6 +7,7 @@
 .stamp-zoneinfo
 # For whatever reason, build/ is versioned, so the * is necessary.
 build/*
+tz/version
 
 # Generated datafile for test_zdump.py
 zdump.out

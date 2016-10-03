@@ -169,7 +169,9 @@ build/dist/locales/pytz.pot: .stamp-tzinfo
 # 	    tar xzf ../tzdata-latest.tar.gz && \
 # 	    echo Done
 
-sync:
+sync: _sync clean
+
+_sync:
 	if [ -n "$(TAG)" ]; then \
 	    git subtree pull --prefix=tz --squash $(IANA_GIT) $(TAG) \
 		-m "IANA $(TAG)"; \
@@ -177,5 +179,4 @@ sync:
 	    echo "Usage: make sync TAG=2016f"; \
 	fi
 
-
-.PHONY: all check dist test test_tzinfo test_docs test_zdump eggs wheels build
+.PHONY: all check dist test test_tzinfo test_docs test_zdump eggs wheels build clean sync _sync
