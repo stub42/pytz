@@ -106,7 +106,9 @@ extern int	optind;
 # define link(from, to) (errno = ENOTSUP, -1)
 #endif
 #if ! HAVE_SYMLINK
+# define lstat(name, st) stat(name, st)
 # define symlink(from, to) (errno = ENOTSUP, -1)
+# define S_ISLNK(m) 0
 #endif
 
 static void	addtt(zic_t starttime, int type);
@@ -114,7 +116,7 @@ static int	addtype(zic_t, char const *, bool, bool, bool);
 static void	leapadd(zic_t, bool, int, int);
 static void	adjleap(void);
 static void	associate(void);
-static void	dolink(const char * fromfield, const char * tofield);
+static void	dolink(const char *, const char *, bool);
 static char **	getfields(char * buf);
 static zic_t	gethms(const char * string, const char * errstring,
 		       bool);
@@ -128,7 +130,7 @@ static bool	inzsub(char **, int, bool);
 static int	itsdir(const char * name);
 static bool	is_alpha(char a);
 static char	lowerit(char);
-static bool	mkdirs(char *);
+static void	mkdirs(char const *, bool);
 static void	newabbr(const char * abbr);
 static zic_t	oadd(zic_t t1, zic_t t2);
 static void	outzone(const struct zone * zp, int ntzones);
@@ -144,7 +146,7 @@ static bool	yearistype(int year, const char * type);
 enum { PERCENT_Z_LEN_BOUND = sizeof "+995959" - 1 };
 
 /* If true, work around a bug in Qt 5.6.1 and earlier, which mishandles
-   tzdata binary files whose POSIX-TZ-style strings contain '<'; see
+   tz binary files whose POSIX-TZ-style strings contain '<'; see
    QTBUG-53071 <https://bugreports.qt.io/browse/QTBUG-53071>.  This
    workaround will no longer be needed when Qt 5.6.1 and earlier are
    obsolete, say in the year 2021.  */
@@ -355,6 +357,7 @@ static const int	len_years[2] = {
 
 static struct attype {
 	zic_t		at;
+	bool		dontmerge;
 	unsigned char	type;
 } *			attypes;
 static zic_t		gmtoffs[TZ_MAX_TYPES];
@@ -495,15 +498,15 @@ warning(const char *const string, ...)
 }
 
 static void
-close_file(FILE *stream, char const *name)
+close_file(FILE *stream, char const *dir, char const *name)
 {
   char const *e = (ferror(stream) ? _("I/O error")
 		   : fclose(stream) != 0 ? strerror(errno) : NULL);
   if (e) {
-    fprintf(stderr, "%s: ", progname);
-    if (name)
-      fprintf(stderr, "%s: ", name);
-    fprintf(stderr, "%s\n", e);
+    fprintf(stderr, "%s: %s%s%s%s%s\n", progname,
+	    dir ? dir : "", dir ? "/" : "",
+	    name ? name : "", name ? ": " : "",
+	    e);
     exit(EXIT_FAILURE);
   }
 }
@@ -518,8 +521,28 @@ usage(FILE *stream, int status)
 	    "Report bugs to %s.\n"),
 	  progname, progname, REPORT_BUGS_TO);
   if (status == EXIT_SUCCESS)
-    close_file(stream, NULL);
+    close_file(stream, NULL, NULL);
   exit(status);
+}
+
+/* Change the working directory to DIR, possibly creating DIR and its
+   ancestors.  After this is done, all files are accessed with names
+   relative to DIR.  */
+static void
+change_directory (char const *dir)
+{
+  if (chdir(dir) != 0) {
+    int chdir_errno = errno;
+    if (chdir_errno == ENOENT) {
+      mkdirs(dir, false);
+      chdir_errno = chdir(dir) == 0 ? 0 : errno;
+    }
+    if (chdir_errno != 0) {
+      fprintf(stderr, _("%s: Can't chdir to %s: %s\n"),
+	      progname, dir, strerror(chdir_errno));
+      exit(EXIT_FAILURE);
+    }
+  }
 }
 
 static const char *	psxrules;
@@ -554,7 +577,7 @@ main(int argc, char **argv)
 	for (i = 1; i < argc; ++i)
 		if (strcmp(argv[i], "--version") == 0) {
 			printf("zic %s%s\n", PKGVERSION, TZVERSION);
-			close_file(stdout, NULL);
+			close_file(stdout, NULL, NULL);
 			return EXIT_SUCCESS;
 		} else if (strcmp(argv[i], "--help") == 0) {
 			usage(stdout, EXIT_SUCCESS);
@@ -637,6 +660,7 @@ _("%s: More than one -L option specified\n"),
 	if (errors)
 		return EXIT_FAILURE;
 	associate();
+	change_directory(directory);
 	for (i = 0; i < nzones; i = j) {
 		/*
 		** Find the next non-continuation zone entry.
@@ -650,7 +674,7 @@ _("%s: More than one -L option specified\n"),
 	*/
 	for (i = 0; i < nlinks; ++i) {
 		eat(links[i].l_filename, links[i].l_linenum);
-		dolink(links[i].l_from, links[i].l_to);
+		dolink(links[i].l_from, links[i].l_to, false);
 		if (noise)
 			for (j = 0; j < nlinks; ++j)
 				if (strcmp(links[i].l_to,
@@ -659,11 +683,11 @@ _("%s: More than one -L option specified\n"),
 	}
 	if (lcltime != NULL) {
 		eat(_("command line"), 1);
-		dolink(lcltime, TZDEFAULT);
+		dolink(lcltime, TZDEFAULT, true);
 	}
 	if (psxrules != NULL) {
 		eat(_("command line"), 1);
-		dolink(psxrules, TZDEFRULES);
+		dolink(psxrules, TZDEFRULES, true);
 	}
 	if (warnings && (ferror(stderr) || fclose(stderr) != 0))
 	  return EXIT_FAILURE;
@@ -740,112 +764,99 @@ namecheck(const char *name)
 	return componentcheck(name, component, cp);
 }
 
-static char *
-relname(char const *dir, char const *base)
-{
-  if (*base == '/')
-    return ecpyalloc(base);
-  else {
-    size_t dir_len = strlen(dir);
-    bool needs_slash = dir_len && dir[dir_len - 1] != '/';
-    char *result = emalloc(dir_len + needs_slash + strlen(base) + 1);
-    result[dir_len] = '/';
-    strcpy(result + dir_len + needs_slash, base);
-    return memcpy(result, dir, dir_len);
-  }
-}
-
 static void
-dolink(char const *fromfield, char const *tofield)
+dolink(char const *fromfield, char const *tofield, bool staysymlink)
 {
-	register char *	fromname;
-	register char *	toname;
 	register int fromisdir;
+	bool todirs_made = false;
+	int link_errno;
 
-	fromname = relname(directory, fromfield);
-	toname = relname(directory, tofield);
 	/*
 	** We get to be careful here since
 	** there's a fair chance of root running us.
 	*/
-	fromisdir = itsdir(fromname);
+	fromisdir = itsdir(fromfield);
 	if (fromisdir) {
 		char const *e = strerror(fromisdir < 0 ? errno : EPERM);
-		fprintf(stderr, _("%s: link from %s failed: %s"),
-			progname, fromname, e);
+		fprintf(stderr, _("%s: link from %s/%s failed: %s\n"),
+			progname, directory, fromfield, e);
 		exit(EXIT_FAILURE);
 	}
-	if (link(fromname, toname) != 0) {
-	  int link_errno = errno;
-	  bool retry_if_link_supported = false;
+	if (staysymlink)
+	  staysymlink = itsdir(tofield) == 2;
+	if (remove(tofield) == 0)
+	  todirs_made = true;
+	else if (errno != ENOENT) {
+	  char const *e = strerror(errno);
+	  fprintf(stderr, _("%s: Can't remove %s/%s: %s\n"),
+		  progname, directory, tofield, e);
+	  exit(EXIT_FAILURE);
+	}
+	link_errno = (staysymlink ? ENOTSUP
+		      : link(fromfield, tofield) == 0 ? 0 : errno);
+	if (link_errno == ENOENT && !todirs_made) {
+	  mkdirs(tofield, true);
+	  todirs_made = true;
+	  link_errno = link(fromfield, tofield) == 0 ? 0 : errno;
+	}
+	if (link_errno != 0) {
+	  const char *s = fromfield;
+	  const char *t;
+	  char *p;
+	  size_t dotdots = 0;
+	  char *symlinkcontents;
+	  int symlink_errno;
 
-	  if (link_errno == ENOENT || link_errno == ENOTSUP) {
-	    if (! mkdirs(toname))
-	      exit(EXIT_FAILURE);
-	    retry_if_link_supported = true;
+	  do
+	    t = s;
+	  while ((s = strchr(s, '/'))
+		 && strncmp(fromfield, tofield, ++s - fromfield) == 0);
+
+	  for (s = tofield + (t - fromfield); *s; s++)
+	    dotdots += *s == '/';
+	  symlinkcontents = emalloc(3 * dotdots + strlen(t) + 1);
+	  for (p = symlinkcontents; dotdots-- != 0; p += 3)
+	    memcpy(p, "../", 3);
+	  strcpy(p, t);
+	  symlink_errno = symlink(symlinkcontents, tofield) == 0 ? 0 : errno;
+	  if (symlink_errno == ENOENT && !todirs_made) {
+	    mkdirs(tofield, true);
+	    symlink_errno = symlink(symlinkcontents, tofield) == 0 ? 0 : errno;
 	  }
-	  if ((link_errno == EEXIST || link_errno == ENOTSUP)
-	      && itsdir(toname) == 0
-	      && (remove(toname) == 0 || errno == ENOENT))
-	    retry_if_link_supported = true;
-	  if (retry_if_link_supported && link_errno != ENOTSUP)
-	    link_errno = link(fromname, toname) == 0 ? 0 : errno;
-	  if (link_errno != 0) {
-	    const char *s = fromfield;
-	    const char *t;
-	    char *p;
-	    size_t dotdots = 0;
-	    char *symlinkcontents;
-	    int symlink_result;
-
-	    do
-	      t = s;
-	    while ((s = strchr(s, '/'))
-		   && strncmp(fromfield, tofield, ++s - fromfield) == 0);
-
-	    for (s = tofield + (t - fromfield); *s; s++)
-	      dotdots += *s == '/';
-	    symlinkcontents = emalloc(3 * dotdots + strlen(t) + 1);
-	    for (p = symlinkcontents; dotdots-- != 0; p += 3)
-	      memcpy(p, "../", 3);
-	    strcpy(p, t);
-	    symlink_result = symlink(symlinkcontents, toname);
-	    free(symlinkcontents);
-	    if (symlink_result == 0) {
-	      if (link_errno != ENOTSUP)
-		warning(_("symbolic link used because hard link failed: %s"),
-			strerror (link_errno));
-	    } else {
-			FILE *fp, *tp;
-			int c;
-			fp = fopen(fromname, "rb");
-			if (!fp) {
-				const char *e = strerror(errno);
-				fprintf(stderr,
-					       _("%s: Can't read %s: %s\n"),
-					       progname, fromname, e);
-				exit(EXIT_FAILURE);
-			}
-			tp = fopen(toname, "wb");
-			if (!tp) {
-				const char *e = strerror(errno);
-				fprintf(stderr,
-					       _("%s: Can't create %s: %s\n"),
-					       progname, toname, e);
-				exit(EXIT_FAILURE);
-			}
-			while ((c = getc(fp)) != EOF)
-				putc(c, tp);
-			close_file(fp, fromname);
-			close_file(tp, toname);
-			if (link_errno != ENOTSUP)
-			  warning(_("copy used because hard link failed: %s"),
-				  strerror (link_errno));
+	  free(symlinkcontents);
+	  if (symlink_errno == 0) {
+	    if (link_errno != ENOTSUP)
+	      warning(_("symbolic link used because hard link failed: %s"),
+		      strerror(link_errno));
+	  } else {
+	    FILE *fp, *tp;
+	    int c;
+	    fp = fopen(fromfield, "rb");
+	    if (!fp) {
+	      char const *e = strerror(errno);
+	      fprintf(stderr, _("%s: Can't read %s/%s: %s\n"),
+		      progname, directory, fromfield, e);
+	      exit(EXIT_FAILURE);
 	    }
+	    tp = fopen(tofield, "wb");
+	    if (!tp) {
+	      char const *e = strerror(errno);
+	      fprintf(stderr, _("%s: Can't create %s/%s: %s\n"),
+		      progname, directory, tofield, e);
+	      exit(EXIT_FAILURE);
+	    }
+	    while ((c = getc(fp)) != EOF)
+	      putc(c, tp);
+	    close_file(fp, directory, fromfield);
+	    close_file(tp, directory, tofield);
+	    if (link_errno != ENOTSUP)
+	      warning(_("copy used because hard link failed: %s"),
+		      strerror(link_errno));
+	    else if (symlink_errno != ENOTSUP)
+	      warning(_("copy used because symbolic link failed: %s"),
+		      strerror(symlink_errno));
 	  }
 	}
-	free(fromname);
-	free(toname);
 }
 
 #define TIME_T_BITS_IN_FILE	64
@@ -891,21 +902,26 @@ static const zic_t early_time = (WORK_AROUND_GNOME_BUG_730332
 				 ? BIG_BANG
 				 : MINVAL(zic_t, TIME_T_BITS_IN_FILE));
 
-/* Return 1 if NAME is a directory, 0 if it's something else, -1 if trouble.  */
+/* Return 1 if NAME is a directory, 2 if a symbolic link, 0 if
+   something else, -1 (setting errno) if trouble.  */
 static int
 itsdir(char const *name)
 {
 	struct stat st;
-	int res = stat(name, &st);
+	int res = lstat(name, &st);
+	if (res == 0) {
 #ifdef S_ISDIR
-	if (res == 0)
-		return S_ISDIR(st.st_mode) != 0;
-#endif
-	if (res == 0 || errno == EOVERFLOW) {
-		char *nameslashdot = relname(name, ".");
-		bool dir = stat(nameslashdot, &st) == 0 || errno == EOVERFLOW;
+		return S_ISDIR(st.st_mode) ? 1 : S_ISLNK(st.st_mode) ? 2 : 0;
+#else
+		size_t n = strlen(name);
+		char *nameslashdot = emalloc(n + 3);
+		bool dir;
+		memcpy(nameslashdot, name, n);
+		strcpy(&nameslashdot[n], &"/."[! (n && name[n - 1] != '/')]);
+		dir = lstat(nameslashdot, &st) == 0;
 		free(nameslashdot);
 		return dir;
+#endif
 	}
 	return -1;
 }
@@ -1079,7 +1095,7 @@ _("%s: panic: Invalid l_value %d\n"),
 		}
 		free(fields);
 	}
-	close_file(fp, filename);
+	close_file(fp, NULL, filename);
 	if (wantcont)
 		error(_("expected continuation line not found"));
 }
@@ -1629,9 +1645,9 @@ writezone(const char *const name, const char *const string, char version)
 	register int			leapcnt32, leapi32;
 	register int			timecnt32, timei32;
 	register int			pass;
-	char *				fullname;
 	static const struct tzhead	tzh0;
 	static struct tzhead		tzh;
+	bool dir_checked = false;
 	zic_t one = 1;
 	zic_t y2038_boundary = one << 31;
 	int nats = timecnt + WORK_AROUND_QTBUG_53071;
@@ -1664,8 +1680,9 @@ writezone(const char *const name, const char *const string, char version)
 						attypes[fromi].type;
 					continue;
 			}
-			if (toi == 0 ||
-				attypes[toi - 1].type != attypes[fromi].type)
+			if (toi == 0
+			    || attypes[fromi].dontmerge
+			    || attypes[toi - 1].type != attypes[fromi].type)
 					attypes[toi++] = attypes[fromi];
 		}
 		timecnt = toi;
@@ -1730,27 +1747,31 @@ writezone(const char *const name, const char *const string, char version)
 		--leapcnt32;
 		++leapi32;
 	}
-	fullname = relname(directory, name);
 	/*
 	** Remove old file, if any, to snap links.
 	*/
-	if (itsdir(fullname) == 0 && remove(fullname) != 0 && errno != ENOENT) {
+	if (remove(name) == 0)
+		dir_checked = true;
+	else if (errno != ENOENT) {
 		const char *e = strerror(errno);
 
-		fprintf(stderr, _("%s: Can't remove %s: %s\n"),
-			progname, fullname, e);
+		fprintf(stderr, _("%s: Can't remove %s/%s: %s\n"),
+			progname, directory, name, e);
 		exit(EXIT_FAILURE);
 	}
-	if ((fp = fopen(fullname, "wb")) == NULL) {
-		if (! mkdirs(fullname))
-			exit(EXIT_FAILURE);
-		if ((fp = fopen(fullname, "wb")) == NULL) {
-			const char *e = strerror(errno);
-
-			fprintf(stderr, _("%s: Can't create %s: %s\n"),
-				progname, fullname, e);
-			exit(EXIT_FAILURE);
-		}
+	fp = fopen(name, "wb");
+	if (!fp) {
+	  int fopen_errno = errno;
+	  if (fopen_errno == ENOENT && !dir_checked) {
+	    mkdirs(name, true);
+	    fp = fopen(name, "wb");
+	    fopen_errno = errno;
+	  }
+	  if (!fp) {
+	    fprintf(stderr, _("%s: Can't create %s/%s: %s\n"),
+		    progname, directory, name, strerror(fopen_errno));
+	    exit(EXIT_FAILURE);
+	  }
 	}
 	for (pass = 1; pass <= 2; ++pass) {
 		register int	thistimei, thistimecnt;
@@ -1943,9 +1964,8 @@ writezone(const char *const name, const char *const string, char version)
 				putc(ttisgmts[i], fp);
 	}
 	fprintf(fp, "\n%s\n", string);
-	close_file(fp, fullname);
+	close_file(fp, directory, name);
 	free(ats);
-	free(fullname);
 }
 
 static char const *
@@ -2288,6 +2308,7 @@ outzone(const struct zone *zpfirst, int zonecount)
 	register int			compat;
 	register bool			do_extend;
 	register char			version;
+	int lastatmax = -1;
 
 	max_abbr_len = 2 + max_format_len + max_abbrvar_len;
 	max_envvar_len = 2 * max_abbr_len + 5 * 9;
@@ -2520,6 +2541,10 @@ outzone(const struct zone *zpfirst, int zonecount)
 				offset = oadd(zp->z_gmtoff, rp->r_stdoff);
 				type = addtype(offset, ab, rp->r_stdoff != 0,
 					rp->r_todisstd, rp->r_todisgmt);
+				if (rp->r_hiyear == ZIC_MAX
+				    && ! (0 <= lastatmax
+					  && ktime < attypes[lastatmax].at))
+				  lastatmax = timecnt;
 				addtt(ktime, type);
 			}
 		}
@@ -2551,6 +2576,8 @@ error(_("can't determine time zone abbreviation to use just after until time"));
 				starttime = tadd(starttime, -gmtoff);
 		}
 	}
+	if (0 <= lastatmax)
+	  attypes[lastatmax].dontmerge = true;
 	if (do_extend) {
 		/*
 		** If we're extending the explicitly listed observations
@@ -2572,21 +2599,8 @@ error(_("can't determine time zone abbreviation to use just after until time"));
 			if (attypes[i].at > lastat->at)
 				lastat = &attypes[i];
 		if (lastat->at < rpytime(&xr, max_year - 1)) {
-			/*
-			** Create new type code for the redundant entry,
-			** to prevent it being optimized away.
-			*/
-			if (typecnt >= TZ_MAX_TYPES) {
-				error(_("too many local time types"));
-				exit(EXIT_FAILURE);
-			}
-			gmtoffs[typecnt] = gmtoffs[lastat->type];
-			isdsts[typecnt] = isdsts[lastat->type];
-			ttisstds[typecnt] = ttisstds[lastat->type];
-			ttisgmts[typecnt] = ttisgmts[lastat->type];
-			abbrinds[typecnt] = abbrinds[lastat->type];
-			++typecnt;
 			addtt(rpytime(&xr, max_year + 1), typecnt-1);
+			attypes[timecnt - 1].dontmerge = true;
 		}
 	}
 	writezone(zpfirst->z_name, envvar, version);
@@ -2614,6 +2628,7 @@ addtt(zic_t starttime, int type)
 	}
 	attypes = growalloc(attypes, sizeof *attypes, timecnt, &timecnt_alloc);
 	attypes[timecnt].at = starttime;
+	attypes[timecnt].dontmerge = false;
 	attypes[timecnt].type = type;
 	++timecnt;
 }
@@ -3021,44 +3036,45 @@ mp = _("time zone abbreviation differs from POSIX standard");
 	charcnt += i;
 }
 
-static bool
-mkdirs(char *argname)
+/* Ensure that the directories of ARGNAME exist, by making any missing
+   ones.  If ANCESTORS, do this only for ARGNAME's ancestors; otherwise,
+   do it for ARGNAME too.  Exit with failure if there is trouble.  */
+static void
+mkdirs(char const *argname, bool ancestors)
 {
 	register char *	name;
 	register char *	cp;
 
-	if (argname == NULL || *argname == '\0')
-		return true;
 	cp = name = ecpyalloc(argname);
-	while ((cp = strchr(cp + 1, '/')) != 0) {
-		*cp = '\0';
+
+	/* Do not mkdir a root directory, as it must exist.  */
 #ifdef HAVE_DOS_FILE_NAMES
-		/*
-		** DOS drive specifier?
-		*/
-		if (is_alpha(name[0]) && name[1] == ':' && name[2] == '\0') {
-				*cp = '/';
-				continue;
-		}
+	if (is_alpha(name[0]) && name[1] == ':')
+	  cp += 2;
 #endif
+	while (*cp == '/')
+	  cp++;
+
+	while (cp && ((cp = strchr(cp, '/')) || !ancestors)) {
+		if (cp)
+		  *cp = '\0';
 		/*
 		** Try to create it.  It's OK if creation fails because
 		** the directory already exists, perhaps because some
-		** other process just created it.
+		** other process just created it.  For simplicity do
+		** not check first whether it already exists, as that
+		** is checked anyway if the mkdir fails.
 		*/
 		if (mkdir(name, MKDIR_UMASK) != 0) {
 			int err = errno;
-			if (itsdir(name) <= 0) {
-				char const *e = strerror(err);
-				warning(_("%s: Can't create directory"
-					  " %s: %s"),
-					progname, name, e);
-				free(name);
-				return false;
+			if (err != EEXIST && itsdir(name) < 0) {
+				error(_("%s: Can't create directory %s: %s"),
+				      progname, name, strerror(err));
+				exit(EXIT_FAILURE);
 			}
 		}
-		*cp = '/';
+		if (cp)
+		  *cp++ = '/';
 	}
 	free(name);
-	return true;
 }
