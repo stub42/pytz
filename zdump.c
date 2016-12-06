@@ -45,7 +45,7 @@
 # define HAVE_STDINT_H \
     (199901 <= __STDC_VERSION__ \
      || 2 < __GLIBC__ + (1 <= __GLIBC_MINOR__)	\
-     || __CYGWIN__)
+     || __CYGWIN__ || INTMAX_MAX)
 #endif
 #if HAVE_STDINT_H
 # include "stdint.h"
@@ -1139,7 +1139,7 @@ istrftime(char *buf, size_t size, char const *time_fmt,
 	}
 	break;
       }
-      if (! (0 <= formatted_len && formatted_len < s))
+      if (s <= formatted_len)
 	return false;
       b += formatted_len, s -= formatted_len;
       f = p + 1;
