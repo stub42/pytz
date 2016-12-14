@@ -9,8 +9,6 @@ before_install:
   - wget https://raw.githubusercontent.com/pypa/setuptools/bootstrap-py24/ez_setup.py -O - | sudo python2.4
   - wget https://raw.githubusercontent.com/pypa/setuptools/bootstrap-py24/ez_setup.py -O - | sudo python2.5
   - wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python2.6
-  - wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python3.1
-  - wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python3.2
   - wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python3.3
   - wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python3.4
   - sudo pip install wheel

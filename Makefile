@@ -44,8 +44,6 @@ eggs:
 	cd build/dist && ${PYTHON35} setup.py -q bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON34} setup.py -q bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON33} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON32} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON31} setup.py -q bdist_egg --dist-dir=../tarballs
 
 wheels:
 	cd build/dist && mkdir -p ../tarballs
