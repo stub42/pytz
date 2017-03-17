@@ -19,89 +19,7 @@
 # define USE_LTZ 1
 #endif
 
-#if USE_LTZ
-# include "private.h"
-#endif
-
-/* Enable tm_gmtoff and tm_zone on GNUish systems.  */
-#define _GNU_SOURCE 1
-/* Enable strtoimax on Solaris 10.  */
-#define __EXTENSIONS__ 1
-
-#include "stdio.h"	/* for stdout, stderr, perror */
-#include "string.h"	/* for strcpy */
-#include "sys/types.h"	/* for time_t */
-#include "time.h"	/* for struct tm */
-#include "stdlib.h"	/* for exit, malloc, atoi */
-#include "limits.h"	/* for CHAR_BIT, LLONG_MAX */
-#include <errno.h>
-
-/*
-** Substitutes for pre-C99 compilers.
-** Much of this section of code is stolen from private.h.
-*/
-
-#ifndef HAVE_STDINT_H
-# define HAVE_STDINT_H \
-    (199901 <= __STDC_VERSION__ \
-     || 2 < __GLIBC__ + (1 <= __GLIBC_MINOR__)	\
-     || __CYGWIN__ || INTMAX_MAX)
-#endif
-#if HAVE_STDINT_H
-# include "stdint.h"
-#endif
-#ifndef HAVE_INTTYPES_H
-# define HAVE_INTTYPES_H HAVE_STDINT_H
-#endif
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-
-#ifndef INT_FAST32_MAX
-# if INT_MAX >> 31 == 0
-typedef long int_fast32_t;
-# else
-typedef int int_fast32_t;
-# endif
-#endif
-
-/* Pre-C99 GCC compilers define __LONG_LONG_MAX__ instead of LLONG_MAX.  */
-#if !defined LLONG_MAX && defined __LONG_LONG_MAX__
-# define LLONG_MAX __LONG_LONG_MAX__
-#endif
-
-#ifndef INTMAX_MAX
-# ifdef LLONG_MAX
-typedef long long intmax_t;
-#  define strtoimax strtoll
-#  define INTMAX_MAX LLONG_MAX
-# else
-typedef long intmax_t;
-#  define strtoimax strtol
-#  define INTMAX_MAX LONG_MAX
-# endif
-#endif
-
-#ifndef PRIdMAX
-# if INTMAX_MAX == LLONG_MAX
-#  define PRIdMAX "lld"
-# else
-#  define PRIdMAX "ld"
-# endif
-#endif
-
-/* Infer TM_ZONE on systems where this information is known, but suppress
-   guessing if NO_TM_ZONE is defined.  Similarly for TM_GMTOFF.  */
-#if (defined __GLIBC__ \
-     || defined __FreeBSD__ || defined __NetBSD__ || defined __OpenBSD__ \
-     || (defined __APPLE__ && defined __MACH__))
-# if !defined TM_GMTOFF && !defined NO_TM_GMTOFF
-#  define TM_GMTOFF tm_gmtoff
-# endif
-# if !defined TM_ZONE && !defined NO_TM_ZONE
-#  define TM_ZONE tm_zone
-# endif
-#endif
+#include "private.h"
 
 #ifndef HAVE_LOCALTIME_R
 # define HAVE_LOCALTIME_R 1
@@ -131,82 +49,6 @@ typedef long intmax_t;
 #define MAX_STRING_LENGTH	1024
 #endif /* !defined MAX_STRING_LENGTH */
 
-#if __STDC_VERSION__ < 199901
-# define true 1
-# define false 0
-# define bool int
-#else
-# include <stdbool.h>
-#endif
-
-#ifndef TYPE_BIT
-#define TYPE_BIT(type)	(sizeof (type) * CHAR_BIT)
-#endif /* !defined TYPE_BIT */
-
-#ifndef TYPE_SIGNED
-#define TYPE_SIGNED(type) (((type) -1) < 0)
-#endif /* !defined TYPE_SIGNED */
-
-#ifndef INT_STRLEN_MAXIMUM
-/*
-** 302 / 1000 is log10(2.0) rounded up.
-** Subtract one for the sign bit if the type is signed;
-** add one for integer division truncation;
-** add one more for a minus sign if the type is signed.
-*/
-#define INT_STRLEN_MAXIMUM(type) \
-	((TYPE_BIT(type) - TYPE_SIGNED(type)) * 302 / 1000 + \
-	1 + TYPE_SIGNED(type))
-#endif /* !defined INT_STRLEN_MAXIMUM */
-
-#ifndef EXIT_SUCCESS
-#define EXIT_SUCCESS	0
-#endif /* !defined EXIT_SUCCESS */
-
-#ifndef EXIT_FAILURE
-#define EXIT_FAILURE	1
-#endif /* !defined EXIT_FAILURE */
-
-#ifndef SECSPERMIN
-#define SECSPERMIN	60
-#endif /* !defined SECSPERMIN */
-
-#ifndef MINSPERHOUR
-#define MINSPERHOUR	60
-#endif /* !defined MINSPERHOUR */
-
-#ifndef SECSPERHOUR
-#define SECSPERHOUR	(SECSPERMIN * MINSPERHOUR)
-#endif /* !defined SECSPERHOUR */
-
-#ifndef HOURSPERDAY
-#define HOURSPERDAY	24
-#endif /* !defined HOURSPERDAY */
-
-#ifndef EPOCH_YEAR
-#define EPOCH_YEAR	1970
-#endif /* !defined EPOCH_YEAR */
-
-#ifndef TM_YEAR_BASE
-#define TM_YEAR_BASE	1900
-#endif /* !defined TM_YEAR_BASE */
-
-#ifndef DAYSPERNYEAR
-#define DAYSPERNYEAR	365
-#endif /* !defined DAYSPERNYEAR */
-
-#ifndef isleap
-#define isleap(y) (((y) % 4) == 0 && (((y) % 100) != 0 || ((y) % 400) == 0))
-#endif /* !defined isleap */
-
-#ifndef isleap_sum
-/*
-** See tzfile.h for details on isleap_sum.
-*/
-#define isleap_sum(a, b)	isleap((a) % 400 + (b) % 400)
-#endif /* !defined isleap_sum */
-
-#define SECSPERDAY	((int_fast32_t) SECSPERHOUR * HOURSPERDAY)
 #define SECSPERNYEAR	(SECSPERDAY * DAYSPERNYEAR)
 #define SECSPERLYEAR	(SECSPERNYEAR + SECSPERDAY)
 #define SECSPER400YEARS	(SECSPERNYEAR * (intmax_t) (300 + 3)	\
@@ -221,37 +63,9 @@ typedef long intmax_t;
 */
 enum { SECSPER400YEARS_FITS = SECSPERLYEAR <= INTMAX_MAX / 400 };
 
-#ifndef HAVE_GETTEXT
-#define HAVE_GETTEXT 0
-#endif
 #if HAVE_GETTEXT
-#include "locale.h"	/* for setlocale */
-#include "libintl.h"
+#include <locale.h>	/* for setlocale */
 #endif /* HAVE_GETTEXT */
-
-#if 2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)
-# define ATTRIBUTE_PURE __attribute__ ((__pure__))
-#else
-# define ATTRIBUTE_PURE /* empty */
-#endif
-
-/*
-** For the benefit of GNU folk...
-** '_(MSGID)' uses the current locale's message library string for MSGID.
-** The default is to use gettext if available, and use MSGID otherwise.
-*/
-
-#ifndef _
-#if HAVE_GETTEXT
-#define _(msgid) gettext(msgid)
-#else /* !HAVE_GETTEXT */
-#define _(msgid) msgid
-#endif /* !HAVE_GETTEXT */
-#endif /* !defined _ */
-
-#if !defined TZ_DOMAIN && defined HAVE_GETTEXT
-# define TZ_DOMAIN "tz"
-#endif
 
 #if ! HAVE_LOCALTIME_RZ
 # undef  timezone_t
@@ -912,7 +726,7 @@ adjusted_yday(struct tm const *a, struct tm const *b)
    the same instant, return A's UTC offset in seconds, where positive
    offsets are east of Greenwich.  On failure, return LONG_MIN.
 
-   If T is nonnull, *T is the time stamp that corresponds to A; call
+   If T is nonnull, *T is the timestamp that corresponds to A; call
    my_gmtime_r and use its result instead of B.  Otherwise, B is the
    possibly nonnull result of an earlier call to my_gmtime_r.  */
 static long
@@ -993,9 +807,11 @@ format_local_time(char *buf, size_t size, struct tm const *tm)
 
 /* Store into BUF, of size SIZE, a formatted UTC offset for the
    localtime *TM corresponding to time T.  Use ISO 8601 format
-   +HH:MM:SS, or -HH:MM:SS for time stamps west of Greenwich.  Omit
-   :SS if :SS is zero, and omit :MM too if :MM is also zero.  If the
-   time stamp represents an unknown UTC offset, use the format -00.
+   +HHMMSS, or -HHMMSS for timestamps west of Greenwich; use the
+   format -00 for unknown UTC offsets.  If the hour needs more than
+   two digits to represent, extend the length of HH as needed.
+   Otherwise, omit SS if SS is zero, and omit MM too if MM is also
+   zero.
 
    Return the length of the resulting string, or -1 if the result is
    not representable as a string.  If the string does not fit, return
@@ -1020,10 +836,10 @@ format_utc_offset(char *buf, size_t size, struct tm const *tm, time_t t)
   ss = off % 60;
   mm = off / 60 % 60;
   hh = off / 60 / 60;
-  return (ss
-	  ? snprintf(buf, size, "%c%02ld:%02d:%02d", sign, hh, mm, ss)
+  return (ss || 100 <= hh
+	  ? snprintf(buf, size, "%c%02ld%02d%02d", sign, hh, mm, ss)
 	  : mm
-	  ? snprintf(buf, size, "%c%02ld:%02d", sign, hh, mm)
+	  ? snprintf(buf, size, "%c%02ld%02d", sign, hh, mm)
 	  : snprintf(buf, size, "%c%02ld", sign, hh));
 }
 
@@ -1058,7 +874,7 @@ format_quoted_string(char *buf, size_t size, char const *p)
   }
 }
 
-/* Store into BUF (of size SIZE) a time stamp formatted by TIME_FMT.
+/* Store into BUF (of size SIZE) a timestamp formatted by TIME_FMT.
    TM is the broken-down time, T the seconds count, AB the time zone
    abbreviation, and ZONE_NAME the zone name.  Return true if
    successful, false if the output would require more than SIZE bytes.
