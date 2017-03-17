@@ -180,7 +180,7 @@ parameter to the ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
 >>> ambiguous = datetime(2009, 10, 31, 23, 30)
 
 The ``is_dst`` parameter is ignored for most timestamps. It is only used
-during DST transition ambiguous periods to resulve that ambiguity.
+during DST transition ambiguous periods to resolve that ambiguity.
 
 >>> tz.utcoffset(normal, is_dst=True)
 datetime.timedelta(-1, 77400)
