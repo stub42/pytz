@@ -14,9 +14,9 @@
 #include "private.h"
 
 #include "tzfile.h"
-#include "fcntl.h"
+#include <fcntl.h>
 
-#if THREAD_SAFE
+#if defined THREAD_SAFE && THREAD_SAFE
 # include <pthread.h>
 static pthread_mutex_t locallock = PTHREAD_MUTEX_INITIALIZER;
 static int lock(void) { return pthread_mutex_lock(&locallock); }
@@ -568,12 +568,12 @@ tzloadbody(char const *name, struct state *sp, bool doextend,
 			    && ts->typecnt == 2) {
 
 			  /* Attempt to reuse existing abbreviations.
-			     Without this, America/Anchorage would stop
-			     working after 2037 when TZ_MAX_CHARS is 50, as
-			     sp->charcnt equals 42 (for LMT CAT CAWT CAPT AHST
+			     Without this, America/Anchorage would be right on
+			     the edge after 2037 when TZ_MAX_CHARS is 50, as
+			     sp->charcnt equals 40 (for LMT AST AWT APT AHST
 			     AHDT YST AKDT AKST) and ts->charcnt equals 10
 			     (for AKST AKDT).  Reusing means sp->charcnt can
-			     stay 42 in this example.  */
+			     stay 40 in this example.  */
 			  int gotabbr = 0;
 			  int charcnt = sp->charcnt;
 			  for (i = 0; i < 2; i++) {
@@ -597,6 +597,15 @@ tzloadbody(char const *name, struct state *sp, bool doextend,
 			  }
 			  if (gotabbr == 2) {
 			    sp->charcnt = charcnt;
+
+			    /* Ignore any trailing, no-op transitions generated
+			       by zic as they don't help here and can run afoul
+			       of bugs in zic 2016j or earlier.  */
+			    while (1 < sp->timecnt
+				   && (sp->types[sp->timecnt - 1]
+				       == sp->types[sp->timecnt - 2]))
+			      sp->timecnt--;
+
 			    for (i = 0; i < ts->timecnt; i++)
 			      if (sp->ats[sp->timecnt - 1] < ts->ats[i])
 				break;
@@ -1071,6 +1080,8 @@ tzparse(const char *name, struct state *sp, bool lastditch)
 			register int	yearlim;
 			register int	timecnt;
 			time_t		janfirst;
+			int_fast32_t janoffset = 0;
+			int yearbeg;
 
 			++name;
 			if ((name = getrule(name, &start)) == NULL)
@@ -1090,8 +1101,20 @@ tzparse(const char *name, struct state *sp, bool lastditch)
 			sp->defaulttype = 0;
 			timecnt = 0;
 			janfirst = 0;
-			yearlim = EPOCH_YEAR + YEARSPERREPEAT;
-			for (year = EPOCH_YEAR; year < yearlim; year++) {
+			yearbeg = EPOCH_YEAR;
+
+			do {
+			  int_fast32_t yearsecs
+			    = year_lengths[isleap(yearbeg - 1)] * SECSPERDAY;
+			  yearbeg--;
+			  if (increment_overflow_time(&janfirst, -yearsecs)) {
+			    janoffset = -yearsecs;
+			    break;
+			  }
+			} while (EPOCH_YEAR - YEARSPERREPEAT / 2 < yearbeg);
+
+			yearlim = yearbeg + YEARSPERREPEAT + 1;
+			for (year = yearbeg; year < yearlim; year++) {
 				int_fast32_t
 				  starttime = transtime(year, &start, stdoffset),
 				  endtime = transtime(year, &end, dstoffset);
@@ -1111,24 +1134,32 @@ tzparse(const char *name, struct state *sp, bool lastditch)
 					       + (stdoffset - dstoffset))))) {
 					if (TZ_MAX_TIMES - 2 < timecnt)
 						break;
-					yearlim = year + YEARSPERREPEAT + 1;
 					sp->ats[timecnt] = janfirst;
-					if (increment_overflow_time
-					    (&sp->ats[timecnt], starttime))
-						break;
-					sp->types[timecnt++] = reversed;
+					if (! increment_overflow_time
+					    (&sp->ats[timecnt],
+					     janoffset + starttime))
+					  sp->types[timecnt++] = reversed;
+					else if (janoffset)
+					  sp->defaulttype = reversed;
 					sp->ats[timecnt] = janfirst;
-					if (increment_overflow_time
-					    (&sp->ats[timecnt], endtime))
-						break;
-					sp->types[timecnt++] = !reversed;
+					if (! increment_overflow_time
+					    (&sp->ats[timecnt],
+					     janoffset + endtime)) {
+					  sp->types[timecnt++] = !reversed;
+					  yearlim = year + YEARSPERREPEAT + 1;
+					} else if (janoffset)
+					  sp->defaulttype = !reversed;
 				}
-				if (increment_overflow_time(&janfirst, yearsecs))
+				if (increment_overflow_time
+				    (&janfirst, janoffset + yearsecs))
 					break;
+				janoffset = 0;
 			}
 			sp->timecnt = timecnt;
-			if (!timecnt)
+			if (! timecnt)
 				sp->typecnt = 1;	/* Perpetual DST.  */
+			else if (YEARSPERREPEAT < year - yearbeg)
+				sp->goback = sp->goahead = true;
 		} else {
 			register int_fast32_t	theirstdoffset;
 			register int_fast32_t	theirdstoffset;

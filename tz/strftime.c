@@ -1,4 +1,4 @@
-/* Convert a broken-down time stamp to a string.  */
+/* Convert a broken-down timestamp to a string.  */
 
 /* Copyright 1989 The Regents of the University of California.
    All rights reserved.
@@ -35,9 +35,8 @@
 
 #include "private.h"
 
-#include "tzfile.h"
-#include "fcntl.h"
-#include "locale.h"
+#include <fcntl.h>
+#include <locale.h>
 
 struct lc_time_T {
 	const char *	mon[MONSPERYEAR];
@@ -500,6 +499,7 @@ label:
 				{
 				long		diff;
 				char const *	sign;
+				bool negative;
 
 # ifdef TM_GMTOFF
 				diff = t->TM_GMTOFF;
@@ -538,7 +538,17 @@ label:
 					continue;
 #  endif
 # endif
-				if (diff < 0) {
+				negative = diff < 0;
+				if (diff == 0) {
+#ifdef TM_ZONE
+				  negative = t->TM_ZONE[0] == '-';
+#else
+				  negative
+				    = (t->tm_isdst < 0
+				       || tzname[t->tm_isdst != 0][0] == '-');
+#endif
+				}
+				if (negative) {
 					sign = "-";
 					diff = -diff;
 				} else	sign = "+";
