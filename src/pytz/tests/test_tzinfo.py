@@ -501,7 +501,7 @@ class NoumeaHistoryStartTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(0),
         }
     after = {
-        'tzname': 'NCT',
+        'tzname': '+11',  # pre-2017a, NCT
         'utcoffset': timedelta(hours=11),
         'dst': timedelta(0),
         }
@@ -512,12 +512,12 @@ class NoumeaDSTEndTestCase(USEasternDSTStartTestCase):
     tzinfo = pytz.timezone('Pacific/Noumea')
     transition_time = datetime(1997, 3, 1, 15, 00, 00, tzinfo=UTC)
     before = {
-        'tzname': 'NCST',
+        'tzname': '+12',  # pre-2017a, NCST
         'utcoffset': timedelta(hours=12),
         'dst': timedelta(hours=1),
         }
     after = {
-        'tzname': 'NCT',
+        'tzname': '+11',  # pre-2017a, NCT
         'utcoffset': timedelta(hours=11),
         'dst': timedelta(0),
         }
@@ -541,7 +541,7 @@ class TahitiTestCase(USEasternDSTStartTestCase):
         'dst': timedelta(0),
         }
     after = {
-        'tzname': 'TAHT',
+        'tzname': '-10',  # pre-2017a, TAHT
         'utcoffset': timedelta(hours=-10),
         'dst': timedelta(0),
         }
@@ -554,12 +554,12 @@ class SamoaInternationalDateLineChange(USEasternDSTStartTestCase):
     tzinfo = pytz.timezone('Pacific/Apia')
     transition_time = datetime(2011, 12, 30, 10, 0, 0, tzinfo=UTC)
     before = {
-        'tzname': 'SDT',
+        'tzname': '-10',  # pre-2017a, SDT
         'utcoffset': timedelta(hours=-10),
         'dst': timedelta(hours=1),
         }
     after = {
-        'tzname': 'WSDT',
+        'tzname': '+14',  # pre-2017a, WSDT
         'utcoffset': timedelta(hours=14),
         'dst': timedelta(hours=1),
         }
@@ -611,7 +611,8 @@ class LocalTestCase(unittest.TestCase):
         self.assertEqual(loc_time.strftime('%Z%z'), 'NST+0120')
 
         loc_time = loc_tz.localize(datetime(1940, 5, 10, 0, 0, 0))
-        self.assertEqual(loc_time.strftime('%Z%z'), 'NET+0020')
+        # pre-2017a, abbreviation was NCT
+        self.assertEqual(loc_time.strftime('%Z%z'), '+0020+0020')
 
         loc_time = loc_tz.localize(datetime(1940, 5, 20, 0, 0, 0))
         self.assertEqual(loc_time.strftime('%Z%z'), 'CEST+0200')
