@@ -263,7 +263,7 @@ pytz custom syntax, the best you can do is make an educated guess:
 As you can see, the system has chosen one for you and there is a 50%
 chance of it being out by one hour. For some applications, this does
 not matter. However, if you are trying to schedule meetings with people
-in different timezones or analyze log files it is not acceptable. 
+in different timezones or analyze log files it is not acceptable.
 
 The best and simplest solution is to stick with using UTC.  The pytz
 package encourages using UTC for internal timezone representation by
@@ -516,7 +516,7 @@ Internationalization - i18n/l10n
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Pytz is an interface to the IANA database, which uses ASCII names. The `Unicode  Consortium's Unicode Locales (CLDR) <http://cldr.unicode.org>`_
-project provides translations. Thomas Khyn's 
+project provides translations. Thomas Khyn's
 `l18n <https://pypi.python.org/pypi/l18n>`_ package can be used to access
 these translations from Python.
 
@@ -555,7 +555,7 @@ hosted there.
 Bugs, Feature Requests & Patches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Bugs can be reported using `Launchpad <https://bugs.launchpad.net/pytz>`_.
+Bugs can be reported using `Launchpad <https://bugs.launchpad.net/pytz>`__.
 
 
 Issues & Limitations
