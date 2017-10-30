@@ -147,8 +147,16 @@ Any line that is blank (after comment stripping) is ignored.
 Non-blank lines are expected to be of one of three types:
 rule lines, zone lines, and link lines.
 .PP
-Names (such as month names) must be in English and are case insensitive.
-Abbreviations, if used, must be unambiguous in context.
+Names must be in English and are case insensitive.
+They appear in several contexts, and include month and weekday names
+and keywords such as
+.BR "maximum" ,
+.BR "only" ,
+.BR "Rolling" ,
+and
+.BR "Zone" .
+A name can be abbreviated by omitting all but an initial prefix; any
+abbreviation must be unambiguous in context.
 .PP
 A rule line has the form
 .nf
@@ -221,7 +229,13 @@ Sun<=25	last Sunday on or before the 25th
 .fi
 .in -.5i
 .sp
-Names of days of the week may be abbreviated or spelled out in full.
+A weekday name (e.g.,
+.BR "Sunday" )
+or a weekday name preceded by
+.q "last"
+(e.g.,
+.BR "lastSunday" )
+may be abbreviated or spelled out in full.
 Note that there must be no spaces within the
 .B ON
 field.
@@ -459,17 +473,6 @@ if a second was added
 or
 .q "\*-"
 if a second was skipped.
-.\" There's no need to document the following, since it's impossible for more
-.\" than one leap second to be inserted or deleted at a time.
-.\" The C Standard is in error in suggesting the possibility.
-.\" See Terry J Quinn, The BIPM and the accurate measure of time,
-.\" Proc IEEE 79, 7 (July 1991), 894-905.
-.\"	or
-.\"	.q ++
-.\"	if two seconds were added
-.\"	or
-.\"	.q --
-.\"	if two seconds were skipped.
 The
 .B R/S
 field

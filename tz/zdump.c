@@ -20,6 +20,11 @@
 #endif
 
 #include "private.h"
+#include <stdio.h>
+
+#ifndef HAVE_SNPRINTF
+# define HAVE_SNPRINTF (199901 <= __STDC_VERSION__)
+#endif
 
 #ifndef HAVE_LOCALTIME_R
 # define HAVE_LOCALTIME_R 1
@@ -72,14 +77,11 @@ enum { SECSPER400YEARS_FITS = SECSPERLYEAR <= INTMAX_MAX / 400 };
 # define timezone_t char **
 #endif
 
-extern char **	environ;
-
 #if !HAVE_POSIX_DECLS
 extern int	getopt(int argc, char * const argv[],
 			const char * options);
 extern char *	optarg;
 extern int	optind;
-extern char *	tzname[];
 #endif
 
 /* The minimum and maximum finite time values.  */
@@ -685,17 +687,15 @@ hunt(timezone_t tz, char *name, time_t lot, time_t hit)
 }
 
 /*
-** Thanks to Paul Eggert for logic used in delta.
+** Thanks to Paul Eggert for logic used in delta_nonneg.
 */
 
 static intmax_t
-delta(struct tm * newp, struct tm *oldp)
+delta_nonneg(struct tm *newp, struct tm *oldp)
 {
 	register intmax_t	result;
 	register int		tmy;
 
-	if (newp->tm_year < oldp->tm_year)
-		return -delta(oldp, newp);
 	result = 0;
 	for (tmy = oldp->tm_year; tmy < newp->tm_year; ++tmy)
 		result += DAYSPERNYEAR + isleap_sum(tmy, TM_YEAR_BASE);
@@ -707,6 +707,14 @@ delta(struct tm * newp, struct tm *oldp)
 	result *= SECSPERMIN;
 	result += newp->tm_sec - oldp->tm_sec;
 	return result;
+}
+
+static intmax_t
+delta(struct tm *newp, struct tm *oldp)
+{
+  return (newp->tm_year < oldp->tm_year
+	  ? -delta_nonneg(oldp, newp)
+	  : delta_nonneg(newp, oldp));
 }
 
 #ifndef TM_GMTOFF
@@ -786,6 +794,38 @@ show(timezone_t tz, char *zone, time_t t, bool v)
 	if (tmp != NULL && *abbr(tmp) != '\0')
 		abbrok(abbr(tmp), zone);
 }
+
+#if !HAVE_SNPRINTF
+# include <stdarg.h>
+
+/* A substitute for snprintf that is good enough for zdump.  */
+static int
+snprintf(char *s, size_t size, char const *format, ...)
+{
+  int n;
+  va_list args;
+  char const *arg;
+  size_t arglen, slen;
+  char buf[1024];
+  va_start(args, format);
+  if (strcmp(format, "%s") == 0) {
+    arg = va_arg(args, char const *);
+    arglen = strlen(arg);
+  } else {
+    n = vsprintf(buf, format, args);
+    if (n < 0)
+      return n;
+    arg = buf;
+    arglen = n;
+  }
+  slen = arglen < size ? arglen : size - 1;
+  memcpy(s, arg, slen);
+  s[slen] = '\0';
+  n = arglen <= INT_MAX ? arglen : -1;
+  va_end(args);
+  return n;
+}
+#endif
 
 /* Store into BUF, of size SIZE, a formatted local time taken from *TM.
    Use ISO 8601 format +HH:MM:SS.  Omit :SS if SS is zero, and omit
@@ -993,9 +1033,11 @@ abbr(struct tm const *tmp)
 #ifdef TM_ZONE
 	return tmp->TM_ZONE;
 #else
-	return (0 <= tmp->tm_isdst && tzname[0 < tmp->tm_isdst]
-		? tzname[0 < tmp->tm_isdst]
-		: "");
+# if HAVE_TZNAME
+	if (0 <= tmp->tm_isdst && tzname[0 < tmp->tm_isdst])
+	  return tzname[0 < tmp->tm_isdst];
+# endif
+	return "";
 #endif
 }
 
@@ -1030,10 +1072,10 @@ tformat(void)
 static void
 dumptime(register const struct tm *timeptr)
 {
-	static const char	wday_name[][3] = {
+	static const char	wday_name[][4] = {
 		"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 	};
-	static const char	mon_name[][3] = {
+	static const char	mon_name[][4] = {
 		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
@@ -1059,7 +1101,7 @@ dumptime(register const struct tm *timeptr)
 		(int) (sizeof mon_name / sizeof mon_name[0]))
 			mn = "???";
 	else		mn = mon_name[timeptr->tm_mon];
-	printf("%.3s %.3s%3d %.2d:%.2d:%.2d ",
+	printf("%s %s%3d %.2d:%.2d:%.2d ",
 		wn, mn,
 		timeptr->tm_mday, timeptr->tm_hour,
 		timeptr->tm_min, timeptr->tm_sec);
