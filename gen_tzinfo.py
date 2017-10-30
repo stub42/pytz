@@ -21,10 +21,10 @@ def allzones():
     ''' Return all available tzfile(5) files in the zoneinfo database '''
     zones = []
     for dirpath, dirnames, filenames in os.walk(zoneinfo):
-        zones.extend([
-                os.path.join(dirpath,f) for f in filenames
-                if not f.endswith('.tab')
-                ])
+        for f in filenames:
+            p = os.path.join(dirpath, f)
+            if open(p, 'rb').read(4) == 'TZif':
+                zones.append(p)
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]
 
