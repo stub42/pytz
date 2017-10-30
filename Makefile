@@ -53,7 +53,7 @@ wheels:
 
 upload: sign
 	cd build/dist && ${PYTHON3} setup.py register
-	twine upload build/tarballs/*.{egg,whl,zip,bz2,gz,asc}
+	twine upload build/tarballs/*.{egg,whl,gz,asc}
 
 sign: dist
 	rm -f build/tarballs/*.asc
