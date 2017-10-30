@@ -79,24 +79,31 @@ def open_resource(name):
 
     Uses the pkg_resources module if available and no standard file
     found at the calculated location.
+
+    It is possible to specify different location for zoneinfo
+    subdir by using the PYTZ_TZDATADIR environment variable.
     """
     name_parts = name.lstrip('/').split('/')
     for part in name_parts:
         if part == os.path.pardir or os.path.sep in part:
             raise ValueError('Bad path segment: %r' % part)
-    filename = os.path.join(os.path.dirname(__file__),
-                            'zoneinfo', *name_parts)
-    if not os.path.exists(filename):
-        # http://bugs.launchpad.net/bugs/383171 - we avoid using this
-        # unless absolutely necessary to help when a broken version of
-        # pkg_resources is installed.
-        try:
-            from pkg_resources import resource_stream
-        except ImportError:
-            resource_stream = None
+    zoneinfo_dir = os.environ.get('PYTZ_TZDATADIR', None)
+    if zoneinfo_dir != None:
+        filename = os.path.join(zoneinfo_dir, *name_parts)
+    else:
+        filename = os.path.join(os.path.dirname(__file__),
+                                'zoneinfo', *name_parts)
+        if not os.path.exists(filename):
+            # http://bugs.launchpad.net/bugs/383171 - we avoid using this
+            # unless absolutely necessary to help when a broken version of
+            # pkg_resources is installed.
+            try:
+                from pkg_resources import resource_stream
+            except ImportError:
+                resource_stream = None
 
-        if resource_stream is not None:
-            return resource_stream(__name__, 'zoneinfo/' + name)
+            if resource_stream is not None:
+                return resource_stream(__name__, 'zoneinfo/' + name)
     return open(filename, 'rb')
 
 
