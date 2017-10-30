@@ -3,9 +3,9 @@ sudo: required
 dist: trusty
 before_install:
   - sudo locale-gen
-  - sudo add-apt-repository -y ppa:fkrull/deadsnakes
+  - sudo add-apt-repository -y ppa:deadsnakes/ppa
   - sudo apt-get update -y -qq
-  - sudo apt-get install -y -qq python-all python-all-dev python3-all python3-all-dev build-essential python-setuptools python3-setuptools python-wheel python3-wheel python3-docutils python3-sphinx python3-flake8 python-flake8 python2.4-complete python2.5-complete python2.6-complete python3.1-complete python3.2-complete python3.3-complete python3.5-complete python2.4-gdbm python2.4-gdbm-dbg wget python-pip python3-pip
+  - sudo apt-get install -y python-all python-all-dev python3-all python3-all-dev build-essential python-setuptools python3-setuptools python-wheel python3-wheel python3-docutils python3-sphinx python3-flake8 python-flake8 python2.4-complete python2.5-complete python2.6-complete python3.1-complete python3.2-complete python3.3-complete python3.5-complete python2.4-gdbm python2.4-gdbm-dbg python3.6 wget python-pip python3-pip
   - wget https://raw.githubusercontent.com/pypa/setuptools/bootstrap-py24/ez_setup.py -O - | sudo python2.4
   - wget https://raw.githubusercontent.com/pypa/setuptools/bootstrap-py24/ez_setup.py -O - | sudo python2.5
   - wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python2.6
