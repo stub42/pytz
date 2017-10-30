@@ -12,6 +12,7 @@ PYTHON32=python3.2
 PYTHON33=python3.3
 PYTHON34=python3.4
 PYTHON35=python3.5
+PYTHON36=python3.6
 PYTHON=/usr/bin/python
 PYTHON3=/usr/bin/python3
 IANA=./tz
@@ -78,7 +79,8 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON32} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON33} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON34} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON35} test_lazy.py ${TESTARGS}
+	    && ${PYTHON35} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON36} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -90,7 +92,8 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON32} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON33} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON34} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON35} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON35} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON36} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
