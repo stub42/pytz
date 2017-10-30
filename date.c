@@ -29,6 +29,7 @@
 
 #include "private.h"
 #include <locale.h>
+#include <stdio.h>
 
 /*
 ** The two things date knows about time are. . .
@@ -42,12 +43,9 @@
 #define SECSPERMIN	60
 #endif /* !defined SECSPERMIN */
 
-extern char **		environ;
-
 #if !HAVE_POSIX_DECLS
 extern char *		optarg;
 extern int		optind;
-extern char *		tzname[];
 #endif
 
 static int		retval = EXIT_SUCCESS;
@@ -56,7 +54,7 @@ static void		display(const char *, time_t);
 static void		dogmt(void);
 static void		errensure(void);
 static void		timeout(FILE *, const char *, const struct tm *);
-static void		usage(void);
+static _Noreturn void	usage(void);
 
 int
 main(const int argc, char *argv[])
@@ -99,7 +97,7 @@ main(const int argc, char *argv[])
 			secs = strtoimax (optarg, &endarg, 0);
 			if (*endarg || optarg == endarg)
 				errno = EINVAL;
-			else if (! (time_t_min <= secs && secs <= time_t_max))
+			else if (! (TIME_T_MIN <= secs && secs <= TIME_T_MAX))
 				errno = ERANGE;
 			if (errno) {
 				perror(optarg);
