@@ -52,8 +52,11 @@ except NameError: # Python 3.x
             ...
         UnicodeEncodeError: ...
         """
-        s.encode('ASCII') # Raise an exception if not ASCII
-        return s # But return the original string - not a byte string.
+        if type(s) == bytes:
+            s = s.decode('ASCII')
+        else:
+            s.encode('ASCII') # Raise an exception if not ASCII
+        return s # But the string - not a byte string.
 
 else: # Python 2.x
 
