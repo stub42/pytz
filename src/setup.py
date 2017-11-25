@@ -38,7 +38,7 @@ setup (
     packages=packages,
     package_data=package_data,
     download_url='http://pypi.python.org/pypi/pytz',
-    platforms=['Independant'],
+    platforms=['Independent'],
     classifiers = [
         'Development Status :: 6 - Mature',
         'Intended Audience :: Developers',
