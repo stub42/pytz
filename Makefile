@@ -31,12 +31,12 @@ check: test_tzinfo test_docs
 build: .stamp-tzinfo
 
 
-dist: build eggs wheels
+dist: eggs wheels
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py -q sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip
 
-eggs:
+eggs: build
 	cd build/dist && mkdir -p ../tarballs
 	cd build/dist && ${PYTHON24} setup.py -q bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON25} setup.py -q bdist_egg --dist-dir=../tarballs
@@ -46,7 +46,7 @@ eggs:
 	cd build/dist && ${PYTHON34} setup.py -q bdist_egg --dist-dir=../tarballs
 	cd build/dist && ${PYTHON33} setup.py -q bdist_egg --dist-dir=../tarballs
 
-wheels:
+wheels: build
 	cd build/dist && mkdir -p ../tarballs
 	cd build/dist && ${PYTHON} setup.py -q bdist_wheel --universal --dist-dir=../tarballs
 	cd build/dist && ${PYTHON3} setup.py -q bdist_wheel --universal --dist-dir=../tarballs
@@ -155,7 +155,7 @@ build/dist/locales/pytz.pot: .stamp-tzinfo
 # Switch to using a git subtree of https://github.com/eggert/tz
 #
 # IANA_URL=http://www.iana.org/time-zones/repository
-# 
+#
 # sync:
 # 	cd elsie.nci.nih.gov && \
 # 	    rm -f tz{code,data}-latest.tar.gz{,.asc} && \
