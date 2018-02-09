@@ -12,9 +12,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
 """ % (
-        __version__,
-        time.strftime('%Y-%m-%d %H:%M+UTC', time.gmtime(time.time()))
-        )
+    __version__,
+    time.strftime('%Y-%m-%d %H:%M+UTC', time.gmtime(time.time()))
+)
+
 
 def main():
     assert len(sys.argv) == 2, 'Output file not specified on command line'
@@ -26,7 +27,7 @@ def main():
     pot = open(pot_file_name, 'wb')
 
     print >> pot, boilerplate
-    
+
     for zone in allzones():
         print >> pot, 'msgid "%s"' % zone
         print >> pot, 'msgstr ""'

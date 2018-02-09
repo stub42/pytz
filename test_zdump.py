@@ -1,6 +1,7 @@
 #!/usr/bin/python2.7
 
-import os.path, sys
+import os.path
+import sys
 sys.path.insert(0, os.path.join('build', 'dist'))
 
 from datetime import datetime, timedelta
@@ -43,7 +44,7 @@ def test_suite():
 
         if zone != last_zone:
             classname = zone.replace(
-                    '+', '_plus_').replace('-', '_minus_').replace('/','_')
+                '+', '_plus_').replace('-', '_minus_').replace('/', '_')
             test_class = type(classname, (ZdumpTestCase,), {})
             testcases.append(test_class)
             last_zone = zone
@@ -58,8 +59,8 @@ def test_suite():
             # Urgh - utcoffset() and dst() have to be rounded to the nearest
             # minute, so we need to break our tests to match this limitation
             real_offset = loc_dt - utc_dt
-            secs = real_offset.seconds + real_offset.days*86400
-            fake_offset = timedelta(seconds=int((secs+30)//60)*60)
+            secs = real_offset.seconds + real_offset.days * 86400
+            fake_offset = timedelta(seconds=int((secs + 30) // 60) * 60)
             return utc_dt + fake_offset
 
         loc_dt = round_dt(loc_dt, utc_dt)
@@ -73,7 +74,7 @@ def test_suite():
         skip_local = skip_next_local
         skip_next_local = False
         try:
-            m = zdump_line_re.match(raw_data[i+1])
+            m = zdump_line_re.match(raw_data[i + 1])
         except IndexError:
             m = None
         if m is not None:
@@ -99,9 +100,10 @@ def test_suite():
         test_name = 'test_utc_to_local_%04d_%02d_%02d_%02d_%02d_%02d' % (
             utc_dt.year, utc_dt.month, utc_dt.day,
             utc_dt.hour, utc_dt.minute, utc_dt.second)
+
         def test_utc_to_local(
-            self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt, tzname=tzname,
-            is_dst=is_dst):
+                self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt,
+                tzname=tzname, is_dst=is_dst):
             self.utc_to_local_check(zone, utc_dt, loc_dt, tzname, is_dst)
         test_utc_to_local.__name__ = test_name
         setattr(test_class, test_name, test_utc_to_local)
@@ -114,15 +116,16 @@ def test_suite():
                 test_name += '_dst'
             else:
                 test_name += '_nodst'
+
             def test_local_to_utc(
-                self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt, tzname=tzname,
-                is_dst=is_dst):
+                    self, zone=zone, utc_dt=utc_dt, loc_dt=loc_dt,
+                    tzname=tzname, is_dst=is_dst):
                 self.local_to_utc_check(zone, utc_dt, loc_dt, tzname, is_dst)
             test_local_to_utc.__name__ = test_name
             setattr(test_class, test_name, test_local_to_utc)
 
     classname = zone.replace(
-            '+', '_plus_').replace('-', '_minus_').replace('/','_')
+        '+', '_plus_').replace('-', '_minus_').replace('/', '_')
     test_class = type(classname, (ZdumpTestCase,), {})
     testcases.append(test_class)
 

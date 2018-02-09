@@ -2,20 +2,19 @@
 '''
 $Id: gen_tzinfo.py,v 1.21 2005/02/15 20:21:38 zenzen Exp $
 '''
-import sys, os, os.path, shutil
+import sys
+import os
+import os.path
+import shutil
 
 from glob import glob
-from datetime import datetime,timedelta,tzinfo
 from pprint import pprint
-from bisect import bisect_right
 import re
 
-sys.path.insert(0, 'src')
-import pytz
-
 zoneinfo = os.path.abspath(os.path.join(
-        os.path.dirname(__file__), 'build','etc','zoneinfo'
-        ))
+    os.path.dirname(__file__), 'build', 'etc', 'zoneinfo'
+))
+
 
 def allzones():
     ''' Return all available tzfile(5) files in the zoneinfo database '''
@@ -43,6 +42,7 @@ def allzones():
     zones.sort()
     return zones
 
+
 def links():
     '''Mapping of alias -> canonical name'''
     l = {}
@@ -65,18 +65,19 @@ def links():
     assert 'US/Pacific-New' in l, 'US/Pacific-New should be in links()'
     return l
 
+
 def dupe_src(destdir):
     ''' Copy ./src to our dest directory '''
     if not os.path.isdir(destdir):
         os.makedirs(destdir)
-    for f in glob(os.path.join('src','*')):
+    for f in glob(os.path.join('src', '*')):
         if not os.path.isdir(f):
             shutil.copy(f, destdir)
 
     destdir = os.path.join(destdir, 'pytz')
     if not os.path.isdir(destdir):
         os.makedirs(destdir)
-    for f in glob(os.path.join('src','pytz', '*')):
+    for f in glob(os.path.join('src', 'pytz', '*')):
         if not os.path.isdir(f):
             shutil.copy(f, destdir)
 
@@ -86,6 +87,7 @@ def dupe_src(destdir):
     for f in glob(os.path.join('src', 'pytz', 'tests', '*')):
         if not os.path.isdir(f):
             shutil.copy(f, destdir)
+
 
 def add_allzones(filename):
     ''' Append a list of all know timezones to the end of the file '''
@@ -97,11 +99,12 @@ def add_allzones(filename):
     # timezones, strip out the legacy noise, and any name linked to
     # a more canonical name (eg. Asia/Singapore is preferred to just
     # Singapore)
-    cz = [z for z in allzones()
-        if z not in obsolete_zones
-            and '/' in z
-            and not z.startswith('SystemV/')
-            and not z.startswith('Etc/')]
+    cz = [
+        z for z in allzones()
+        if (z not in obsolete_zones and
+            '/' in z and
+            not z.startswith('SystemV/') and
+            not z.startswith('Etc/'))]
     # And extend our list manually with stuff we think deserves to be
     # labelled 'common'.
     cz.extend([
@@ -150,4 +153,3 @@ if __name__ == '__main__':
     except IndexError:
         target = None
     main('build')
-
