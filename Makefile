@@ -63,6 +63,9 @@ sign: dist
 
 test: test_lazy test_tzinfo test_docs test_zdump
 
+lint: .stamp-tzinfo
+	flake8 --ignore=E402 build/dist gen_*.py test_zdump.py
+
 clean:
 	rm -f .stamp-*
 	rm -rf build/*/* zdump.out
@@ -135,7 +138,7 @@ upload_docs_pythonhosted: docs
 	touch $@
 
 .stamp-zoneinfo:
-	${MAKE} -C ${IANA} TOPDIR=`pwd`/build install
+	${MAKE} -C ${IANA} TOPDIR=`pwd`/build USRDIR= USRSHAREDIR=etc install
 	# Break hard links, working around http://bugs.python.org/issue8876.
 	for d in zoneinfo zoneinfo-leaps zoneinfo-posix; do \
 	    rm -rf `pwd`/build/etc/$$d.tmp; \
