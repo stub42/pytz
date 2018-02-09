@@ -40,8 +40,8 @@ setup(
     packages=packages,
     package_data=package_data,
     download_url='http://pypi.python.org/pypi/pytz',
-    platforms=['Independant'],
-    classifiers=[
+    platforms=['Independent'],
+    classifiers = [
         'Development Status :: 6 - Mature',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
