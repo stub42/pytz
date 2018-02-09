@@ -9,8 +9,8 @@ on how to use these modules.
 '''
 
 # The IANA (nee Olson) database is updated several times a year.
-OLSON_VERSION = '2017c'
-VERSION = '2017.3'  # Switching to pip compatible version numbering.
+OLSON_VERSION = '2018c'
+VERSION = '2018.3'  # Switching to pip compatible version numbering.
 __version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION # Old releases had this misspelling
