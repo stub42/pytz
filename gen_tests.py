@@ -12,7 +12,7 @@ from gen_tzinfo import allzones
 import gen_tzinfo
 
 zdump = os.path.abspath(os.path.join(
-    os.path.dirname(__file__), 'build', 'etc', 'zdump'
+    os.path.dirname(__file__), 'build', 'bin', 'zdump'
 ))
 
 

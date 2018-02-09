@@ -474,9 +474,9 @@ True
 True
 >>> 'Canada/Eastern' in common_timezones
 True
->>> 'US/Pacific-New' in all_timezones
+>>> 'Australia/Yancowinna' in all_timezones
 True
->>> 'US/Pacific-New' in common_timezones
+>>> 'Australia/Yancowinna' in common_timezones
 False
 
 Both ``common_timezones`` and ``all_timezones`` are alphabetically
