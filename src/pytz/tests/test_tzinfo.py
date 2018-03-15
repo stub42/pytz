@@ -57,9 +57,7 @@ def prettydt(dt):
         dt.tzname(), offset)
 
 
-try:
-    unicode
-except NameError:
+if sys.version_info[0] > 2:
     # Python 3.x doesn't have unicode(), making writing code
     # for Python 2.3 and Python 3.x a pain.
     unicode = str
