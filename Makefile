@@ -13,6 +13,7 @@ PYTHON33=python3.3
 PYTHON34=python3.4
 PYTHON35=python3.5
 PYTHON36=python3.6
+PYTHON37=python3.7
 PYTHON=/usr/bin/python
 PYTHON3=/usr/bin/python3
 IANA=./tz
@@ -31,20 +32,10 @@ check: test_tzinfo test_docs
 build: .stamp-tzinfo
 
 
-dist: build eggs wheels
+dist: build wheels
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py -q sdist --dist-dir ../tarballs \
 	    --formats=bztar,gztar,zip
-
-eggs:
-	cd build/dist && mkdir -p ../tarballs
-	cd build/dist && ${PYTHON24} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON25} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON26} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON27} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON35} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON34} setup.py -q bdist_egg --dist-dir=../tarballs
-	cd build/dist && ${PYTHON33} setup.py -q bdist_egg --dist-dir=../tarballs
 
 wheels:
 	cd build/dist && mkdir -p ../tarballs
@@ -53,11 +44,11 @@ wheels:
 
 upload: sign
 	cd build/dist && ${PYTHON3} setup.py register
-	twine upload build/tarballs/*.{egg,whl,gz,asc}
+	twine upload build/tarballs/*.{whl,gz,asc}
 
 sign: dist
 	rm -f build/tarballs/*.asc
-	for f in build/tarballs/*.{egg,whl,zip,bz2,gz} ; do \
+	for f in build/tarballs/*.{whl,zip,bz2,gz} ; do \
 	    gpg2 --detach-sign -a $$f; \
 	done
 
@@ -83,7 +74,8 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON33} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON34} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON35} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON36} test_lazy.py ${TESTARGS}
+	    && ${PYTHON36} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON37} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -96,12 +88,13 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON33} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON34} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON35} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON36} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON36} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON37} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON27} test_docs.py ${TESTARGS} \
-	    && ${PYTHON34} test_docs.py ${TESTARGS}
+	    && ${PYTHON} test_docs.py ${TESTARGS} \
+	    && ${PYTHON3} test_docs.py ${TESTARGS}
 
 test_zdump: dist
 	${PYTHON} gen_tests.py ${TARGET} && \
@@ -183,4 +176,4 @@ _sync:
 	    echo "Usage: make sync TAG=2016f"; \
 	fi
 
-.PHONY: all check dist test test_tzinfo test_docs test_zdump eggs wheels build clean sync _sync
+.PHONY: all check dist test test_tzinfo test_docs test_zdump wheels build clean sync _sync
