@@ -17,7 +17,7 @@ from pytz.exceptions import InvalidTimeError
 from pytz.exceptions import NonExistentTimeError
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.lazy import LazyDict, LazyList, LazySet
-from pytz.tzinfo import unpickler
+from pytz.tzinfo import unpickler, BaseTzInfo
 from pytz.tzfile import build_tzinfo
 
 
@@ -188,7 +188,7 @@ ZERO = datetime.timedelta(0)
 HOUR = datetime.timedelta(hours=1)
 
 
-class UTC(datetime.tzinfo):
+class UTC(BaseTzInfo):
     """UTC
 
     Optimized UTC implementation. It unpickles using the single module global
