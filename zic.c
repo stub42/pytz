@@ -41,6 +41,10 @@ typedef int_fast64_t	zic_t;
 #else
 #define MKDIR_UMASK 0755
 #endif
+/* Port to native MS-Windows and to ancient UNIX.  */
+#if !defined S_ISDIR && defined S_IFDIR && defined S_IFMT
+# define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
+#endif
 
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>	/* for WIFEXITED and WEXITSTATUS */
@@ -893,9 +897,11 @@ dolink(char const *fromfield, char const *tofield, bool staysymlink)
 	  char *linkalloc = absolute ? NULL : relname(fromfield, tofield);
 	  char const *contents = absolute ? fromfield : linkalloc;
 	  int symlink_errno = symlink(contents, tofield) == 0 ? 0 : errno;
-	  if (symlink_errno == ENOENT && !todirs_made) {
+	  if (!todirs_made
+	      && (symlink_errno == ENOENT || symlink_errno == ENOTSUP)) {
 	    mkdirs(tofield, true);
-	    symlink_errno = symlink(contents, tofield) == 0 ? 0 : errno;
+	    if (symlink_errno == ENOENT)
+	      symlink_errno = symlink(contents, tofield) == 0 ? 0 : errno;
 	  }
 	  free(linkalloc);
 	  if (symlink_errno == 0) {
@@ -1190,8 +1196,10 @@ static zic_t
 gethms(char const *string, char const *errstring, bool signable)
 {
 	zic_t	hh;
-	int	mm, ss, sign;
-	char xs;
+	int sign, mm = 0, ss = 0;
+	char hhx, mmx, ssx, xr = '0', xs;
+	int tenths = 0;
+	bool ok = true;
 
 	if (string == NULL || *string == '\0')
 		return 0;
@@ -1201,12 +1209,24 @@ gethms(char const *string, char const *errstring, bool signable)
 		sign = -1;
 		++string;
 	} else	sign = 1;
-	if (sscanf(string, "%"SCNdZIC"%c", &hh, &xs) == 1)
-		mm = ss = 0;
-	else if (sscanf(string, "%"SCNdZIC":%d%c", &hh, &mm, &xs) == 2)
-		ss = 0;
-	else if (sscanf(string, "%"SCNdZIC":%d:%d%c", &hh, &mm, &ss, &xs)
-		 != 3) {
+	switch (sscanf(string,
+		       "%"SCNdZIC"%c%d%c%d%c%1d%*[0]%c%*[0123456789]%c",
+		       &hh, &hhx, &mm, &mmx, &ss, &ssx, &tenths, &xr, &xs)) {
+	  default: ok = false; break;
+	  case 8:
+	    ok = '0' <= xr && xr <= '9';
+	    /* fallthrough */
+	  case 7:
+	    ok &= ssx == '.';
+	    if (ok && noise)
+	      warning(_("fractional seconds rejected by"
+			" pre-2018 versions of zic"));
+	    /* fallthrough */
+	  case 5: ok &= mmx == ':'; /* fallthrough */
+	  case 3: ok &= hhx == ':'; /* fallthrough */
+	  case 1: break;
+	}
+	if (!ok) {
 			error("%s", errstring);
 			return 0;
 	}
@@ -1220,6 +1240,7 @@ gethms(char const *string, char const *errstring, bool signable)
 		error(_("time overflow"));
 		return 0;
 	}
+	ss += 5 + ((ss ^ 1) & (xr == '0')) <= tenths; /* Round to even.  */
 	if (noise && (hh > HOURSPERDAY ||
 		(hh == HOURSPERDAY && (mm != 0 || ss != 0))))
 warning(_("values over 24 hours not handled by pre-2007 versions of zic"));
