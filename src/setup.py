@@ -39,7 +39,7 @@ setup(
     keywords=['timezone', 'tzinfo', 'datetime', 'olson', 'time'],
     packages=packages,
     package_data=package_data,
-    download_url='http://pypi.python.org/pypi/pytz',
+    download_url='https://pypi.org/project/pytz/',
     platforms=['Independent'],
     classifiers = [
         'Development Status :: 6 - Mature',
