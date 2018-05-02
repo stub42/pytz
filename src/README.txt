@@ -517,7 +517,7 @@ Internationalization - i18n/l10n
 
 Pytz is an interface to the IANA database, which uses ASCII names. The `Unicode  Consortium's Unicode Locales (CLDR) <http://cldr.unicode.org>`_
 project provides translations. Thomas Khyn's
-`l18n <https://pypi.python.org/pypi/l18n>`_ package can be used to access
+`l18n <https://pypi.org/project/l18n/>`_ package can be used to access
 these translations from Python.
 
 
@@ -538,7 +538,7 @@ Latest Versions
 
 This package will be updated after releases of the Olson timezone
 database.  The latest version can be downloaded from the `Python Package
-Index <http://pypi.python.org/pypi/pytz/>`_.  The code that is used
+Index <https://pypi.org/project/pytz/>`_.  The code that is used
 to generate this distribution is hosted on launchpad.net and available
 using git::
 
