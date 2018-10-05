@@ -22,8 +22,8 @@ from pytz.tzfile import build_tzinfo
 
 
 # The IANA (nee Olson) database is updated several times a year.
-OLSON_VERSION = '2018e'
-VERSION = '2018.5'  # pip compatible version number.
+OLSON_VERSION = '2018f'
+VERSION = '2018.10'  # pip compatible version number.
 __version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION  # Old releases had this misspelling
@@ -34,6 +34,7 @@ __all__ = [
     'NonExistentTimeError', 'UnknownTimeZoneError',
     'all_timezones', 'all_timezones_set',
     'common_timezones', 'common_timezones_set',
+    'BaseTzInfo',
 ]
 
 
