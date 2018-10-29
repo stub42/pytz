@@ -27,8 +27,8 @@ from pytz.tzinfo import DstTzInfo, StaticTzInfo
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
-EXPECTED_VERSION = '2018.6'
-EXPECTED_OLSON_VERSION = '2018f'
+EXPECTED_VERSION = '2018.7'
+EXPECTED_OLSON_VERSION = '2018g'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
