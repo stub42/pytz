@@ -31,11 +31,11 @@ def main():
         zd_out = subprocess.check_output(command)
         # Skip bogus output on 64bit architectures, per Bug #213816
         lines = [
-            line.strip() for line in zd_out.splitlines()
+            line.decode('utf-8').strip() for line in zd_out.splitlines()
             if not line.decode('utf-8').strip().endswith('NULL')]
 
         for line in lines:
-            print >> datf, line
+            print(line, file=datf)
     datf.flush()
     datf.close()
 
