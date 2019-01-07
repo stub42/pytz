@@ -765,7 +765,7 @@ class ZoneCaseInsensitivityTestCase(unittest.TestCase):
             from_passed = pytz.timezone(tz)
             self.assertEqual(from_lower,
                              from_passed,
-                             "arg '{}' and arg '{}' produce different timezone objects".format(from_lower, from_passed))
+                             "arg '%s' and arg '%s' produce different timezone objects" % (from_lower, from_passed))
 
 
 class BaseTzInfoTestCase:
