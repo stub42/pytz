@@ -157,6 +157,9 @@ def timezone(zone):
     Unknown
 
     '''
+    if zone is None:
+        raise UnknownTimeZoneError(None)
+
     if zone.upper() == 'UTC':
         return utc
 
