@@ -169,7 +169,7 @@ def timezone(zone):
         # All valid timezones are ASCII
         raise UnknownTimeZoneError(zone)
 
-    zone = _unmunge_zone(zone)
+    zone = _case_insensitive_zone_lookup(_unmunge_zone(zone))
     if zone not in _tzinfo_cache:
         if zone in all_timezones_set:
             fp = open_resource(zone)
@@ -186,6 +186,11 @@ def timezone(zone):
 def _unmunge_zone(zone):
     """Undo the time zone name munging done by older versions of pytz."""
     return zone.replace('_plus_', '+').replace('_minus_', '-')
+
+
+def _case_insensitive_zone_lookup(zone):
+    """Get case-insensitively matching timezone, if found, else return zone unchanged"""
+    return _all_timezones_lower_to_standard.get(zone.lower()) or zone
 
 
 ZERO = datetime.timedelta(0)

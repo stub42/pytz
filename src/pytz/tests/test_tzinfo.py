@@ -758,6 +758,16 @@ class CommonTimezonesTestCase(unittest.TestCase):
         self.assertFalse('Europe/Belfast' in pytz.common_timezones_set)
 
 
+class ZoneCaseInsensitivityTestCase(unittest.TestCase):
+    def test_lower_case_timezone_constructor_arg(self):
+        for tz in pytz.all_timezones_set:
+            from_lower = pytz.timezone(tz.lower())
+            from_passed = pytz.timezone(tz)
+            self.assertEqual(from_lower,
+                             from_passed,
+                             "arg '%s' and arg '%s' produce different timezone objects" % (from_lower, from_passed))
+
+
 class BaseTzInfoTestCase:
     '''Ensure UTC, StaticTzInfo and DstTzInfo work consistently.
 
