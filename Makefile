@@ -46,7 +46,7 @@ upload: sign
 	cd build/dist && ${PYTHON3} setup.py register
 	twine upload build/tarballs/*.{whl,gz,asc}
 
-sign: dist
+sign:
 	rm -f build/tarballs/*.asc
 	for f in build/tarballs/*.{whl,zip,bz2,gz} ; do \
 	    gpg --detach-sign -a $$f; \
