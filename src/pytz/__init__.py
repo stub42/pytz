@@ -16,14 +16,14 @@ from pytz.exceptions import AmbiguousTimeError
 from pytz.exceptions import InvalidTimeError
 from pytz.exceptions import NonExistentTimeError
 from pytz.exceptions import UnknownTimeZoneError
-from pytz.lazy import LazyDict, LazyList, LazySet
+from pytz.lazy import LazyDict, LazyList, LazySet  # noqa
 from pytz.tzinfo import unpickler, BaseTzInfo
 from pytz.tzfile import build_tzinfo
 
 
 # The IANA (nee Olson) database is updated several times a year.
-OLSON_VERSION = '2018i'
-VERSION = '2018.9'  # pip compatible version number.
+OLSON_VERSION = '2019a'
+VERSION = '2019.1'  # pip compatible version number.
 __version__ = VERSION
 
 OLSEN_VERSION = OLSON_VERSION  # Old releases had this misspelling
@@ -171,7 +171,7 @@ def timezone(zone):
 
     zone = _case_insensitive_zone_lookup(_unmunge_zone(zone))
     if zone not in _tzinfo_cache:
-        if zone in all_timezones_set:
+        if zone in all_timezones_set:  # noqa
             fp = open_resource(zone)
             try:
                 _tzinfo_cache[zone] = build_tzinfo(zone, fp)
@@ -189,8 +189,8 @@ def _unmunge_zone(zone):
 
 
 def _case_insensitive_zone_lookup(zone):
-    """Get case-insensitively matching timezone, if found, else return zone unchanged"""
-    return _all_timezones_lower_to_standard.get(zone.lower()) or zone
+    """case-insensitively matching timezone, else return zone unchanged"""
+    return _all_timezones_lower_to_standard.get(zone.lower()) or zone  # noqa
 
 
 ZERO = datetime.timedelta(0)
@@ -280,6 +280,8 @@ def _UTC():
     False
     """
     return utc
+
+
 _UTC.__safe_for_unpickling__ = True
 
 
@@ -290,6 +292,8 @@ def _p(*args):
     by shortening the path.
     """
     return unpickler(*args)
+
+
 _p.__safe_for_unpickling__ = True
 
 
@@ -338,7 +342,7 @@ class _CountryTimezoneDict(LazyDict):
                 if line.startswith('#'):
                     continue
                 code, coordinates, zone = line.split(None, 4)[:3]
-                if zone not in all_timezones_set:
+                if zone not in all_timezones_set:  # noqa
                     continue
                 try:
                     data[code].append(zone)
@@ -347,6 +351,7 @@ class _CountryTimezoneDict(LazyDict):
             self.data = data
         finally:
             zone_tab.close()
+
 
 country_timezones = _CountryTimezoneDict()
 
@@ -370,6 +375,7 @@ class _CountryNameDict(LazyDict):
             self.data = data
         finally:
             zone_tab.close()
+
 
 country_names = _CountryNameDict()
 
@@ -482,6 +488,7 @@ def FixedOffset(offset, _tzinfos={}):
 
     return info
 
+
 FixedOffset.__safe_for_unpickling__ = True
 
 
@@ -490,6 +497,7 @@ def _test():
     sys.path.insert(0, os.pardir)
     import pytz
     return doctest.testmod(pytz)
+
 
 if __name__ == '__main__':
     _test()
