@@ -1,6 +1,10 @@
+from __future__ import unicode_literals
+
 import sys
 import os.path
 import time
+
+from io import open
 from gen_tzinfo import allzones
 
 from pytz import __version__
@@ -24,14 +28,13 @@ def main():
     if not os.path.exists(os.path.dirname(pot_file_name)):
         os.makedirs(os.path.dirname(pot_file_name))
 
-    pot = open(pot_file_name, 'wb')
+    with open(pot_file_name, 'w', encoding='utf-8') as pot:
+        pot.write(boilerplate + '\n')
 
-    print >> pot, boilerplate
-
-    for zone in allzones():
-        print >> pot, 'msgid "%s"' % zone
-        print >> pot, 'msgstr ""'
-        print >> pot
+        for zone in allzones():
+            pot.write('msgid "%s"\n' % zone)
+            pot.write('msgstr ""\n')
+            pot.write('\n')
 
 
 if __name__ == '__main__':

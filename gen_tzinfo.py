@@ -22,8 +22,9 @@ def allzones():
     for dirpath, dirnames, filenames in os.walk(zoneinfo):
         for f in filenames:
             p = os.path.join(dirpath, f)
-            if open(p, 'rb').read(4) == 'TZif':
-                zones.append(p)
+            with open(p, 'rb') as fin:
+                if fin.read(4) == b'TZif':
+                    zones.append(p)
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]
 
@@ -52,16 +53,20 @@ def links():
         # Filenames containing a '.' are not data files.
         if '.' in os.path.basename(filename):
             continue
-        for line in open(filename):
-            if line.strip().startswith('#') or not line.strip():
-                continue
-            match = re.search(r'^\s*Link\s+([\w/\-]+)\s+([\w/\-]+)', line)
-            if match is not None:
-                new_name = match.group(1)
-                old_name = match.group(2)
-                l[old_name] = new_name
-            else:
-                assert not line.startswith('Link'), line
+        try:
+            for line in open(filename):
+                if line.strip().startswith('#') or not line.strip():
+                    continue
+                match = re.search(r'^\s*Link\s+([\w/\-]+)\s+([\w/\-]+)', line)
+                if match is not None:
+                    new_name = match.group(1)
+                    old_name = match.group(2)
+                    l[old_name] = new_name
+                else:
+                    assert not line.startswith('Link'), line
+        except UnicodeDecodeError:
+            # reading zic / other binary file in python 3
+            pass
     assert 'US/Pacific-New' in l, 'US/Pacific-New should be in links()'
     return l
 
@@ -91,54 +96,49 @@ def dupe_src(destdir):
 
 def add_allzones(filename):
     ''' Append a list of all know timezones to the end of the file '''
-    outf = open(filename, 'a')
+    with open(filename, 'a') as outf:
+        obsolete_zones = links().keys()
 
-    obsolete_zones = links().keys()
+        # Calculate 'common' timezones as best we can. We start with all
+        # timezones, strip out the legacy noise, and any name linked to
+        # a more canonical name (eg. Asia/Singapore is preferred to just
+        # Singapore)
+        cz = [
+            z for z in allzones()
+            if (z not in obsolete_zones and
+                '/' in z and
+                not z.startswith('SystemV/') and
+                not z.startswith('Etc/'))]
+        # And extend our list manually with stuff we think deserves to be
+        # labelled 'common'.
+        cz.extend([
+            'UTC', 'GMT', 'US/Eastern', 'US/Pacific', 'US/Mountain',
+            'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska',
+            # Canadian timezones per Bug #506341
+            'Canada/Newfoundland', 'Canada/Atlantic', 'Canada/Eastern',
+            'Canada/Central', 'Canada/Mountain', 'Canada/Pacific'])
+        # And extend out list with all preferred country timezones.
+        zone_tab = open(os.path.join(zoneinfo, 'zone.tab'), 'r')
+        for line in zone_tab:
+            if line.startswith('#'):
+                continue
+            code, coordinates, zone = line.split(None, 4)[:3]
+            if zone not in cz:
+                cz.append(zone)
+        cz.sort()
 
-    # Calculate 'common' timezones as best we can. We start with all
-    # timezones, strip out the legacy noise, and any name linked to
-    # a more canonical name (eg. Asia/Singapore is preferred to just
-    # Singapore)
-    cz = [
-        z for z in allzones()
-        if (z not in obsolete_zones and
-            '/' in z and
-            not z.startswith('SystemV/') and
-            not z.startswith('Etc/'))]
-    # And extend our list manually with stuff we think deserves to be
-    # labelled 'common'.
-    cz.extend([
-        'UTC', 'GMT', 'US/Eastern', 'US/Pacific', 'US/Mountain',
-        'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska',
-        # Canadian timezones per Bug #506341
-        'Canada/Newfoundland', 'Canada/Atlantic', 'Canada/Eastern',
-        'Canada/Central', 'Canada/Mountain', 'Canada/Pacific'])
-    # And extend out list with all preferred country timezones.
-    zone_tab = open(os.path.join(zoneinfo, 'zone.tab'), 'r')
-    for line in zone_tab:
-        if line.startswith('#'):
-            continue
-        code, coordinates, zone = line.split(None, 4)[:3]
-        if zone not in cz:
-            cz.append(zone)
-    cz.sort()
+        outf.write('all_timezones = \\\n')
+        pprint(sorted(allzones()), outf)
+        outf.write('''all_timezones = LazyList(    
+        tz for tz in all_timezones if resource_exists(tz))\n\n''')
+        outf.write('all_timezones_set = LazySet(all_timezones)\n')
+        outf.write('_all_timezones_lower_to_standard = dict((tz.lower(), tz) for tz in all_timezones)\n\n')
 
-    print >> outf, 'all_timezones = \\'
-    pprint(sorted(allzones()), outf)
-    print >> outf, '''all_timezones = LazyList(
-        tz for tz in all_timezones if resource_exists(tz))
-        '''
-    print >> outf, 'all_timezones_set = LazySet(all_timezones)'
-    print >> outf, '_all_timezones_lower_to_standard = dict((tz.lower(), tz) for tz in all_timezones)'
-
-    print >> outf, 'common_timezones = \\'
-    pprint(cz, outf)
-    print >> outf, '''common_timezones = LazyList(
-            tz for tz in common_timezones if tz in all_timezones)
-        '''
-    print >> outf, 'common_timezones_set = LazySet(common_timezones)'
-
-    outf.close()
+        outf.write('common_timezones = \\\n')
+        pprint(cz, outf)
+        outf.write('''common_timezones = LazyList(
+        tz for tz in common_timezones if tz in all_timezones)\n''')
+        outf.write('common_timezones_set = LazySet(common_timezones)\n')
 
 
 def main(destdir):
@@ -146,6 +146,7 @@ def main(destdir):
 
     dupe_src(_destdir)
     add_allzones(os.path.join(_destdir, 'pytz', '__init__.py'))
+
 
 target = None
 if __name__ == '__main__':
