@@ -177,29 +177,29 @@ parameter to the ``utcoffset()``, ``dst()`` && ``tzname()`` methods.
 The ``is_dst`` parameter is ignored for most timestamps. It is only used
 during DST transition ambiguous periods to resolve that ambiguity.
 
->>> tz.utcoffset(normal, is_dst=True)
-datetime.timedelta(-1, 77400)
->>> tz.dst(normal, is_dst=True)
-datetime.timedelta(0, 3600)
+>>> print(tz.utcoffset(normal, is_dst=True))
+-1 day, 21:30:00
+>>> print(tz.dst(normal, is_dst=True))
+1:00:00
 >>> tz.tzname(normal, is_dst=True)
 'NDT'
 
->>> tz.utcoffset(ambiguous, is_dst=True)
-datetime.timedelta(-1, 77400)
->>> tz.dst(ambiguous, is_dst=True)
-datetime.timedelta(0, 3600)
+>>> print(tz.utcoffset(ambiguous, is_dst=True))
+-1 day, 21:30:00
+>>> print(tz.dst(ambiguous, is_dst=True))
+1:00:00
 >>> tz.tzname(ambiguous, is_dst=True)
 'NDT'
 
->>> tz.utcoffset(normal, is_dst=False)
-datetime.timedelta(-1, 77400)
+>>> print(tz.utcoffset(normal, is_dst=False))
+-1 day, 21:30:00
 >>> tz.dst(normal, is_dst=False)
 datetime.timedelta(0, 3600)
 >>> tz.tzname(normal, is_dst=False)
 'NDT'
 
->>> tz.utcoffset(ambiguous, is_dst=False)
-datetime.timedelta(-1, 73800)
+>>> print(tz.utcoffset(ambiguous, is_dst=False))
+-1 day, 20:30:00
 >>> tz.dst(ambiguous, is_dst=False)
 datetime.timedelta(0)
 >>> tz.tzname(ambiguous, is_dst=False)
@@ -208,10 +208,10 @@ datetime.timedelta(0)
 If ``is_dst`` is not specified, ambiguous timestamps will raise
 an ``pytz.exceptions.AmbiguousTimeError`` exception.
 
->>> tz.utcoffset(normal)
-datetime.timedelta(-1, 77400)
->>> tz.dst(normal)
-datetime.timedelta(0, 3600)
+>>> print(tz.utcoffset(normal))
+-1 day, 21:30:00
+>>> print(tz.dst(normal))
+1:00:00
 >>> tz.tzname(normal)
 'NDT'
 
