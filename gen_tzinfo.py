@@ -129,7 +129,8 @@ def add_allzones(filename):
         tz for tz in all_timezones if resource_exists(tz))
         '''
     print >> outf, 'all_timezones_set = LazySet(all_timezones)'
-    print >> outf, '_all_timezones_lower_to_standard = dict((tz.lower(), tz) for tz in all_timezones)'
+    # Per lp:1835784 we can't afford to do this at import time
+    # print >> outf, '_all_timezones_lower_to_standard = dict((tz.lower(), tz) for tz in all_timezones)'
 
     print >> outf, 'common_timezones = \\'
     pprint(cz, outf)
