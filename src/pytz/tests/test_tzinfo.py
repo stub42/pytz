@@ -183,8 +183,14 @@ class PicklingTest(unittest.TestCase):
         # Python 3 introduced a new pickle protocol where numbers are stored in
         # hexadecimal representation. Here we extract the pickle
         # representation of the number for the current Python version.
-        old_pickle_pattern = pickle.dumps(tz._utcoffset.seconds)[3:-1]
-        new_pickle_pattern = pickle.dumps(new_utcoffset)[3:-1]
+        #
+        # Test protocol 3 on Python 3 and protocol 0 on Python 2.
+        if sys.version_info >= (3,):
+            protocol = 3
+        else:
+            protocol = 0
+        old_pickle_pattern = pickle.dumps(tz._utcoffset.seconds, protocol)[3:-1]
+        new_pickle_pattern = pickle.dumps(new_utcoffset, protocol)[3:-1]
         hacked_p = p.replace(old_pickle_pattern, new_pickle_pattern)
 
         self.assertNotEqual(p, hacked_p)
