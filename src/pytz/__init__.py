@@ -8,9 +8,11 @@ See the datetime section of the Python Library Reference for information
 on how to use these modules.
 '''
 
-import sys
+import collections
 import datetime
 import os.path
+import re
+import sys
 
 from pytz.exceptions import AmbiguousTimeError
 from pytz.exceptions import InvalidTimeError
@@ -303,6 +305,69 @@ def _p(*args):
 _p.__safe_for_unpickling__ = True
 
 
+def _zone_tab():
+    """Load zone.tab and return each line in parsed form.
+
+    >>> zone_tab[0] == ('AD', (42.5, 1.5166666666666666), 'Europe/Andorra', '')
+    True
+    >>> sys.version_info[0] == 2 and sys.version_info[1] < 6 or zone_tab[0].code == 'AD'
+    True
+    >>> [row for row in zone_tab if row[2] == 'America/Los_Angeles'][0][3] == 'Pacific'
+    True
+    """
+    try:
+        zonetype = collections.namedtuple('Zone', ('code', 'coordinates', 'zone', 'comment'))
+    except AttributeError:
+        zonetype = lambda *args: args
+    lines = []
+    try:
+        fobj = open_resource('zone.tab')
+        lines = fobj.readlines()
+    finally:
+        fobj.close()
+    for line in lines:
+        line = line.decode('UTF-8')
+        if line.startswith('#'):
+            continue
+        pieces = line.rstrip().split(None, 3)
+        code, coordinates, zone = pieces[:3]
+        comment = len(pieces) == 4 and pieces[3] or ''
+        if zone not in all_timezones_set:
+            continue
+
+        coordinates = _parse_iso6709(coordinates)
+        if not coordinates:
+            continue
+        lat, lon = coordinates
+
+        yield zonetype(code, (lat, lon), zone, comment)
+
+
+zone_tab = LazyList(_zone_tab())
+
+
+def _parse_iso6709(iso6709):
+    match = re.match('^([-+][0-9]+)([-+][0-9]+)$', iso6709)
+    if not match:
+        return
+    return map(_parse_iso6709_coord, match.groups())
+
+
+def _parse_iso6709_coord(coord):
+    if len(coord) % 2:
+        deg = float(coord[:3])
+        coord = coord[3:]
+    else:
+        deg = float(coord[:4])
+        coord = coord[4:]
+    div = 60
+    while coord:
+        deg += float(coord[:2]) / div
+        div *= 60
+        coord = coord[2:]
+    return deg
+
+
 class _CountryTimezoneDict(LazyDict):
     """Map ISO 3166 country code to a list of timezone names commonly used
     in that country.
@@ -341,22 +406,12 @@ class _CountryTimezoneDict(LazyDict):
 
     def _fill(self):
         data = {}
-        zone_tab = open_resource('zone.tab')
-        try:
-            for line in zone_tab:
-                line = line.decode('UTF-8')
-                if line.startswith('#'):
-                    continue
-                code, coordinates, zone = line.split(None, 4)[:3]
-                if zone not in all_timezones_set:  # noqa
-                    continue
-                try:
-                    data[code].append(zone)
-                except KeyError:
-                    data[code] = [zone]
-            self.data = data
-        finally:
-            zone_tab.close()
+        for code, _, zone, _ in zone_tab:
+            try:
+                data[code].append(zone)
+            except KeyError:
+                data[code] = [zone]
+        self.data = data
 
 
 country_timezones = _CountryTimezoneDict()
