@@ -34,7 +34,7 @@ __all__ = [
     'NonExistentTimeError', 'UnknownTimeZoneError',
     'all_timezones', 'all_timezones_set',
     'common_timezones', 'common_timezones_set',
-    'BaseTzInfo',
+    'BaseTzInfo', 'FixedOffset',
 ]
 
 
