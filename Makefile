@@ -3,10 +3,6 @@
 
 MAKE=make
 SHELL=/bin/bash
-PYTHON24=python2.4
-PYTHON25=python2.5
-PYTHON26=python2.6
-PYTHON27=python2.7
 PYTHON31=python3.1
 PYTHON32=python3.2
 PYTHON33=python3.3
@@ -63,10 +59,6 @@ clean:
 
 test_lazy: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON24} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON25} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON26} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON27} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON31} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON32} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON33} test_lazy.py ${TESTARGS} \
@@ -77,10 +69,6 @@ test_lazy: .stamp-tzinfo
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON24} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON25} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON26} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON27} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON31} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON32} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON33} test_tzinfo.py ${TESTARGS} \
