@@ -550,7 +550,13 @@ hosted there.
 Bugs, Feature Requests & Patches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Bugs can be reported using `Launchpad <https://bugs.launchpad.net/pytz>`__.
+Bugs can be reported using `Launchpad <https://bugs.launchpad.net/pytz>`_.
+
+
+Security Issues
+~~~~~~~~~~~~~~~
+
+Reports about security issues can be made via `Tidelift <https://tidelift.com/security>`_.
 
 
 Issues & Limitations
