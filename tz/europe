@@ -2733,13 +2733,13 @@ Zone Europe/Simferopol	 2:16:24 -	LMT	1880
 #
 # From Paul Eggert (2006-03-22):
 # The _Economist_ (1994-05-28, p 45) reports that central Crimea switched
-# from Kiev to Moscow time sometime after the January 1994 elections.
+# from Kyiv to Moscow time sometime after the January 1994 elections.
 # Shanks (1999) says "date of change uncertain", but implies that it happened
 # sometime between the 1994 DST switches.  Shanks & Pottenger simply say
 # 1994-09-25 03:00, but that can't be right.  For now, guess it
 # changed in May.
 			 2:00	E-Eur	EE%sT	1994 May
-# From IATA SSIM (1994/1997), which also says that Kerch is still like Kiev.
+# From IATA SSIM (1994/1997), which also says that Kerch is still like Kyiv.
 			 3:00	E-Eur	MSK/MSD	1996 Mar 31  0:00s
 			 3:00	1:00	MSD	1996 Oct 27  3:00s
 # IATA SSIM (1997-09) says Crimea switched to EET/EEST.
@@ -3892,7 +3892,7 @@ Link	Europe/Istanbul	Asia/Istanbul	# Istanbul is in both continents.
 # via Garrett Wollman (2003-01-27):
 # BTW, I've found the official document on this matter. It's government
 # regulations No. 509, May 13, 1996. In my poor translation it says:
-# "Time in Ukraine is set to second timezone (Kiev time). Each last Sunday
+# "Time in Ukraine is set to second timezone (Kyiv time). Each last Sunday
 # of March at 3am the time is changing to 4am and each last Sunday of
 # October the time at 4am is changing to 3am"
 
@@ -3919,7 +3919,7 @@ Link	Europe/Istanbul	Asia/Istanbul	# Istanbul is in both continents.
 #
 # From Udo Schwedt (2011-10-18):
 # As far as I understand, the recent change to the Ukrainian time zone
-# (Europe/Kiev) to introduce permanent daylight saving time (similar
+# (Europe/Kyiv) to introduce permanent daylight saving time (similar
 # to Russia) was reverted today:
 # http://portal.rada.gov.ua/rada/control/en/publish/article/info_left?art_id=287324&cat_id=105995
 #
@@ -3927,7 +3927,7 @@ Link	Europe/Istanbul	Asia/Istanbul	# Istanbul is in both continents.
 # The law documents themselves are at
 # http://w1.c1.rada.gov.ua/pls/zweb_n/webproc4_1?id=&pf3511=41484
 
-# From Vladimir in Moscow via Alois Treindl re Kiev time 1991/2 (2014-02-28):
+# From Vladimir in Moscow via Alois Treindl re Kyiv time 1991/2 (2014-02-28):
 # First in Ukraine they changed Time zone from UTC+3 to UTC+2 with DST:
 #       03 25 1990 02:00 -03.00 1       Time Zone 3 with DST
 #       07 01 1990 02:00 -02.00 1       Time Zone 2 with DST
@@ -3957,21 +3957,21 @@ Link	Europe/Istanbul	Asia/Istanbul	# Istanbul is in both continents.
 
 # From Paul Eggert (2018-10-03):
 # As is usual in tzdb, Ukrainian zones use the most common English spellings.
-# For example, tzdb uses Europe/Kiev, as "Kiev" is the most common spelling in
+# For example, tzdb uses Europe/Kyiv, as "Kyiv" is the most common spelling in
 # English for Ukraine's capital, even though it is certainly wrong as a
 # transliteration of the Ukrainian "Київ".  This is similar to tzdb's use of
 # Europe/Prague, which is certainly wrong as a transliteration of the Czech
-# "Praha".  ("Kiev" came from old Slavic via Russian to English, and "Prague"
+# "Praha".  ("Kyiv" came from old Slavic via Russian to English, and "Prague"
 # came from old Slavic via French to English, so the two cases have something
 # in common.)  Admittedly English-language spelling of Ukrainian names is
 # controversial, and some day "Kyiv" may become substantially more popular in
-# English; in the meantime, stick with the traditional English "Kiev" as that
+# English; in the meantime, stick with the traditional English "Kyiv" as that
 # means less disruption for our users.
 
 # Zone	NAME		STDOFF	RULES	FORMAT	[UNTIL]
-# This represents most of Ukraine.  See above for the spelling of "Kiev".
-Zone Europe/Kiev	2:02:04 -	LMT	1880
-			2:02:04	-	KMT	1924 May  2 # Kiev Mean Time
+# This represents most of Ukraine.  See above for the spelling of "Kyiv".
+Zone Europe/Kyiv	2:02:04 -	LMT	1880
+			2:02:04	-	KMT	1924 May  2 # Kyiv Mean Time
 			2:00	-	EET	1930 Jun 21
 			3:00	-	MSK	1941 Sep 20
 			1:00	C-Eur	CE%sT	1943 Nov  6
