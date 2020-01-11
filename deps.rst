@@ -1,6 +1,8 @@
 dev container setup cheat sheet
 -------------------------------
-.. code:: shell
+
+.. code::
+
     locale-gen
     add-apt-repository ppa:deadsnakes/ppa
 
