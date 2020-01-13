@@ -4,8 +4,11 @@ Brings the IANA tz database into Python. This library allows accurate and
 cross platform timezone calculations.
 
 pytz contains generated code, and this branch generates it. The actual
-pytz code and documentation can be found in the src/ directory. More
-information about pytz can be found in src/README.txt
+pytz code and documentation can be found in the src/ directory.
+
+## Usage Information / Documentation
+
+See [the pytz README](src/README.rst).
 
 ## pytz for Enterprise
 
