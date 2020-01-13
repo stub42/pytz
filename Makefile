@@ -108,7 +108,7 @@ doc: docs
 docs: dist
 	mkdir -p build/docs/source/.static
 	mkdir -p build/docs/built
-	cp src/README.txt build/docs/source/index.txt
+	cp src/README.rst build/docs/source/index.txt
 	cp conf.py build/docs/source/conf.py
 	sphinx-build build/docs/source build/docs/built
 	chmod -R og-w build/docs/built
