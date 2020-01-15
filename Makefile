@@ -3,10 +3,6 @@
 
 MAKE=make
 SHELL=/bin/bash
-PYTHON24=python2.4
-PYTHON25=python2.5
-PYTHON26=python2.6
-PYTHON27=python2.7
 PYTHON31=python3.1
 PYTHON32=python3.2
 PYTHON33=python3.3
@@ -14,8 +10,7 @@ PYTHON34=python3.4
 PYTHON35=python3.5
 PYTHON36=python3.6
 PYTHON37=python3.7
-PYTHON=/usr/bin/python
-PYTHON3=/usr/bin/python3
+PYTHON=/usr/bin/python3
 IANA=./tz
 IANA_GIT=https://github.com/eggert/tz.git
 
@@ -40,10 +35,9 @@ dist: build wheels
 wheels:
 	cd build/dist && mkdir -p ../tarballs
 	cd build/dist && ${PYTHON} setup.py -q bdist_wheel --universal --dist-dir=../tarballs
-	cd build/dist && ${PYTHON3} setup.py -q bdist_wheel --universal --dist-dir=../tarballs
 
 upload: sign
-	cd build/dist && ${PYTHON3} setup.py register
+	cd build/dist && ${PYTHON} setup.py register
 	twine upload build/tarballs/*.{whl,gz,asc}
 
 sign:
@@ -65,10 +59,6 @@ clean:
 
 test_lazy: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON24} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON25} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON26} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON27} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON31} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON32} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON33} test_lazy.py ${TESTARGS} \
@@ -79,10 +69,6 @@ test_lazy: .stamp-tzinfo
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON24} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON25} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON26} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON27} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON31} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON32} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON33} test_tzinfo.py ${TESTARGS} \
@@ -94,12 +80,10 @@ test_tzinfo: .stamp-tzinfo
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
 	    && ${PYTHON} test_docs.py ${TESTARGS} \
-	    && ${PYTHON3} test_docs.py ${TESTARGS}
 
 test_zdump: dist
 	${PYTHON} gen_tests.py ${TARGET} && \
 	${PYTHON} test_zdump.py ${TESTARGS} && \
-	${PYTHON3} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 
