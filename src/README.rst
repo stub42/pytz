@@ -558,7 +558,7 @@ hosted there.
 Bugs, Feature Requests & Patches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Bugs can be reported using `Launchpad <https://bugs.launchpad.net/pytz>`_.
+Bugs can be reported using `Launchpad Bugs <https://bugs.launchpad.net/pytz>`_.
 
 
 Security Issues
