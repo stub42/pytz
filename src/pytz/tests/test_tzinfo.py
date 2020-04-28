@@ -859,6 +859,7 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite('pytz'))
     suite.addTest(doctest.DocTestSuite('pytz.tzinfo'))
+    suite.addTest(doctest.DocTestSuite('pytz.exceptions'))
     import test_tzinfo
     suite.addTest(unittest.defaultTestLoader.loadTestsFromModule(test_tzinfo))
     return suite
