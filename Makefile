@@ -14,6 +14,8 @@ PYTHON34=python3.4
 PYTHON35=python3.5
 PYTHON36=python3.6
 PYTHON37=python3.7
+PYTHON38=python3.8
+PYTHON39=python3.9
 PYTHON=/usr/bin/python
 PYTHON3=/usr/bin/python3
 IANA=./tz
@@ -75,7 +77,9 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON34} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON35} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON36} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON37} test_lazy.py ${TESTARGS}
+	    && ${PYTHON37} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON38} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON39} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -89,7 +93,9 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON34} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON35} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON36} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON37} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON37} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON38} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON39} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -99,7 +105,8 @@ test_docs: .stamp-tzinfo
 test_zdump: dist
 	${PYTHON} gen_tests.py ${TARGET} && \
 	${PYTHON} test_zdump.py ${TESTARGS} && \
-	${PYTHON3} test_zdump.py ${TESTARGS}
+	${PYTHON3} test_zdump.py ${TESTARGS} && \
+	${PYTHON39} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 
