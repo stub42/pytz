@@ -158,6 +158,7 @@ static struct tm *gmtsub(struct state const *, time_t const *, int_fast32_t,
 			 struct tm *);
 static bool increment_overflow(int *, int);
 static bool increment_overflow_time(time_t *, int_fast32_t);
+static int_fast64_t leapcorr(struct state const *, time_t);
 static bool normalize_overflow32(int_fast32_t *, int *, int);
 static struct tm *timesub(time_t const *, int_fast32_t, struct state const *,
 			  struct tm *);
@@ -193,20 +194,18 @@ static int		lcl_is_set;
 
 static struct tm	tm;
 
-#if !HAVE_POSIX_DECLS || TZ_TIME_T
-# if HAVE_TZNAME
+#if 2 <= HAVE_TZNAME + TZ_TIME_T
 char *			tzname[2] = {
 	(char *) wildabbr,
 	(char *) wildabbr
 };
-# endif
-# if USG_COMPAT
+#endif
+#if 2 <= USG_COMPAT + TZ_TIME_T
 long			timezone;
 int			daylight;
-# endif
-# ifdef ALTZONE
+#endif
+#if 2 <= ALTZONE + TZ_TIME_T
 long			altzone;
-# endif
 #endif
 
 /* Initialize *S to a value based on UTOFF, ISDST, and DESIGIDX.  */
@@ -276,7 +275,7 @@ update_tzname_etc(struct state const *sp, struct ttinfo const *ttisp)
   if (!ttisp->tt_isdst)
     timezone = - ttisp->tt_utoff;
 #endif
-#ifdef ALTZONE
+#if ALTZONE
   if (ttisp->tt_isdst)
     altzone = - ttisp->tt_utoff;
 #endif
@@ -295,9 +294,9 @@ settzname(void)
 	daylight = 0;
 	timezone = 0;
 #endif
-#ifdef ALTZONE
+#if ALTZONE
 	altzone = 0;
-#endif /* defined ALTZONE */
+#endif
 	if (sp == NULL) {
 		return;
 	}
@@ -643,11 +642,13 @@ tzloadbody(char const *name, struct state *sp, bool doextend,
 
 			    for (i = 0; i < ts->timecnt; i++)
 			      if (sp->timecnt == 0
-				  || sp->ats[sp->timecnt - 1] < ts->ats[i])
+				  || (sp->ats[sp->timecnt - 1]
+				      < ts->ats[i] + leapcorr(sp, ts->ats[i])))
 				break;
 			    while (i < ts->timecnt
 				   && sp->timecnt < TZ_MAX_TIMES) {
-			      sp->ats[sp->timecnt] = ts->ats[i];
+			      sp->ats[sp->timecnt]
+				= ts->ats[i] + leapcorr(sp, ts->ats[i]);
 			      sp->types[sp->timecnt] = (sp->typecnt
 							+ ts->types[i]);
 			      sp->timecnt++;
@@ -2241,20 +2242,6 @@ timeoff(struct tm *tmp, long offset)
 
 #endif /* defined STD_INSPIRED */
 
-/*
-** XXX--is the below the right way to conditionalize??
-*/
-
-#ifdef STD_INSPIRED
-
-/*
-** IEEE Std 1003.1 (POSIX) says that 536457599
-** shall correspond to "Wed Dec 31 23:59:59 UTC 1986", which
-** is not the case if we are accounting for leap seconds.
-** So, we provide the following conversion routines for use
-** when exchanging timestamps with POSIX conforming systems.
-*/
-
 static int_fast64_t
 leapcorr(struct state const *sp, time_t t)
 {
@@ -2269,6 +2256,20 @@ leapcorr(struct state const *sp, time_t t)
 	}
 	return 0;
 }
+
+/*
+** XXX--is the below the right way to conditionalize??
+*/
+
+#ifdef STD_INSPIRED
+
+/*
+** IEEE Std 1003.1 (POSIX) says that 536457599
+** shall correspond to "Wed Dec 31 23:59:59 UTC 1986", which
+** is not the case if we are accounting for leap seconds.
+** So, we provide the following conversion routines for use
+** when exchanging timestamps with POSIX conforming systems.
+*/
 
 NETBSD_INSPIRED_EXTERN time_t
 time2posix_z(struct state *sp, time_t t)
@@ -2345,7 +2346,7 @@ posix2time(time_t t)
 #  define daylight 0
 #  define timezone 0
 # endif
-# ifndef ALTZONE
+# if !ALTZONE
 #  define altzone 0
 # endif
 
