@@ -111,6 +111,13 @@ def open_resource(name):
 def resource_exists(name):
     """Return true if the given resource exists"""
     try:
+        if os.environ.get('PYTZ_SKIPEXISTSCHECK', ''):
+            # In "standard" distributions, we can assume that
+            # all the listed timezones are present. As an
+            # import-speed optimization, you can set the
+            # PYTZ_SKIPEXISTSCHECK flag to skip checking
+            # for the presence of the resource file on disk.
+            return True
         open_resource(name).close()
         return True
     except IOError:
