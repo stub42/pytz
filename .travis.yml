@@ -1,13 +1,44 @@
 # vim: set filetype=yaml sw=2:
 sudo: required
-dist: trusty
-before_install:
-  - sudo locale-gen
-  - sudo add-apt-repository -y ppa:deadsnakes/ppa
-  - sudo apt-get update -y -qq
-  - sudo apt-get install -y python-all python-all-dev python3-all python3-all-dev build-essential python-setuptools python3-setuptools python-wheel python3-wheel python3-docutils python3-sphinx python3-flake8 python-flake8 python2.4-complete python2.5-complete python2.6-complete python3.1-complete python3.2-complete python3.3-complete python3.5-complete python2.4-gdbm python2.4-gdbm-dbg python3.6 wget python-pip python3-pip python3.7 python3.7-dev python3.7-distutils python3.8 python3.8-dev python3.8-distutils python3.9 python3.9-dev python3.9-distutils
-  - sudo pip install wheel
-  - sudo pip3 install wheel
-
+dist: bionic
+addons:
+  apt:
+    sources:
+      - deadsnakes
+    update: true
+    packages:
+      - wget
+      - build-essential
+      - python-all
+      - python-all-dev
+      - python-setuptools
+      - python-pip
+      - python-wheel
+      - python-flake8
+      - python3-all
+      - python3-all-dev
+      - python3-setuptools
+      - python3-pip
+      - python3-wheel
+      - python3-flake8
+      - python3-docutils
+      - python3-sphinx
+      - python2.4-complete
+      - python2.4-gdbm
+      - python2.4-gdbm-dbg
+      - python2.5-complete
+      - python2.6-complete
+      - python3.1-complete
+      - python3.2-complete
+      - python3.3-complete
+      - python3.4-complete
+      - python3.5-complete
+      - python3.6
+      - python3.7
+      - python3.7-dev
+      - python3.8
+      - python3.8-dev
+      - python3.9
+      - python3.9-dev
 install: true
 script: make test TESTARGS=
