@@ -62,7 +62,7 @@ def links():
                 l[old_name] = new_name
             else:
                 assert not line.startswith('Link'), line
-    assert 'US/Pacific-New' in l, 'US/Pacific-New should be in links()'
+    assert 'Portugal' in l, 'Portugal should be in links()'
     return l
 
 
