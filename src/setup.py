@@ -18,8 +18,7 @@ resources = ['zone.tab', 'locales/pytz.pot']
 for dirpath, dirnames, filenames in os.walk(os.path.join('pytz', 'zoneinfo')):
     # remove the 'pytz' part of the path
     basepath = dirpath.split(os.path.sep, 1)[1]
-    resources.extend([os.path.join(basepath, filename)
-                     for filename in filenames])
+    resources.extend([os.path.join(basepath, filename) for filename in filenames])
 package_data = {'pytz': resources}
 
 assert len(resources) > 10, 'zoneinfo files not found!'
@@ -41,7 +40,7 @@ setup(
     package_data=package_data,
     download_url='https://pypi.org/project/pytz/',
     platforms=['Independent'],
-    classifiers = [
+    classifiers=[
         'Development Status :: 6 - Mature',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
@@ -63,6 +62,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )
