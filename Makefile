@@ -138,7 +138,7 @@ upload_docs_pythonhosted: docs
 	touch $@
 
 .stamp-zoneinfo:
-	${MAKE} -C ${IANA} TOPDIR=`pwd`/build USRDIR= USRSHAREDIR=etc install
+	${MAKE} -C ${IANA} ZFLAGS='-b fat' TOPDIR=`pwd`/build USRDIR= USRSHAREDIR=etc install
 	# Break hard links, working around http://bugs.python.org/issue8876.
 	for d in zoneinfo zoneinfo-leaps zoneinfo-posix; do \
 	    rm -rf `pwd`/build/etc/$$d.tmp; \
