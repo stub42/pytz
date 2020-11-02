@@ -81,7 +81,6 @@ struct rule {
 
 	zic_t		r_loyear;	/* for example, 1986 */
 	zic_t		r_hiyear;	/* for example, 1986 */
-	const char *	r_yrtype;
 	bool		r_lowasnum;
 	bool		r_hiwasnum;
 
@@ -133,22 +132,22 @@ struct zone {
 #if !HAVE_POSIX_DECLS
 extern int	getopt(int argc, char * const argv[],
 			const char * options);
-extern int	link(const char * fromname, const char * toname);
+extern int	link(const char * target, const char * linkname);
 extern char *	optarg;
 extern int	optind;
 #endif
 
 #if ! HAVE_LINK
-# define link(from, to) (errno = ENOTSUP, -1)
+# define link(target, linkname) (errno = ENOTSUP, -1)
 #endif
 #if ! HAVE_SYMLINK
 # define readlink(file, buf, size) (errno = ENOTSUP, -1)
-# define symlink(from, to) (errno = ENOTSUP, -1)
+# define symlink(target, linkname) (errno = ENOTSUP, -1)
 # define S_ISLNK(m) 0
 #endif
 #ifndef AT_SYMLINK_FOLLOW
-# define linkat(fromdir, from, todir, to, flag) \
-    (itssymlink(from) ? (errno = ENOTSUP, -1) : link(from, to))
+# define linkat(targetdir, target, linknamedir, linkname, flag) \
+    (itssymlink(target) ? (errno = ENOTSUP, -1) : link(target, linkname))
 #endif
 
 static void	addtt(zic_t starttime, int type);
@@ -182,7 +181,6 @@ static void	rulesub(struct rule * rp,
 			const char * typep, const char * monthp,
 			const char * dayp, const char * timep);
 static zic_t	tadd(zic_t t1, zic_t t2);
-static bool	yearistype(zic_t year, const char * type);
 
 /* Bound on length of what %z can expand to.  */
 enum { PERCENT_Z_LEN_BOUND = sizeof "+995959" - 1 };
@@ -275,8 +273,8 @@ static int		typecnt;
 ** Which fields are which on a Link line.
 */
 
-#define LF_FROM		1
-#define LF_TO		2
+#define LF_TARGET	1
+#define LF_LINKNAME	2
 #define LINK_FIELDS	3
 
 /*
@@ -313,8 +311,8 @@ static ptrdiff_t	nzones_alloc;
 struct link {
 	const char *	l_filename;
 	lineno		l_linenum;
-	const char *	l_from;
-	const char *	l_to;
+	const char *	l_target;
+	const char *	l_linkname;
 };
 
 static struct link *	links;
@@ -658,11 +656,10 @@ static const char *	lcltime;
 static const char *	directory;
 static const char *	leapsec;
 static const char *	tzdefault;
-static const char *	yitcommand;
 
 /* -1 if the TZif output file should be slim, 0 if default, 1 if the
-   output should be fat for backward compatibility.  Currently the
-   default is fat, although this may change.  */
+   output should be fat for backward compatibility.  ZIC_BLOAT_DEFAULT
+   determines the default.  */
 static int bloat;
 
 static bool
@@ -672,7 +669,7 @@ want_bloat(void)
 }
 
 #ifndef ZIC_BLOAT_DEFAULT
-# define ZIC_BLOAT_DEFAULT "fat"
+# define ZIC_BLOAT_DEFAULT "slim"
 #endif
 
 int
@@ -763,15 +760,7 @@ _("%s: More than one -p option specified\n"),
 				tzdefault = optarg;
 				break;
 			case 'y':
-				if (yitcommand == NULL) {
-					warning(_("-y is obsolescent"));
-					yitcommand = optarg;
-				} else {
-					fprintf(stderr,
-_("%s: More than one -y option specified\n"),
-						progname);
-					return EXIT_FAILURE;
-				}
+				warning(_("-y ignored"));
 				break;
 			case 'L':
 				if (leapsec == NULL)
@@ -807,14 +796,19 @@ _("%s: invalid time range: %s\n"),
 		}
 	if (optind == argc - 1 && strcmp(argv[optind], "=") == 0)
 		usage(stderr, EXIT_FAILURE);	/* usage message by request */
-	if (bloat == 0)
-	  bloat = strcmp(ZIC_BLOAT_DEFAULT, "slim") == 0 ? -1 : 1;
+	if (bloat == 0) {
+	  static char const bloat_default[] = ZIC_BLOAT_DEFAULT;
+	  if (strcmp(bloat_default, "slim") == 0)
+	    bloat = -1;
+	  else if (strcmp(bloat_default, "fat") == 0)
+	    bloat = 1;
+	  else
+	    abort(); /* Configuration error.  */
+	}
 	if (directory == NULL)
 		directory = TZDIR;
 	if (tzdefault == NULL)
 		tzdefault = TZDEFAULT;
-	if (yitcommand == NULL)
-		yitcommand = "yearistype";
 
 	if (optind < argc && leapsec != NULL) {
 		infile(leapsec);
@@ -840,11 +834,11 @@ _("%s: invalid time range: %s\n"),
 	*/
 	for (i = 0; i < nlinks; ++i) {
 		eat(links[i].l_filename, links[i].l_linenum);
-		dolink(links[i].l_from, links[i].l_to, false);
+		dolink(links[i].l_target, links[i].l_linkname, false);
 		if (noise)
 			for (j = 0; j < nlinks; ++j)
-				if (strcmp(links[i].l_to,
-					links[j].l_from) == 0)
+				if (strcmp(links[i].l_linkname,
+					links[j].l_target) == 0)
 						warning(_("link to link"));
 	}
 	if (lcltime != NULL) {
@@ -936,27 +930,27 @@ namecheck(const char *name)
    is relative to the global variable DIRECTORY.  TO can be either
    relative or absolute.  */
 static char *
-relname(char const *from, char const *to)
+relname(char const *target, char const *linkname)
 {
   size_t i, taillen, dotdotetcsize;
   size_t dir_len = 0, dotdots = 0, linksize = SIZE_MAX;
-  char const *f = from;
+  char const *f = target;
   char *result = NULL;
-  if (*to == '/') {
+  if (*linkname == '/') {
     /* Make F absolute too.  */
     size_t len = strlen(directory);
     bool needslash = len && directory[len - 1] != '/';
-    linksize = len + needslash + strlen(from) + 1;
+    linksize = len + needslash + strlen(target) + 1;
     f = result = emalloc(linksize);
     strcpy(result, directory);
     result[len] = '/';
-    strcpy(result + len + needslash, from);
+    strcpy(result + len + needslash, target);
   }
-  for (i = 0; f[i] && f[i] == to[i]; i++)
+  for (i = 0; f[i] && f[i] == linkname[i]; i++)
     if (f[i] == '/')
       dir_len = i + 1;
-  for (; to[i]; i++)
-    dotdots += to[i] == '/' && to[i - 1] != '/';
+  for (; linkname[i]; i++)
+    dotdots += linkname[i] == '/' && linkname[i - 1] != '/';
   taillen = strlen(f + dir_len);
   dotdotetcsize = 3 * dotdots + taillen + 1;
   if (dotdotetcsize <= linksize) {
@@ -972,53 +966,56 @@ relname(char const *from, char const *to)
 /* Hard link FROM to TO, following any symbolic links.
    Return 0 if successful, an error number otherwise.  */
 static int
-hardlinkerr(char const *from, char const *to)
+hardlinkerr(char const *target, char const *linkname)
 {
-  int r = linkat(AT_FDCWD, from, AT_FDCWD, to, AT_SYMLINK_FOLLOW);
+  int r = linkat(AT_FDCWD, target, AT_FDCWD, linkname, AT_SYMLINK_FOLLOW);
   return r == 0 ? 0 : errno;
 }
 
 static void
-dolink(char const *fromfield, char const *tofield, bool staysymlink)
+dolink(char const *target, char const *linkname, bool staysymlink)
 {
-	bool todirs_made = false;
+	bool remove_only = strcmp(target, "-") == 0;
+	bool linkdirs_made = false;
 	int link_errno;
 
 	/*
 	** We get to be careful here since
 	** there's a fair chance of root running us.
 	*/
-	if (itsdir(fromfield)) {
-		fprintf(stderr, _("%s: link from %s/%s failed: %s\n"),
-			progname, directory, fromfield, strerror(EPERM));
+	if (!remove_only && itsdir(target)) {
+		fprintf(stderr, _("%s: linking target %s/%s failed: %s\n"),
+			progname, directory, target, strerror(EPERM));
 		exit(EXIT_FAILURE);
 	}
 	if (staysymlink)
-	  staysymlink = itssymlink(tofield);
-	if (remove(tofield) == 0)
-	  todirs_made = true;
+	  staysymlink = itssymlink(linkname);
+	if (remove(linkname) == 0)
+	  linkdirs_made = true;
 	else if (errno != ENOENT) {
 	  char const *e = strerror(errno);
 	  fprintf(stderr, _("%s: Can't remove %s/%s: %s\n"),
-		  progname, directory, tofield, e);
+		  progname, directory, linkname, e);
 	  exit(EXIT_FAILURE);
 	}
-	link_errno = staysymlink ? ENOTSUP : hardlinkerr(fromfield, tofield);
-	if (link_errno == ENOENT && !todirs_made) {
-	  mkdirs(tofield, true);
-	  todirs_made = true;
-	  link_errno = hardlinkerr(fromfield, tofield);
+	if (remove_only)
+	  return;
+	link_errno = staysymlink ? ENOTSUP : hardlinkerr(target, linkname);
+	if (link_errno == ENOENT && !linkdirs_made) {
+	  mkdirs(linkname, true);
+	  linkdirs_made = true;
+	  link_errno = hardlinkerr(target, linkname);
 	}
 	if (link_errno != 0) {
-	  bool absolute = *fromfield == '/';
-	  char *linkalloc = absolute ? NULL : relname(fromfield, tofield);
-	  char const *contents = absolute ? fromfield : linkalloc;
-	  int symlink_errno = symlink(contents, tofield) == 0 ? 0 : errno;
-	  if (!todirs_made
+	  bool absolute = *target == '/';
+	  char *linkalloc = absolute ? NULL : relname(target, linkname);
+	  char const *contents = absolute ? target : linkalloc;
+	  int symlink_errno = symlink(contents, linkname) == 0 ? 0 : errno;
+	  if (!linkdirs_made
 	      && (symlink_errno == ENOENT || symlink_errno == ENOTSUP)) {
-	    mkdirs(tofield, true);
+	    mkdirs(linkname, true);
 	    if (symlink_errno == ENOENT)
-	      symlink_errno = symlink(contents, tofield) == 0 ? 0 : errno;
+	      symlink_errno = symlink(contents, linkname) == 0 ? 0 : errno;
 	  }
 	  free(linkalloc);
 	  if (symlink_errno == 0) {
@@ -1028,24 +1025,24 @@ dolink(char const *fromfield, char const *tofield, bool staysymlink)
 	  } else {
 	    FILE *fp, *tp;
 	    int c;
-	    fp = fopen(fromfield, "rb");
+	    fp = fopen(target, "rb");
 	    if (!fp) {
 	      char const *e = strerror(errno);
 	      fprintf(stderr, _("%s: Can't read %s/%s: %s\n"),
-		      progname, directory, fromfield, e);
+		      progname, directory, target, e);
 	      exit(EXIT_FAILURE);
 	    }
-	    tp = fopen(tofield, "wb");
+	    tp = fopen(linkname, "wb");
 	    if (!tp) {
 	      char const *e = strerror(errno);
 	      fprintf(stderr, _("%s: Can't create %s/%s: %s\n"),
-		      progname, directory, tofield, e);
+		      progname, directory, linkname, e);
 	      exit(EXIT_FAILURE);
 	    }
 	    while ((c = getc(fp)) != EOF)
 	      putc(c, tp);
-	    close_file(fp, directory, fromfield);
-	    close_file(tp, directory, tofield);
+	    close_file(fp, directory, target);
+	    close_file(tp, directory, linkname);
 	    if (link_errno != ENOTSUP)
 	      warning(_("copy used because hard link failed: %s"),
 		      strerror(link_errno));
@@ -1624,16 +1621,16 @@ inlink(char **fields, int nfields)
 		error(_("wrong number of fields on Link line"));
 		return;
 	}
-	if (*fields[LF_FROM] == '\0') {
-		error(_("blank FROM field on Link line"));
+	if (*fields[LF_TARGET] == '\0') {
+		error(_("blank TARGET field on Link line"));
 		return;
 	}
-	if (! namecheck(fields[LF_TO]))
+	if (! namecheck(fields[LF_LINKNAME]))
 	  return;
 	l.l_filename = filename;
 	l.l_linenum = linenum;
-	l.l_from = ecpyalloc(fields[LF_FROM]);
-	l.l_to = ecpyalloc(fields[LF_TO]);
+	l.l_target = ecpyalloc(fields[LF_TARGET]);
+	l.l_linkname = ecpyalloc(fields[LF_LINKNAME]);
 	links = growalloc(links, sizeof *links, nlinks, &nlinks_alloc);
 	links[nlinks++] = l;
 }
@@ -1729,16 +1726,10 @@ rulesub(struct rule *rp, const char *loyearp, const char *hiyearp,
 		error(_("starting year greater than ending year"));
 		return;
 	}
-	if (*typep == '\0')
-		rp->r_yrtype = NULL;
-	else {
-		if (rp->r_loyear == rp->r_hiyear) {
-			error(_("typed single year"));
-			return;
-		}
-		warning(_("year type \"%s\" is obsolete; use \"-\" instead"),
+	if (*typep != '\0') {
+		error(_("year type \"%s\" is unsupported; use \"-\" instead"),
 			typep);
-		rp->r_yrtype = ecpyalloc(typep);
+		return;
 	}
 	/*
 	** Day work.
@@ -2500,8 +2491,6 @@ stringzone(char *result, struct zone const *zpfirst, ptrdiff_t zonecount)
 		rp = &zp->z_rules[i];
 		if (rp->r_hiwasnum || rp->r_hiyear != ZIC_MAX)
 			continue;
-		if (rp->r_yrtype != NULL)
-			continue;
 		if (!rp->r_isdst) {
 			if (stdrp == NULL)
 				stdrp = rp;
@@ -2756,14 +2745,14 @@ outzone(const struct zone *zpfirst, ptrdiff_t zonecount)
 			/*
 			** Mark which rules to do in the current year.
 			** For those to do, calculate rpytime(rp, year);
+			** The former TYPE field was also considered here.
 			*/
 			for (j = 0; j < zp->z_nrules; ++j) {
 				rp = &zp->z_rules[j];
 				eats(zp->z_filename, zp->z_linenum,
 					rp->r_filename, rp->r_linenum);
 				rp->r_todo = year >= rp->r_loyear &&
-						year <= rp->r_hiyear &&
-						yearistype(year, rp->r_yrtype);
+						year <= rp->r_hiyear;
 				if (rp->r_todo) {
 					rp->r_temp = rpytime(rp, year);
 					rp->r_todo
@@ -3052,50 +3041,6 @@ adjleap(void)
 	  if (leapexpires <= hi_time)
 	    hi_time = leapexpires - 1;
 	}
-}
-
-static char *
-shellquote(char *b, char const *s)
-{
-  *b++ = '\'';
-  while (*s) {
-    if (*s == '\'')
-      *b++ = '\'', *b++ = '\\', *b++ = '\'';
-    *b++ = *s++;
-  }
-  *b++ = '\'';
-  return b;
-}
-
-static bool
-yearistype(zic_t year, const char *type)
-{
-	char *buf;
-	char *b;
-	int result;
-
-	if (type == NULL || *type == '\0')
-		return true;
-	buf = emalloc(1 + 4 * strlen(yitcommand) + 2
-		      + INT_STRLEN_MAXIMUM(zic_t) + 2 + 4 * strlen(type) + 2);
-	b = shellquote(buf, yitcommand);
-	*b++ = ' ';
-	b += sprintf(b, "%"PRIdZIC, year);
-	*b++ = ' ';
-	b = shellquote(b, type);
-	*b = '\0';
-	result = system(buf);
-	if (WIFEXITED(result)) {
-	  int status = WEXITSTATUS(result);
-	  if (status <= 1) {
-	    free(buf);
-	    return status == 0;
-	  }
-	}
-	error(_("Wild result from command execution"));
-	fprintf(stderr, _("%s: command was '%s', result was %d\n"),
-		progname, buf, result);
-	exit(EXIT_FAILURE);
 }
 
 /* Is A a space character in the C locale?  */
