@@ -2,6 +2,7 @@
 '''
 $Id: gen_tzinfo.py,v 1.21 2005/02/15 20:21:38 zenzen Exp $
 '''
+from __future__ import print_function
 import sys
 import os
 import os.path
@@ -123,21 +124,21 @@ def add_allzones(filename):
             cz.append(zone)
     cz.sort()
 
-    print >> outf, 'all_timezones = \\'
+    print('all_timezones = \\', file=outf)
     pprint(sorted(allzones()), outf)
-    print >> outf, '''all_timezones = LazyList(
+    print('''all_timezones = LazyList(
         tz for tz in all_timezones if resource_exists(tz))
-        '''
-    print >> outf, 'all_timezones_set = LazySet(all_timezones)'
+        ''', file=outf)
+    print('all_timezones_set = LazySet(all_timezones)', file=outf)
     # Per lp:1835784 we can't afford to do this at import time
     # print >> outf, '_all_timezones_lower_to_standard = dict((tz.lower(), tz) for tz in all_timezones)'
 
-    print >> outf, 'common_timezones = \\'
+    print('common_timezones = \\', file=outf)
     pprint(cz, outf)
-    print >> outf, '''common_timezones = LazyList(
+    print('''common_timezones = LazyList(
             tz for tz in common_timezones if tz in all_timezones)
-        '''
-    print >> outf, 'common_timezones_set = LazySet(common_timezones)'
+        ''', file=outf)
+    print('common_timezones_set = LazySet(common_timezones)', file=outf)
 
     outf.close()
 
