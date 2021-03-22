@@ -1,5 +1,4 @@
 # vim: set filetype=yaml sw=2:
-sudo: required
 dist: bionic
 addons:
   apt:
