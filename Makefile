@@ -16,8 +16,9 @@ PYTHON36=python3.6
 PYTHON37=python3.7
 PYTHON38=python3.8
 PYTHON39=python3.9
-PYTHON=/usr/bin/python
+PYTHON2=/usr/bin/python2
 PYTHON3=/usr/bin/python3
+PYTHON=${PYTHON3}
 IANA=./tz
 IANA_GIT=https://github.com/eggert/tz.git
 

@@ -23,7 +23,7 @@ def allzones():
     for dirpath, dirnames, filenames in os.walk(zoneinfo):
         for f in filenames:
             p = os.path.join(dirpath, f)
-            if open(p, 'rb').read(4) == 'TZif':
+            if open(p, 'rb').read(4) == b'TZif':
                 zones.append(p)
     stripnum = len(os.path.commonprefix(zones))
     zones = [z[stripnum:] for z in zones]
@@ -41,19 +41,16 @@ def allzones():
     zones = [z for z in zones if 'Riyadh8' not in z and z not in [
         'Factory', 'localtime', 'posixrules']]
     zones.sort()
+    assert len(zones) > 0
     return zones
 
 
 def links():
     '''Mapping of alias -> canonical name'''
     l = {}
-    olson_src_files = glob('tz/*')
-    assert olson_src_files, 'No src files'
+    olson_src_files = ['tz/vanguard.zi', 'tz/main.zi', 'tz/rearguard.zi']
     for filename in olson_src_files:
-        # Filenames containing a '.' are not data files.
-        if '.' in os.path.basename(filename):
-            continue
-        for line in open(filename):
+        for line in open(filename, 'r'):
             if line.strip().startswith('#') or not line.strip():
                 continue
             match = re.search(r'^\s*Link\s+([\w/\-]+)\s+([\w/\-]+)', line)
