@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import os.path
 import time
@@ -26,12 +27,12 @@ def main():
 
     pot = open(pot_file_name, 'wb')
 
-    print >> pot, boilerplate
+    print(boilerplate, file=pot)
 
     for zone in allzones():
-        print >> pot, 'msgid "%s"' % zone
-        print >> pot, 'msgstr ""'
-        print >> pot
+        print('msgid "%s"' % zone, file=pot)
+        print('msgstr ""', file=pot)
+        print(file=pot)
 
 
 if __name__ == '__main__':
