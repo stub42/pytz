@@ -66,6 +66,10 @@
 #define HAVE_LINK		1
 #endif /* !defined HAVE_LINK */
 
+#ifndef HAVE_MALLOC_ERRNO
+#define HAVE_MALLOC_ERRNO 1
+#endif
+
 #ifndef HAVE_POSIX_DECLS
 #define HAVE_POSIX_DECLS 1
 #endif
@@ -89,10 +93,6 @@
 #ifndef HAVE_SYS_STAT_H
 #define HAVE_SYS_STAT_H		1
 #endif /* !defined HAVE_SYS_STAT_H */
-
-#ifndef HAVE_SYS_WAIT_H
-#define HAVE_SYS_WAIT_H		1
-#endif /* !defined HAVE_SYS_WAIT_H */
 
 #ifndef HAVE_UNISTD_H
 #define HAVE_UNISTD_H		1
@@ -164,8 +164,15 @@
 
 #include <errno.h>
 
+#ifndef EINVAL
+# define EINVAL ERANGE
+#endif
+
 #ifndef ENAMETOOLONG
 # define ENAMETOOLONG EINVAL
+#endif
+#ifndef ENOMEM
+# define ENOMEM EINVAL
 #endif
 #ifndef ENOTSUP
 # define ENOTSUP EINVAL
@@ -217,9 +224,6 @@
 #ifndef R_OK
 #define R_OK	4
 #endif /* !defined R_OK */
-
-/* Unlike <ctype.h>'s isdigit, this also works if c < 0 | c > UCHAR_MAX. */
-#define is_digit(c) ((unsigned)(c) - '0' <= 9)
 
 /*
 ** Define HAVE_STDINT_H's default value here, rather than at the
@@ -321,6 +325,10 @@ typedef long intmax_t;
 # endif
 #endif
 
+#ifndef UINT_FAST32_MAX
+typedef unsigned long uint_fast32_t;
+#endif
+
 #ifndef UINT_FAST64_MAX
 # if defined ULLONG_MAX || defined __LONG_LONG_MAX__
 typedef unsigned long long uint_fast64_t;
@@ -361,10 +369,10 @@ typedef unsigned long uintmax_t;
 #endif
 
 #if 3 <= __GNUC__
-# define ATTRIBUTE_CONST __attribute__ ((const))
-# define ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
-# define ATTRIBUTE_PURE __attribute__ ((__pure__))
-# define ATTRIBUTE_FORMAT(spec) __attribute__ ((__format__ spec))
+# define ATTRIBUTE_CONST __attribute__((const))
+# define ATTRIBUTE_MALLOC __attribute__((__malloc__))
+# define ATTRIBUTE_PURE __attribute__((__pure__))
+# define ATTRIBUTE_FORMAT(spec) __attribute__((__format__ spec))
 #else
 # define ATTRIBUTE_CONST /* empty */
 # define ATTRIBUTE_MALLOC /* empty */
@@ -374,7 +382,7 @@ typedef unsigned long uintmax_t;
 
 #if !defined _Noreturn && __STDC_VERSION__ < 201112
 # if 2 < __GNUC__ + (8 <= __GNUC_MINOR__)
-#  define _Noreturn __attribute__ ((__noreturn__))
+#  define _Noreturn __attribute__((__noreturn__))
 # else
 #  define _Noreturn
 # endif
@@ -418,10 +426,11 @@ typedef unsigned long uintmax_t;
 # define TZ_TIME_T 0
 #endif
 
-#if TZ_TIME_T
-# ifdef LOCALTIME_IMPLEMENTATION
+#if defined LOCALTIME_IMPLEMENTATION && TZ_TIME_T
 static time_t sys_time(time_t *x) { return time(x); }
-# endif
+#endif
+
+#if TZ_TIME_T
 
 typedef time_tz tz_time_t;
 
@@ -619,7 +628,7 @@ time_t time2posix_z(timezone_t, time_t) ATTRIBUTE_PURE;
 # define bool int
 #endif
 
-#define TYPE_BIT(type)	(sizeof (type) * CHAR_BIT)
+#define TYPE_BIT(type)	(sizeof(type) * CHAR_BIT)
 #define TYPE_SIGNED(type) (((type) -1) < 0)
 #define TWOS_COMPLEMENT(t) ((t) ~ (t) 0 < 0)
 
@@ -637,7 +646,7 @@ time_t time2posix_z(timezone_t, time_t) ATTRIBUTE_PURE;
 #define TIME_T_MAX_NO_PADDING MAXVAL(time_t, TYPE_BIT(time_t))
 
 /* The extreme time values.  These are macros, not constants, so that
-   any portability problem occur only when compiling .c files that use
+   any portability problems occur only when compiling .c files that use
    the macros, which is safer for applications that need only zdump and zic.
    This implementation assumes no padding if time_t is signed and
    either the compiler lacks support for _Generic or time_t is not one
@@ -684,6 +693,19 @@ time_t time2posix_z(timezone_t, time_t) ATTRIBUTE_PURE;
 # define UNINIT_TRAP 0
 #endif
 
+#ifdef DEBUG
+# define UNREACHABLE() abort()
+#elif 4 < __GNUC__ + (5 <= __GNUC_MINOR__)
+# define UNREACHABLE() __builtin_unreachable()
+#elif defined __has_builtin
+# if __has_builtin(__builtin_unreachable)
+#  define UNREACHABLE() __builtin_unreachable()
+# endif
+#endif
+#ifndef UNREACHABLE
+# define UNREACHABLE() ((void) 0)
+#endif
+
 /*
 ** For the benefit of GNU folk...
 ** '_(MSGID)' uses the current locale's message library string for MSGID.
@@ -709,8 +731,6 @@ char *ctime_r(time_t const *, char *);
 
 /* Handy macros that are independent of tzfile implementation.  */
 
-#define YEARSPERREPEAT		400	/* years before a Gregorian repeat */
-
 #define SECSPERMIN	60
 #define MINSPERHOUR	60
 #define HOURSPERDAY	24
@@ -720,6 +740,11 @@ char *ctime_r(time_t const *, char *);
 #define SECSPERHOUR	(SECSPERMIN * MINSPERHOUR)
 #define SECSPERDAY	((int_fast32_t) SECSPERHOUR * HOURSPERDAY)
 #define MONSPERYEAR	12
+
+#define YEARSPERREPEAT		400	/* years before a Gregorian repeat */
+#define DAYSPERREPEAT		((int_fast32_t) 400 * 365 + 100 - 4 + 1)
+#define SECSPERREPEAT		((int_fast64_t) DAYSPERREPEAT * SECSPERDAY)
+#define AVGSECSPERYEAR		(SECSPERREPEAT / YEARSPERREPEAT)
 
 #define TM_SUNDAY	0
 #define TM_MONDAY	1
@@ -743,6 +768,7 @@ char *ctime_r(time_t const *, char *);
 #define TM_DECEMBER	11
 
 #define TM_YEAR_BASE	1900
+#define TM_WDAY_BASE	TM_MONDAY
 
 #define EPOCH_YEAR	1970
 #define EPOCH_WDAY	TM_THURSDAY
@@ -762,15 +788,5 @@ char *ctime_r(time_t const *, char *);
 */
 
 #define isleap_sum(a, b)	isleap((a) % 400 + (b) % 400)
-
-
-/*
-** The Gregorian year averages 365.2425 days, which is 31556952 seconds.
-*/
-
-#define AVGSECSPERYEAR		31556952L
-#define SECSPERREPEAT \
-  ((int_fast64_t) YEARSPERREPEAT * (int_fast64_t) AVGSECSPERYEAR)
-#define SECSPERREPEAT_BITS	34	/* ceil(log2(SECSPERREPEAT)) */
 
 #endif /* !defined PRIVATE_H */
