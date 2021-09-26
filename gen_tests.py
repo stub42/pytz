@@ -32,7 +32,7 @@ def main():
         # Skip bogus output on 64bit architectures, per Bug #213816
         lines = [
             line.strip() for line in zd_out.splitlines()
-            if not line.strip().endswith('NULL')]
+            if not (line.strip().endswith('NULL') or '214748' in line)]
 
         for line in lines:
             print(line, file=datf)
