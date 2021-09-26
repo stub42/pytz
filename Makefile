@@ -100,13 +100,13 @@ test_tzinfo: .stamp-tzinfo
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON} test_docs.py ${TESTARGS} \
-	    && ${PYTHON3} test_docs.py ${TESTARGS}
+	    && ${PYTHON3} test_docs.py ${TESTARGS} \
+	    && ${PYTHON2} test_docs.py ${TESTARGS}
 
 test_zdump: dist
-	${PYTHON} gen_tests.py ${TARGET} && \
-	${PYTHON} test_zdump.py ${TESTARGS} && \
+	${PYTHON3} gen_tests.py ${TARGET} && \
 	${PYTHON3} test_zdump.py ${TESTARGS} && \
+	${PYTHON2} test_zdump.py ${TESTARGS} && \
 	${PYTHON39} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
