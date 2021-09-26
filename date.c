@@ -92,7 +92,7 @@ main(const int argc, char *argv[])
 			}
 			rflag = true;
 			errno = 0;
-			secs = strtoimax (optarg, &endarg, 0);
+			secs = strtoimax(optarg, &endarg, 0);
 			if (*endarg || optarg == endarg)
 				errno = EINVAL;
 			else if (! (TIME_T_MIN <= secs && secs <= TIME_T_MAX))
@@ -138,7 +138,7 @@ dogmt(void)
 			continue;
 		fakeenv = malloc((n + 2) * sizeof *fakeenv);
 		if (fakeenv == NULL) {
-			perror(_("Memory exhausted"));
+			fprintf(stderr, _("date: Memory exhausted\n"));
 			errensure();
 			exit(retval);
 		}
