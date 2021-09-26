@@ -27,12 +27,9 @@ def main():
         # the daterange we test against - zdump understands v2 format
         # files and will output historical records we can't cope with
         # otherwise.
-        command = [zdump, '-v', '-c', '1902,2038', zone]
+        command = [zdump, '-V', '-c', '1902,2038', zone]
         zd_out = subprocess.check_output(command, encoding="utf8")
-        # Skip bogus output on 64bit architectures, per Bug #213816
-        lines = [
-            line.strip() for line in zd_out.splitlines()
-            if not (line.strip().endswith('NULL') or '214748' in line)]
+        lines = [line.strip() for line in zd_out.splitlines()]
 
         for line in lines:
             print(line, file=datf)
