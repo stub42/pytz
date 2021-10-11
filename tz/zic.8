@@ -31,7 +31,8 @@ zic \- timezone compiler
 The
 .B zic
 program reads text from the file(s) named on the command line
-and creates the time conversion information files specified in this input.
+and creates the timezone information format (TZif) files
+specified in this input.
 If a
 .I filename
 is
@@ -61,15 +62,13 @@ is
 .BR slim ,
 keep the output files small; this can help check for the bugs
 and incompatibilities.
-Although the default is currently
-.BR fat ,
-this is intended to change in future
-.B zic
-versions, as software that mishandles the 64-bit data typically
+The default is
+.BR slim ,
+as software that mishandles 64-bit data typically
 mishandles timestamps after the year 2038 anyway.
 Also see the
 .B \*-r
-option for another way to shrink output size.
+option for another way to alter output size.
 .TP
 .BI "\*-d " directory
 Create time conversion information files in the named directory rather than
@@ -85,6 +84,12 @@ will act as if the input contained a link line of the form
 .ti +.5i
 .ta \w'Link\0\0'u  +\w'\fItimezone\fP\0\0'u
 Link	\fItimezone\fP		localtime
+.sp
+If
+.I timezone
+is
+.BR \*- ,
+any already-existing link is removed.
 .TP
 .BI "\*-L " leapsecondfilename
 Read leap second information from the file with the given name.
@@ -108,7 +113,13 @@ and it should not be combined with
 .B "\*-b slim"
 if
 .IR timezone 's
-transitions are at standard time or UT instead of local time.
+transitions are at standard time or Universal Time (UT) instead of local time.
+.sp
+If
+.I timezone
+is
+.BR \*- ,
+any already-existing link is removed.
 .TP
 .BR "\*-r " "[\fB@\fP\fIlo\fP][\fB/@\fP\fIhi\fP]"
 Reduce the size of output files by limiting their applicability
@@ -203,6 +214,15 @@ code designed for older
 output formats.  These compatibility issues affect only timestamps
 before 1970 or after the start of 2038.
 .PP
+The output contains a truncated leap second table,
+which can cause some older TZif readers to misbehave.
+This can occur if the
+.B "\*-L"
+option is used, and either an Expires line is present or
+the
+.B "\*-r"
+option is also used.
+.PP
 The output file contains more than 1200 transitions,
 which may be mishandled by some clients.
 The current reference client supports at most 2000 transitions;
@@ -224,7 +244,7 @@ or that starts with
 .RE
 .SH FILES
 Input files use the format described in this section; output files use
-.IR tzfile (5)
+.BR tzfile (5)
 format.
 .PP
 Input files should be text files, that is, they should be a series of
@@ -232,7 +252,7 @@ zero or more lines, each ending in a newline byte and containing at
 most 511 bytes, and without any NUL bytes.  The input text's encoding
 is typically UTF-8 or ASCII; it should have a unibyte representation
 for the POSIX Portable Character Set (PPCS)
-\*<http://pubs\*:.opengroup\*:.org/\*:onlinepubs/\*:9699919799/\*:basedefs/\*:V1_chap06\*:.html\*>
+\*<https://pubs\*:.opengroup\*:.org/\*:onlinepubs/\*:9699919799/\*:basedefs/\*:V1_chap06\*:.html\*>
 and the encoding's non-unibyte characters should consist entirely of
 non-PPCS bytes.  Non-PPCS characters typically occur only in comments:
 although output file names and time zone abbreviations can contain
@@ -268,9 +288,9 @@ abbreviation must be unambiguous in context.
 A rule line has the form
 .nf
 .ti +.5i
-.ta \w'Rule\0\0'u +\w'NAME\0\0'u +\w'FROM\0\0'u +\w'1973\0\0'u +\w'TYPE\0\0'u +\w'Apr\0\0'u +\w'lastSun\0\0'u +\w'2:00w\0\0'u +\w'1:00d\0\0'u
+.ta \w'Rule\0\0'u +\w'NAME\0\0'u +\w'FROM\0\0'u +\w'1973\0\0'u +\w'\*-\0\0'u +\w'Apr\0\0'u +\w'lastSun\0\0'u +\w'2:00w\0\0'u +\w'1:00d\0\0'u
 .sp
-Rule	NAME	FROM	TO	TYPE	IN	ON	AT	SAVE	LETTER/S
+Rule	NAME	FROM	TO	\*-	IN	ON	AT	SAVE	LETTER/S
 .sp
 For example:
 .ti +.5i
@@ -319,12 +339,17 @@ may be used to repeat the value of the
 .B FROM
 field.
 .TP
-.B TYPE
-should be
+.B \*-
+Is a reserved field and should always contain
 .q \*-
-and is present for compatibility with older versions of
-.B zic
-in which it could contain year types.
+for compatibility with older versions of
+.BR zic .
+It was previously known as the
+.B TYPE
+field, which could contain values to allow a
+separate script to further restrict in which
+.q types
+of years the rule would apply.
 .TP
 .B IN
 Names the month in which the rule takes effect.
@@ -525,7 +550,7 @@ using the shortest form that does not lose information, where
 .IR mm ,
 and
 .I ss
-are the hours, minutes, and seconds east (+) or west (\(mi) of UT.
+are the hours, minutes, and seconds east (+) or west (\-) of UT.
 Alternatively,
 a slash (/)
 separates standard and daylight abbreviations.
@@ -575,6 +600,42 @@ first transition into standard time.
 In a single zone it is an error if two rules take effect at the same
 instant, or if two zone changes take effect at the same instant.
 .PP
+If a continuation line subtracts
+.I N
+seconds from the UT offset after a transition that would be
+interpreted to be later if using the continuation line's UT offset and
+rules, the
+.q "until"
+time of the previous zone or continuation line is interpreted
+according to the continuation line's UT offset and rules, and any rule
+that would otherwise take effect in the next
+.I N
+seconds is instead assumed to take effect simultaneously.
+For example:
+.br
+.ne 7
+.nf
+.in +2m
+.ta \w'# Rule\0\0'u +\w'NAME\0\0'u +\w'FROM\0\0'u +\w'2006\0\0'u +\w'\*-\0\0'u +\w'Oct\0\0'u +\w'lastSun\0\0'u +\w'2:00\0\0'u +\w'SAVE\0\0'u
+.sp
+# Rule	NAME	FROM	TO	\*-	IN	ON	AT	SAVE	LETTER/S
+Rule	US	1967	2006	-	Oct	lastSun	2:00	0	S
+Rule	US	1967	1973	-	Apr	lastSun	2:00	1:00	D
+.ta \w'Zone\0\0America/Menominee\0\0'u +\w'STDOFF\0\0'u +\w'RULES\0\0'u +\w'FORMAT\0\0'u
+# Zone\0\0NAME	STDOFF	RULES	FORMAT	[UNTIL]
+Zone\0\0America/Menominee	\*-5:00	\*-	EST	1973 Apr 29 2:00
+	\*-6:00	US	C%sT
+.sp
+.in
+.fi
+Here, an incorrect reading would be there were two clock changes on 1973-04-29,
+the first from 02:00 EST (\*-05) to 01:00 CST (\*-06),
+and the second an hour later from 02:00 CST (\*-06) to 03:00 CDT (\*-05).
+However,
+.B zic
+interprets this more sensibly as a single transition from 02:00 CST (\*-05) to
+02:00 CDT (\*-05).
+.PP
 A link line has the form
 .sp
 .nf
@@ -606,7 +667,9 @@ However, the behavior is unspecified if multiple zone or link lines
 define the same name, or if the source of one link line is the target
 of another.
 .PP
-Lines in the file that describes leap seconds have the following form:
+The file that describes leap seconds can have leap lines and an
+expiration line.
+Leap lines have the following form:
 .nf
 .ti +.5i
 .ta \w'Leap\0\0'u +\w'YEAR\0\0'u +\w'MONTH\0\0'u +\w'DAY\0\0'u +\w'HH:MM:SS\0\0'u +\w'CORR\0\0'u
@@ -646,6 +709,40 @@ or
 .q "Rolling"
 if the leap second time given by the other fields should be interpreted as
 local (wall clock) time.
+.PP
+Rolling leap seconds were implemented back when it was not
+clear whether common practice was rolling or stationary,
+with concerns that one would see
+Times Square ball drops where there'd be a
+.q "3... 2... 1... leap... Happy New Year"
+countdown, placing the leap second at
+midnight New York time rather than midnight UTC.
+However, this countdown style does not seem to have caught on,
+which means rolling leap seconds are not used in practice;
+also, they are not supported if the
+.B \*-r
+option is used.
+.PP
+The expiration line, if present, has the form:
+.nf
+.ti +.5i
+.ta \w'Expires\0\0'u +\w'YEAR\0\0'u +\w'MONTH\0\0'u +\w'DAY\0\0'u
+.sp
+Expires	YEAR	MONTH	DAY	HH:MM:SS
+.sp
+For example:
+.ti +.5i
+.sp
+Expires	2020	Dec	28	00:00:00
+.sp
+.fi
+The
+.BR YEAR ,
+.BR MONTH ,
+.BR DAY ,
+and
+.B HH:MM:SS
+fields give the expiration timestamp in UTC for the leap second table;
 .SH "EXTENDED EXAMPLE"
 Here is an extended example of
 .B zic
@@ -656,9 +753,9 @@ and for its predecessor organization, the European Communities.
 .ne 22
 .nf
 .in +2m
-.ta \w'# Rule\0\0'u +\w'NAME\0\0'u +\w'FROM\0\0'u +\w'1973\0\0'u +\w'TYPE\0\0'u +\w'Apr\0\0'u +\w'lastSun\0\0'u +\w'2:00\0\0'u +\w'SAVE\0\0'u
+.ta \w'# Rule\0\0'u +\w'NAME\0\0'u +\w'FROM\0\0'u +\w'1973\0\0'u +\w'\*-\0\0'u +\w'Apr\0\0'u +\w'lastSun\0\0'u +\w'2:00\0\0'u +\w'SAVE\0\0'u
 .sp
-# Rule	NAME	FROM	TO	TYPE	IN	ON	AT	SAVE	LETTER/S
+# Rule	NAME	FROM	TO	\*-	IN	ON	AT	SAVE	LETTER/S
 Rule	Swiss	1941	1942	\*-	May	Mon>=1	1:00	1:00	S
 Rule	Swiss	1941	1942	\*-	Oct	Mon>=1	2:00	0	\*-
 .sp .5

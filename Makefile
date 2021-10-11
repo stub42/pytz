@@ -14,8 +14,12 @@ PYTHON34=python3.4
 PYTHON35=python3.5
 PYTHON36=python3.6
 PYTHON37=python3.7
-PYTHON=/usr/bin/python
+PYTHON38=python3.8
+PYTHON39=python3.9
+PYTHON310=python3.10
+PYTHON2=/usr/bin/python2
 PYTHON3=/usr/bin/python3
+PYTHON=${PYTHON3}
 IANA=./tz
 IANA_GIT=https://github.com/eggert/tz.git
 
@@ -75,7 +79,10 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON34} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON35} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON36} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON37} test_lazy.py ${TESTARGS}
+	    && ${PYTHON37} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON38} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON39} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON310} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -89,17 +96,21 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON34} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON35} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON36} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON37} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON37} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON38} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON39} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON310} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
-	    && ${PYTHON} test_docs.py ${TESTARGS} \
-	    && ${PYTHON3} test_docs.py ${TESTARGS}
+	    && ${PYTHON3} test_docs.py ${TESTARGS} \
+	    && ${PYTHON2} test_docs.py ${TESTARGS}
 
 test_zdump: dist
-	${PYTHON} gen_tests.py ${TARGET} && \
-	${PYTHON} test_zdump.py ${TESTARGS} && \
-	${PYTHON3} test_zdump.py ${TESTARGS}
+	${PYTHON3} gen_tests.py ${TARGET} && \
+	${PYTHON3} test_zdump.py ${TESTARGS} && \
+	${PYTHON2} test_zdump.py ${TESTARGS} && \
+	${PYTHON310} test_zdump.py ${TESTARGS}
 
 build/dist/test_zdump.py: .stamp-zoneinfo
 
@@ -108,7 +119,7 @@ doc: docs
 docs: dist
 	mkdir -p build/docs/source/.static
 	mkdir -p build/docs/built
-	cp src/README.txt build/docs/source/index.txt
+	cp src/README.rst build/docs/source/index.txt
 	cp conf.py build/docs/source/conf.py
 	sphinx-build build/docs/source build/docs/built
 	chmod -R og-w build/docs/built
@@ -131,7 +142,7 @@ upload_docs_pythonhosted: docs
 	touch $@
 
 .stamp-zoneinfo:
-	${MAKE} -C ${IANA} TOPDIR=`pwd`/build USRDIR= USRSHAREDIR=etc install
+	${MAKE} -C ${IANA} ZFLAGS='-b fat' TOPDIR=`pwd`/build USRDIR= USRSHAREDIR=etc install
 	# Break hard links, working around http://bugs.python.org/issue8876.
 	for d in zoneinfo zoneinfo-leaps zoneinfo-posix; do \
 	    rm -rf `pwd`/build/etc/$$d.tmp; \
