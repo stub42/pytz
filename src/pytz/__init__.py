@@ -86,7 +86,7 @@ def open_resource(name):
     """
     name_parts = name.lstrip('/').split('/')
     for part in name_parts:
-        if part == os.path.pardir or os.path.sep in part:
+        if part == os.path.pardir or os.sep in part:
             raise ValueError('Bad path segment: %r' % part)
     zoneinfo_dir = os.environ.get('PYTZ_TZDATADIR', None)
     if zoneinfo_dir is not None:
