@@ -31,18 +31,6 @@
 #include <locale.h>
 #include <stdio.h>
 
-/*
-** The two things date knows about time are. . .
-*/
-
-#ifndef TM_YEAR_BASE
-#define TM_YEAR_BASE	1900
-#endif /* !defined TM_YEAR_BASE */
-
-#ifndef SECSPERMIN
-#define SECSPERMIN	60
-#endif /* !defined SECSPERMIN */
-
 #if !HAVE_POSIX_DECLS
 extern char *		optarg;
 extern int		optind;
@@ -70,9 +58,9 @@ main(const int argc, char *argv[])
 	setlocale(LC_ALL, "");
 #endif /* defined(LC_ALL) */
 #if HAVE_GETTEXT
-#ifdef TZ_DOMAINDIR
+# ifdef TZ_DOMAINDIR
 	bindtextdomain(TZ_DOMAIN, TZ_DOMAINDIR);
-#endif /* defined(TEXTDOMAINDIR) */
+# endif /* defined(TEXTDOMAINDIR) */
 	textdomain(TZ_DOMAIN);
 #endif /* HAVE_GETTEXT */
 	t = time(NULL);
@@ -132,7 +120,7 @@ dogmt(void)
 		register int	from;
 		register int	to;
 		register int	n;
-		static char	tzegmt0[] = "TZ=GMT0";
+		static char	tzeutc0[] = "TZ=UTC0";
 
 		for (n = 0;  environ[n] != NULL;  ++n)
 			continue;
@@ -143,7 +131,7 @@ dogmt(void)
 			exit(retval);
 		}
 		to = 0;
-		fakeenv[to++] = tzegmt0;
+		fakeenv[to++] = tzeutc0;
 		for (from = 1; environ[from] != NULL; ++from)
 			if (strncmp(environ[from], "TZ=", 3) != 0)
 				fakeenv[to++] = environ[from];
@@ -192,8 +180,6 @@ display(char const *format, time_t now)
 	}
 }
 
-#define INCR	1024
-
 static void
 timeout(FILE *fp, char const *format, struct tm const *tmp)
 {
@@ -201,6 +187,7 @@ timeout(FILE *fp, char const *format, struct tm const *tmp)
 	size_t	result;
 	size_t	size;
 	struct tm tm;
+	int INCR = 1024;
 
 	if (!tmp) {
 		fprintf(stderr, _("date: error: time out of range\n"));
