@@ -585,7 +585,7 @@ Further Reading
 ~~~~~~~~~~~~~~~
 
 More info than you want to know about timezones:
-http://www.twinsun.com/tz/tz-link.htm
+https://data.iana.org/time-zones/tz-link.html
 
 
 Contact
