@@ -758,10 +758,9 @@ class CommonTimezonesTestCase(unittest.TestCase):
         self.assertTrue('US/Eastern' in pytz.common_timezones_set)
 
     def test_belfast(self):
-        # Belfast uses London time.
         self.assertTrue('Europe/Belfast' in pytz.all_timezones_set)
-        self.assertFalse('Europe/Belfast' in pytz.common_timezones)
-        self.assertFalse('Europe/Belfast' in pytz.common_timezones_set)
+        self.assertTrue('Europe/Belfast' in pytz.common_timezones)
+        self.assertTrue('Europe/Belfast' in pytz.common_timezones_set)
 
 
 class ZoneCaseInsensitivityTestCase(unittest.TestCase):
