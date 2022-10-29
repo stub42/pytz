@@ -14,14 +14,16 @@ import pytz
 class ZdumpTestCase(unittest.TestCase):
     def utc_to_local_check(self, zone, utc_dt, loc_dt, loc_tzname, is_dst):
         loc_tz = pytz.timezone(zone)
-        self.failUnlessEqual(
+        self.assertEqual(
             utc_dt.astimezone(loc_tz).replace(tzinfo=None),
-            loc_dt.replace(tzinfo=None))
+            loc_dt.replace(tzinfo=None)
+        )
 
     def local_to_utc_check(self, zone, utc_dt, loc_dt, loc_tzname, is_dst):
-        self.failUnlessEqual(
+        self.assertEqual(
             loc_dt.astimezone(pytz.utc).replace(tzinfo=None),
-            utc_dt.replace(tzinfo=None))
+            utc_dt.replace(tzinfo=None)
+        )
 
 
 def test_suite():
@@ -133,6 +135,7 @@ def test_suite():
     while testcases:
         suite.addTest(unittest.makeSuite(testcases.pop()))
     return suite
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
