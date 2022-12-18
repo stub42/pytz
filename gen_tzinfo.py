@@ -121,10 +121,10 @@ def add_allzones(filename):
             cz.append(zone)
     cz.sort()
 
-    print('all_timezones_unchecked = \\', file=outf)
+    print('_all_timezones_unchecked = \\', file=outf)
     pprint(sorted(allzones()), outf)
     print('''all_timezones = LazyList(
-        tz for tz in all_timezones_unchecked if resource_exists(tz))
+        tz for tz in _all_timezones_unchecked if resource_exists(tz))
         ''', file=outf)
     print('all_timezones_set = LazySet(all_timezones)', file=outf)
     # Per lp:1835784 we can't afford to do this at import time
