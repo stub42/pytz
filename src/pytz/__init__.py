@@ -202,7 +202,9 @@ def _case_insensitive_zone_lookup(zone):
     """case-insensitively matching timezone, else return zone unchanged"""
     global _all_timezones_lower_to_standard
     if _all_timezones_lower_to_standard is None:
+        global _all_timezones_unchecked
         _all_timezones_lower_to_standard = dict((tz.lower(), tz) for tz in _all_timezones_unchecked)  # noqa
+        del _all_timezones_unchecked
     return _all_timezones_lower_to_standard.get(zone.lower()) or zone  # noqa
 
 
