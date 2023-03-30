@@ -539,7 +539,7 @@ class NoumeaDSTEndTestCase(USEasternDSTStartTestCase):
 
 
 class NoumeaNoMoreDSTTestCase(NoumeaDSTEndTestCase):
-    # Noumea dropped DST in 1997. Here we test that it stops occuring.
+    # Noumea dropped DST in 1997. Here we test that it stops occurring.
     transition_time = (
         NoumeaDSTEndTestCase.transition_time + timedelta(days=365 * 10))
     before = NoumeaDSTEndTestCase.after

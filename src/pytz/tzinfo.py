@@ -355,7 +355,7 @@ class DstTzInfo(BaseTzInfo):
                     is_dst=False) + timedelta(hours=6)
 
         # If we get this far, we have multiple possible timezones - this
-        # is an ambiguous case occuring during the end-of-DST transition.
+        # is an ambiguous case occurring during the end-of-DST transition.
 
         # If told to be strict, raise an exception since we have an
         # ambiguous case
