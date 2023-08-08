@@ -1621,8 +1621,8 @@ Rule	Iran	2021	2022	-	Sep	21	24:00	0	-
 Zone	Asia/Tehran	3:25:44	-	LMT	1916
 			3:25:44	-	TMT	1935 Jun 13 # Tehran Mean Time
 			3:30	Iran	+0330/+0430 1977 Oct 20 24:00
-			3:30	Iran	+04/+05	1979
-			3:30	Iran	+0330/+0430
+			4:30	Iran	+04/+05	1979
+			3:30	Iran	+0330
 
 
 # Iraq
