@@ -24,7 +24,7 @@ def memorized_timedelta(seconds):
         _timedelta_cache[seconds] = delta
         return delta
 
-_epoch = datetime.fromtimestamp(0, tz=timezone.utc)
+_epoch = datetime.fromtimestamp(0, tz=timezone.utc).replace(tzinfo=None)
 _datetime_cache = {0: _epoch}
 
 
@@ -33,8 +33,8 @@ def memorized_datetime(seconds):
     try:
         return _datetime_cache[seconds]
     except KeyError:
-        # NB. We can't just do datetime.fromtimestamp(seconds, tz=timezone.utc) as this
-        # fails with negative values under Windows (Bug #90096)
+        # NB. We can't just do datetime.fromtimestamp(seconds, tz=timezone.utc).replace(tzinfo=None)
+        # as this fails with negative values under Windows (Bug #90096)
         dt = _epoch + timedelta(seconds=seconds)
         _datetime_cache[seconds] = dt
         return dt
