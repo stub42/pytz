@@ -1,6 +1,6 @@
 '''Base classes and helpers for building zone specific tzinfo classes'''
 
-from datetime import datetime, timedelta, tzinfo
+from datetime import datetime, timedelta, timezone, tzinfo
 from bisect import bisect_right
 try:
     set
@@ -24,7 +24,7 @@ def memorized_timedelta(seconds):
         _timedelta_cache[seconds] = delta
         return delta
 
-_epoch = datetime.utcfromtimestamp(0)
+_epoch = datetime.fromtimestamp(0, tz=timezone.utc).replace(tzinfo=None)
 _datetime_cache = {0: _epoch}
 
 
@@ -33,8 +33,8 @@ def memorized_datetime(seconds):
     try:
         return _datetime_cache[seconds]
     except KeyError:
-        # NB. We can't just do datetime.utcfromtimestamp(seconds) as this
-        # fails with negative values under Windows (Bug #90096)
+        # NB. We can't just do datetime.fromtimestamp(seconds, tz=timezone.utc).replace(tzinfo=None)
+        # as this fails with negative values under Windows (Bug #90096)
         dt = _epoch + timedelta(seconds=seconds)
         _datetime_cache[seconds] = dt
         return dt
@@ -355,7 +355,7 @@ class DstTzInfo(BaseTzInfo):
                     is_dst=False) + timedelta(hours=6)
 
         # If we get this far, we have multiple possible timezones - this
-        # is an ambiguous case occuring during the end-of-DST transition.
+        # is an ambiguous case occurring during the end-of-DST transition.
 
         # If told to be strict, raise an exception since we have an
         # ambiguous case
