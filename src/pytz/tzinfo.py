@@ -1,6 +1,6 @@
 '''Base classes and helpers for building zone specific tzinfo classes'''
 
-from datetime import datetime, timedelta, timezone, tzinfo
+from datetime import datetime, timedelta, tzinfo
 from bisect import bisect_right
 try:
     set
@@ -24,7 +24,8 @@ def memorized_timedelta(seconds):
         _timedelta_cache[seconds] = delta
         return delta
 
-_epoch = datetime.fromtimestamp(0, tz=timezone.utc).replace(tzinfo=None)
+
+_epoch = datetime(1970, 1, 1, 0, 0) # datetime.utcfromtimestamp(0)
 _datetime_cache = {0: _epoch}
 
 
@@ -38,6 +39,7 @@ def memorized_datetime(seconds):
         dt = _epoch + timedelta(seconds=seconds)
         _datetime_cache[seconds] = dt
         return dt
+
 
 _ttinfo_cache = {}
 
@@ -54,6 +56,7 @@ def memorized_ttinfo(*args):
         )
         _ttinfo_cache[args] = ttinfo
         return ttinfo
+
 
 _notime = memorized_timedelta(0)
 
