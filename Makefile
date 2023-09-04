@@ -18,6 +18,7 @@ PYTHON38=python3.8
 PYTHON39=python3.9
 PYTHON310=python3.10
 PYTHON311=python3.11
+PYTHON312=python3.12
 PYTHON2=/usr/bin/python2
 PYTHON3=/usr/bin/python3
 PYTHON=${PYTHON3}
@@ -84,7 +85,8 @@ test_lazy: .stamp-tzinfo
 	    && ${PYTHON38} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON39} test_lazy.py ${TESTARGS} \
 	    && ${PYTHON310} test_lazy.py ${TESTARGS} \
-	    && ${PYTHON311} test_lazy.py ${TESTARGS}
+	    && ${PYTHON311} test_lazy.py ${TESTARGS} \
+	    && ${PYTHON312} test_lazy.py ${TESTARGS}
 
 test_tzinfo: .stamp-tzinfo
 	cd build/dist/pytz/tests \
@@ -102,7 +104,8 @@ test_tzinfo: .stamp-tzinfo
 	    && ${PYTHON38} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON39} test_tzinfo.py ${TESTARGS} \
 	    && ${PYTHON310} test_tzinfo.py ${TESTARGS} \
-	    && ${PYTHON311} test_tzinfo.py ${TESTARGS}
+	    && ${PYTHON311} test_tzinfo.py ${TESTARGS} \
+	    && ${PYTHON312} test_tzinfo.py ${TESTARGS}
 
 test_docs: .stamp-tzinfo
 	cd build/dist/pytz/tests \
