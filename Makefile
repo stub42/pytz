@@ -41,7 +41,7 @@ build: .stamp-tzinfo
 dist: build wheels
 	cd build/dist && mkdir -p ../tarballs && \
 	${PYTHON} setup.py -q sdist --dist-dir ../tarballs \
-	    --formats=bztar,gztar,zip
+	    --formats=gztar
 
 wheels:
 	cd build/dist && mkdir -p ../tarballs
