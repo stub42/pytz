@@ -18,11 +18,15 @@
 */
 
 /* PORT_TO_C89 means the code should work even if the underlying
-   compiler and library support only C89.  SUPPORT_C89 means the
+   compiler and library support only C89 plus C99's 'long long'
+   and perhaps a few other extensions to C89.  SUPPORT_C89 means the
    tzcode library should support C89 callers in addition to the usual
-   support for C99-and-later callers.  These macros are obsolescent,
+   support for C99-and-later callers; however, C89 support can trigger
+   latent bugs in C99-and-later callers.  These macros are obsolescent,
    and the plan is to remove them along with any code needed only when
-   they are nonzero.  */
+   they are nonzero.  A good time to do that might be in the year 2029
+   because RHEL 7 (whose GCC defaults to C89) extended life cycle
+   support (ELS) is scheduled to end on 2028-06-30.  */
 #ifndef PORT_TO_C89
 # define PORT_TO_C89 0
 #endif
@@ -70,9 +74,7 @@
 #endif
 
 #if !defined HAVE__GENERIC && defined __has_extension
-# if __has_extension(c_generic_selections)
-#  define HAVE__GENERIC 1
-# else
+# if !__has_extension(c_generic_selections)
 #  define HAVE__GENERIC 0
 # endif
 #endif
