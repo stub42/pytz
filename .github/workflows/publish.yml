@@ -1,8 +1,8 @@
 name: Publish
 on:
   push:
-      tags:
-        - 'release_*'
+    tags:
+      - 'release_*'
   workflow_dispatch: {}
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
     needs: ['build']
     environment: 'publish'
 
-    name: upload release to PyPI
+    name: Upload release to PyPI
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -58,5 +58,16 @@ jobs:
         with:
           packages-dir: artifact/
 
+  gh-publish:
+    needs: ['build']
+    environment: 'ghpublish'
 
+    name: Upload release to Github
+    runs-on: ubuntu-latest
 
+    steps:
+      - uses: actions/download-artifact@v3
+      - name: Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifact/*
