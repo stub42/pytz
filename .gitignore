@@ -2,12 +2,18 @@
 # This file is in the public domain.
 *.a
 *.asc
+*.ck
+*.ckd/
 *.diff
+*.dir/
 *.i
 *.o
 *.orig
 *.patch
+*.pdf
+*.ps
 *.rej
+*.s
 *.tar
 *.tar.*
 *.txt
@@ -15,13 +21,11 @@
 *.zi
 *~
 ChangeLog
-check_*
 date
 leapseconds
 tzdir.h
 tzselect
 version
 version.h
-yearistype
 zdump
 zic
