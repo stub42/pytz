@@ -128,6 +128,6 @@ if __name__ == '__main__':
     base = os.path.join(os.path.dirname(__file__), 'zoneinfo')
     tz = build_tzinfo('Australia/Melbourne',
                       open(os.path.join(base, 'Australia', 'Melbourne'), 'rb'))
-    tz = build_tzinfo('US/Eastern',
-                      open(os.path.join(base, 'US', 'Eastern'), 'rb'))
+    tz = build_tzinfo('America/New_York',
+                      open(os.path.join(base, 'America', 'New_York'), 'rb'))
     pprint(tz._utc_transition_times)
