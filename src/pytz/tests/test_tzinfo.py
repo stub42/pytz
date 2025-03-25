@@ -98,7 +98,7 @@ class BasicTest(unittest.TestCase):
         # This tzinfo behavior is required to make
         # datetime.time.{utcoffset, dst, tzname} work as documented.
 
-        dst_tz = pytz.timezone('US/Eastern')
+        dst_tz = pytz.timezone('America/New_York')
 
         # This information is not known when we don't have a date,
         # so return None per API.
@@ -106,7 +106,7 @@ class BasicTest(unittest.TestCase):
         self.assertIsNone(dst_tz.dst(None))
         # We don't know the abbreviation, but this is still a valid
         # tzname per the Python documentation.
-        self.assertEqual(dst_tz.tzname(None), 'US/Eastern')
+        self.assertEqual(dst_tz.tzname(None), 'America/New_York')
 
     def clearCache(self):
         pytz._tzinfo_cache.clear()
@@ -116,12 +116,12 @@ class BasicTest(unittest.TestCase):
         # and traditional strings, and that the desired singleton is
         # returned.
         self.clearCache()
-        eastern = pytz.timezone(unicode('US/Eastern'))
-        self.assertIs(eastern, pytz.timezone('US/Eastern'))
+        eastern = pytz.timezone(unicode('America/New_York'))
+        self.assertIs(eastern, pytz.timezone('America/New_York'))
 
         self.clearCache()
-        eastern = pytz.timezone('US/Eastern')
-        self.assertIs(eastern, pytz.timezone(unicode('US/Eastern')))
+        eastern = pytz.timezone('America/New_York')
+        self.assertIs(eastern, pytz.timezone(unicode('America/New_York')))
 
     def testStaticTzInfo(self):
         # Ensure that static timezones are correctly detected,
@@ -204,11 +204,11 @@ class PicklingTest(unittest.TestCase):
         # where created with pytz2006j
         east1 = pickle.loads(
             _byte_string(
-                "cpytz\n_p\np1\n(S'US/Eastern'\np2\nI-18000\n"
+                "cpytz\n_p\np1\n(S'America/New_York'\np2\nI-18000\n"
                 "I0\nS'EST'\np3\ntRp4\n."
             )
         )
-        east2 = pytz.timezone('US/Eastern').localize(
+        east2 = pytz.timezone('America/New_York').localize(
             datetime(2006, 1, 1)).tzinfo
         self.assertIs(east1, east2)
 
@@ -227,8 +227,8 @@ class PicklingTest(unittest.TestCase):
         self.assertIs(gmt1, gmt2)
 
 
-class USEasternDSTStartTestCase(unittest.TestCase):
-    tzinfo = pytz.timezone('US/Eastern')
+class AmericaNewYorkDSTStartTestCase(unittest.TestCase):
+    tzinfo = pytz.timezone('America/New_York')
 
     # 24 hours before DST changeover
     transition_time = datetime(2002, 4, 7, 7, 0, 0, tzinfo=UTC)
@@ -353,8 +353,8 @@ class USEasternDSTStartTestCase(unittest.TestCase):
         )
 
 
-class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
-    tzinfo = pytz.timezone('US/Eastern')
+class AmericaNewYorkDSTEndTestCase(AmericaNewYorkDSTStartTestCase):
+    tzinfo = pytz.timezone('America/New_York')
     transition_time = datetime(2002, 10, 27, 6, 0, 0, tzinfo=UTC)
     before = {
         'tzname': 'EDT',
@@ -368,7 +368,7 @@ class USEasternDSTEndTestCase(USEasternDSTStartTestCase):
     }
 
 
-class USEasternEPTStartTestCase(USEasternDSTStartTestCase):
+class AmericaNewYorkEPTStartTestCase(AmericaNewYorkDSTStartTestCase):
     transition_time = datetime(1945, 8, 14, 23, 0, 0, tzinfo=UTC)
     before = {
         'tzname': 'EWT',
@@ -382,7 +382,7 @@ class USEasternEPTStartTestCase(USEasternDSTStartTestCase):
     }
 
 
-class USEasternEPTEndTestCase(USEasternDSTStartTestCase):
+class AmericaNewYorkEPTEndTestCase(AmericaNewYorkDSTStartTestCase):
     transition_time = datetime(1945, 9, 30, 6, 0, 0, tzinfo=UTC)
     before = {
         'tzname': 'EPT',
@@ -396,7 +396,7 @@ class USEasternEPTEndTestCase(USEasternDSTStartTestCase):
     }
 
 
-class WarsawWMTEndTestCase(USEasternDSTStartTestCase):
+class WarsawWMTEndTestCase(AmericaNewYorkDSTStartTestCase):
     # In 1915, Warsaw changed from Warsaw to Central European time.
     # This involved the clocks being set backwards, causing a end-of-DST
     # like situation without DST being involved.
@@ -414,7 +414,7 @@ class WarsawWMTEndTestCase(USEasternDSTStartTestCase):
     }
 
 
-class VilniusWMTEndTestCase(USEasternDSTStartTestCase):
+class VilniusWMTEndTestCase(AmericaNewYorkDSTStartTestCase):
     # At the end of 1916, Vilnius changed timezones putting its clock
     # forward by 11 minutes 35 seconds. Neither timezone was in DST mode.
     tzinfo = pytz.timezone('Europe/Vilnius')
@@ -432,7 +432,7 @@ class VilniusWMTEndTestCase(USEasternDSTStartTestCase):
     }
 
 
-class VilniusCESTStartTestCase(USEasternDSTStartTestCase):
+class VilniusCESTStartTestCase(AmericaNewYorkDSTStartTestCase):
     # In 1941, Vilnius changed from MSG to CEST, switching to summer
     # time while simultaneously reducing its UTC offset by two hours,
     # causing the clocks to go backwards for this summer time
@@ -451,7 +451,7 @@ class VilniusCESTStartTestCase(USEasternDSTStartTestCase):
     }
 
 
-class LondonHistoryStartTestCase(USEasternDSTStartTestCase):
+class LondonHistoryStartTestCase(AmericaNewYorkDSTStartTestCase):
     # The first known timezone transition in London was in 1847 when
     # clocks where synchronized to GMT. However, we currently only
     # understand v1 format tzfile(5) files which does handle years
@@ -482,7 +482,7 @@ class LondonHistoryStartTestCase(USEasternDSTStartTestCase):
     }
 
 
-class LondonHistoryEndTestCase(USEasternDSTStartTestCase):
+class LondonHistoryEndTestCase(AmericaNewYorkDSTStartTestCase):
     # Timezone switchovers are projected into the future, even
     # though no official statements exist or could be believed even
     # if they did exist. We currently only check the last known
@@ -503,7 +503,7 @@ class LondonHistoryEndTestCase(USEasternDSTStartTestCase):
     }
 
 
-class NoumeaHistoryStartTestCase(USEasternDSTStartTestCase):
+class NoumeaHistoryStartTestCase(AmericaNewYorkDSTStartTestCase):
     # Noumea adopted a whole hour offset in 1912. Previously
     # it was 11 hours, 5 minutes and 48 seconds off UTC. However,
     # due to limitations of the Python datetime library, we need
@@ -522,7 +522,7 @@ class NoumeaHistoryStartTestCase(USEasternDSTStartTestCase):
     }
 
 
-class NoumeaDSTEndTestCase(USEasternDSTStartTestCase):
+class NoumeaDSTEndTestCase(AmericaNewYorkDSTStartTestCase):
     # Noumea dropped DST in 1997.
     tzinfo = pytz.timezone('Pacific/Noumea')
     transition_time = datetime(1997, 3, 1, 15, 00, 00, tzinfo=UTC)
@@ -546,7 +546,7 @@ class NoumeaNoMoreDSTTestCase(NoumeaDSTEndTestCase):
     after = NoumeaDSTEndTestCase.after
 
 
-class TahitiTestCase(USEasternDSTStartTestCase):
+class TahitiTestCase(AmericaNewYorkDSTStartTestCase):
     # Tahiti has had a single transition in its history.
     tzinfo = pytz.timezone('Pacific/Tahiti')
     transition_time = datetime(1912, 10, 1, 9, 58, 16, tzinfo=UTC)
@@ -562,7 +562,7 @@ class TahitiTestCase(USEasternDSTStartTestCase):
     }
 
 
-class SamoaInternationalDateLineChange(USEasternDSTStartTestCase):
+class SamoaInternationalDateLineChange(AmericaNewYorkDSTStartTestCase):
     # At the end of 2011, Samoa will switch from being east of the
     # international dateline to the west. There will be no Dec 30th
     # 2011 and it will switch from UTC-10 to UTC+14.
@@ -580,7 +580,7 @@ class SamoaInternationalDateLineChange(USEasternDSTStartTestCase):
     }
 
 
-class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
+class ReferenceAmericaNewYorkDSTStartTestCase(AmericaNewYorkDSTStartTestCase):
     tzinfo = reference.Eastern
 
     def test_arithmetic(self):
@@ -588,13 +588,13 @@ class ReferenceUSEasternDSTStartTestCase(USEasternDSTStartTestCase):
         pass
 
 
-class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
+class ReferenceAmericaNewYorkDSTEndTestCase(AmericaNewYorkDSTEndTestCase):
     tzinfo = reference.Eastern
 
     def testHourBefore(self):
         # Python's datetime library has a bug, where the hour before
         # a daylight saving transition is one hour out. For example,
-        # at the end of US/Eastern daylight saving time, 01:00 EST
+        # at the end of America/New_York daylight saving time, 01:00 EST
         # occurs twice (once at 05:00 UTC and once at 06:00 UTC),
         # whereas the first should actually be 01:00 EDT.
         # Note that this bug is by design - by accepting this ambiguity
@@ -612,7 +612,7 @@ class ReferenceUSEasternDSTEndTestCase(USEasternDSTEndTestCase):
 
 class LocalTestCase(unittest.TestCase):
     def testLocalize(self):
-        loc_tz = pytz.timezone('US/Eastern')
+        loc_tz = pytz.timezone('America/New_York')
 
         # End of DST ambiguity check
         loc_time = loc_tz.localize(datetime(1918, 10, 27, 1, 59, 59), is_dst=1)
@@ -671,7 +671,7 @@ class LocalTestCase(unittest.TestCase):
                 self.assertEqual(loc_time.strftime(fmt), expected[not dst])
 
     def testNormalize(self):
-        tz = pytz.timezone('US/Eastern')
+        tz = pytz.timezone('America/New_York')
         dt = datetime(2004, 4, 4, 7, 0, 0, tzinfo=UTC).astimezone(tz)
         dt2 = dt - timedelta(minutes=10)
         self.assertEqual(
@@ -706,9 +706,9 @@ class CommonTimezonesTestCase(unittest.TestCase):
         self.assertIn('Europe/Bratislava', pytz.common_timezones)
         self.assertIn('Europe/Bratislava', pytz.common_timezones_set)
 
-    def test_us_eastern(self):
-        self.assertIn('US/Eastern', pytz.common_timezones)
-        self.assertIn('US/Eastern', pytz.common_timezones_set)
+    def test_america_new_york(self):
+        self.assertIn('America/New_York', pytz.common_timezones)
+        self.assertIn('America/New_York', pytz.common_timezones_set)
 
     def test_belfast(self):
         self.assertIn('Europe/Belfast', pytz.all_timezones_set)

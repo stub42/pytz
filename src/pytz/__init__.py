@@ -132,10 +132,10 @@ def timezone(zone):
 
     >>> from datetime import datetime, timedelta
     >>> utc = timezone('UTC')
-    >>> eastern = timezone('US/Eastern')
+    >>> eastern = timezone('America/New_York')
     >>> eastern.zone
-    'US/Eastern'
-    >>> timezone(unicode('US/Eastern')) is eastern
+    'America/New_York'
+    >>> timezone(unicode('America/New_York')) is eastern
     True
     >>> utc_dt = datetime(2002, 10, 27, 6, 0, 0, tzinfo=utc)
     >>> loc_dt = utc_dt.astimezone(eastern)
