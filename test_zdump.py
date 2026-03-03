@@ -133,7 +133,7 @@ def test_suite():
 
     suite = unittest.TestSuite()
     while testcases:
-        suite.addTest(unittest.makeSuite(testcases.pop()))
+        suite.addTest(unittest.TestLoader().loadTestsFromTestCase(testcases.pop()))
     return suite
 
 
