@@ -151,7 +151,7 @@ upload_docs_pythonhosted: docs
 .stamp-zoneinfo:
 	${MAKE} -C ${IANA} ZFLAGS='-b fat' PACKRATDATA= TOPDIR=`pwd`/build USRDIR= USRSHAREDIR=etc install
 	# Break hard links, working around http://bugs.python.org/issue8876.
-	for d in zoneinfo zoneinfo-leaps zoneinfo-posix; do \
+	for d in zoneinfo ; do \
 	    rm -rf `pwd`/build/etc/$$d.tmp; \
 	    rsync -a `pwd`/build/etc/$$d/ `pwd`/build/etc/$$d.tmp; \
 	    rm -rf `pwd`/build/etc/$$d; \
