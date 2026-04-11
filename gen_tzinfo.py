@@ -119,6 +119,7 @@ def add_allzones(filename):
         code, coordinates, zone = line.split(None, 4)[:3]
         if zone not in cz:
             cz.append(zone)
+    zone_tab.close()
     cz.sort()
 
     print('_all_timezones_unchecked = \\', file=outf)
