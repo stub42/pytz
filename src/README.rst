@@ -73,9 +73,9 @@ Localized times and date arithmetic
 >>> utc = pytz.utc
 >>> utc.zone
 'UTC'
->>> eastern = timezone('US/Eastern')
+>>> eastern = timezone('America/New_York')
 >>> eastern.zone
-'US/Eastern'
+'America/New_York'
 >>> amsterdam = timezone('Europe/Amsterdam')
 >>> fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
@@ -120,7 +120,7 @@ This library also allows you to do date arithmetic using local
 times, although it is more complicated than working in UTC as you
 need to use the ``normalize()`` method to handle daylight saving time
 and other timezone transitions. In this example, ``loc_dt`` is set
-to the instant when daylight saving time ends in the US/Eastern
+to the instant when daylight saving time ends in the America/New_York
 timezone.
 
 >>> before = loc_dt - timedelta(minutes=10)
@@ -253,7 +253,7 @@ Problems with Localtime
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The major problem we have to deal with is that certain datetimes
-may occur twice in a year. For example, in the US/Eastern timezone
+may occur twice in a year. For example, in the America/New_York timezone
 on the last Sunday morning in October, the following sequence
 happens:
 
@@ -262,7 +262,7 @@ happens:
       and 01:00 happens again (this time 01:00 EST)
 
 In fact, every instant between 01:00 and 02:00 occurs twice. This means
-that if you try and create a time in the 'US/Eastern' timezone
+that if you try and create a time in the 'America/New_York' timezone
 the standard datetime syntax, there is no way to specify if you meant
 before of after the end-of-daylight-saving-time transition. Using the
 pytz custom syntax, the best you can do is make an educated guess:
@@ -325,7 +325,7 @@ If you pass None as the is_dst flag to localize(), pytz will refuse to
 guess and raise exceptions if you try to build ambiguous or non-existent
 times.
 
-For example, 1:30am on 27th Oct 2002 happened twice in the US/Eastern
+For example, 1:30am on 27th Oct 2002 happened twice in the America/New_York
 timezone when the clocks where put back at the end of Daylight Saving
 Time:
 
@@ -337,7 +337,7 @@ Time:
 pytz.exceptions.AmbiguousTimeError: 2002-10-27 01:30:00
 
 Similarly, 2:30am on 7th April 2002 never happened at all in the
-US/Eastern timezone, as the clocks where put forward at 2:00am skipping
+America/New_York timezone, as the clocks where put forward at 2:00am skipping
 the entire hour:
 
 >>> dt = datetime(2002, 4, 7, 2, 30, 00)
@@ -391,7 +391,7 @@ by converting from another timezone such as UTC:
 '1915-08-04 23:36:00 CET+0100'
 
 The standard Python way of handling all these ambiguities is not to
-handle them, such as demonstrated in this example using the US/Eastern
+handle them, such as demonstrated in this example using the America/New_York
 timezone definition from the Python documentation (Note that this
 implementation only works for dates between 1987 and 2006 - it is
 included for tests only!):
