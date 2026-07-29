@@ -174,8 +174,8 @@ def timezone(zone):
     Unknown
 
     '''
-    if zone is None:
-        raise UnknownTimeZoneError(None)
+    if not isinstance(zone, str):
+        raise UnknownTimeZoneError(zone)
 
     if zone.upper() == 'UTC':
         return utc
