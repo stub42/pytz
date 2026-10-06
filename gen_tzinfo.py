@@ -110,7 +110,8 @@ def add_allzones(filename):
         'US/Central', 'US/Arizona', 'US/Hawaii', 'US/Alaska',
         # Canadian timezones per Bug #506341
         'Canada/Newfoundland', 'Canada/Atlantic', 'Canada/Eastern',
-        'Canada/Central', 'Canada/Mountain', 'Canada/Pacific'])
+        'Canada/Central', 'Canada/Mountain', 'Canada/Pacific',
+        'Canada/Saskatchewan', 'Canada/Yukon'])
     # And extend out list with all preferred country timezones.
     zone_tab = open(os.path.join(zoneinfo, 'zone.tab'), 'r')
     for line in zone_tab:
