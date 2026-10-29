@@ -27,8 +27,8 @@ from pytz.tzinfo import BaseTzInfo, DstTzInfo, StaticTzInfo  # noqa
 
 # I test for expected version to ensure the correct version of pytz is
 # actually being tested.
-EXPECTED_VERSION = '2026.5'
-EXPECTED_OLSON_VERSION = '2026e'
+EXPECTED_VERSION = '2026.6'
+EXPECTED_OLSON_VERSION = '2026f'
 
 fmt = '%Y-%m-%d %H:%M:%S %Z%z'
 
